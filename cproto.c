@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.5.1.5 1997/06/12 00:03:14 tom Exp $
+/* $Id: cproto.c,v 4.5.1.6 1997/08/23 21:26:50 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.5.1.5 1997/06/12 00:03:14 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.5.1.6 1997/08/23 21:26:50 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -497,7 +497,7 @@ char ***pargv;
 	    if (num_inc_dir < MAX_INC_DIR) {
 		char *save = inc_dir[--num_inc_dir];
 		inc_dir[num_inc_dir++] = trim_path_sep(xstrdup(optarg));
-		inc_dir[num_inc_dir] = save;
+		inc_dir[num_inc_dir++] = save;
 	    } else {
 		fprintf(stderr, "%s: too many include directories\n",
 		    progname);
