@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.2 1994/10/13 17:26:04 cthuang Exp $
+/* $Id: lex.l,v 4.1.1.1 1994/10/15 17:59:38 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -16,9 +16,10 @@
  *	pass them back to the grammar.
  *
  * Apollo extensions:
- *	"&" is ignored because we ignore expressions of all kinds.  Note that
- *	function-prototypes may use "&" to denote reference-parameters.  By
- *	ignoring that as well, we make the output compatible with lint (kludge).
+ *	"&" is ignored when creating lint-libraries, because we ignore
+ *	expressions of all kinds.  Note that function-prototypes may use "&" to
+ *	denote reference-parameters.  By ignoring that as well, we make the
+ *	output compatible with lint (kludge).
  *
  *	Similarly, ignore "std_$call", since it is not compatible with lint.
  *
@@ -127,7 +128,7 @@ QUOTE		[\"\']
 "/*"			{ save_text(); get_comment(); }
 "//".*$ 		save_text();
 
-"&"			{ save_text(); /* ignored (apollo) */ }
+<INITIAL>"&"		{ save_text(); return '&'; /* C++ ref-variable? */ }
 
 <LEXYACC>^"%%"		{ save_text(); if (++ly_count >= 2) BEGIN INITIAL; }
 <LEXYACC>^"%{"		{ save_text(); BEGIN INITIAL; }

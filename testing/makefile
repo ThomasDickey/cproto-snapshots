@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.8 1994/08/18 22:43:07 tom Exp $
+# $Id: makefile,v 3.9 1994/10/15 19:06:19 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -35,7 +35,12 @@ scripts : $(SOURCES)
 	make_dcl.sh `fgrep unix run_test.txt |sed -e 's/=.*//'`
 
 clean:
-	rm -f *.log *.out *.dcl *.err *.tmp case*.c case*.bat
+	- rm -f *.log *.out *.err *.tmp case*.c
+
+distclean: clean
+
+realclean: distclean
+	- rm -f *.dcl case*.bat
 
 run_test:	$(SOURCES)
 	date >>$@.out
