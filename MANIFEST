@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940915
+MANIFEST for cproto, version t19940918
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -13,6 +13,7 @@ configure.in                    script for generating 'configure' via autoconf
 cproto.1                        man-page for CPROTO
 cproto.c                        main program of CPROTO
 cproto.h                        common datatypes and definitions for CPROTO
+dump.c                          debug/trace
 getopt.c                        GNU getopt.c
 getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO
@@ -31,6 +32,7 @@ symbol.c                        symbol-table support for CPROTO
 symbol.h                        interface definitions for symbol.c
 system.h                        system-dependent definitions, coordinated with config.h
 trace.c                         debugging support for CPROTO
+trace.h                         header for trace.c, dump.c
 yyerror.c                       enhanced error reporting support for yacc/bison
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
