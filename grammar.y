@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.7 1998/01/21 00:55:55 cthuang Exp $
+/* $Id: grammar.y,v 4.7.1.1 1999/10/21 23:46:47 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -13,6 +13,8 @@
 	T_AUTO T_EXTERN T_REGISTER T_STATIC T_TYPEDEF
 	/* This keyword included for compatibility with C++. */
 	T_INLINE
+	/* This keyword included for compatibility with GCC */
+	T_EXTENSION
 
 	/* type specifiers */
 	T_CHAR T_DOUBLE T_FLOAT T_INT T_VOID
@@ -237,7 +239,11 @@ declaration
 	;
 
 any_typedef
-	: T_TYPEDEF
+	: T_EXTENSION T_TYPEDEF
+	{
+	    begin_typedef();
+	}
+	| T_TYPEDEF
 	{
 	    begin_typedef();
 	}
@@ -686,23 +692,23 @@ opt_identifier_list
 	;
 
 identifier_list
-	: T_IDENTIFIER
+	: any_id
 	{
 	    new_ident_list(&$$);
 	    add_ident_list(&$$, &$$, $1.text);
 	}
-	| identifier_list ',' T_IDENTIFIER
+	| identifier_list ',' any_id
 	{
 	    add_ident_list(&$$, &$1, $3.text);
 	}
 	;
 
 identifier_or_ref
-	: T_IDENTIFIER
+	: any_id
 	{
 	    $$ = $1;
 	}
-	| '&' T_IDENTIFIER
+	| '&' any_id
 	{
 #if OPT_LINTLIBRARY
 	    if (lintLibrary()) { /* Lint doesn't grok C++ ref variables */
