@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.1.1.1 1994/10/21 00:05:38 tom Exp $
+/* $Id: semantic.c,v 4.2 1995/01/01 19:34:59 cthuang Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -511,13 +511,15 @@ int	commented;	/* comment-delimiters already from higher level */
 #endif
 
     if (p->declarator->text[0] != '\0') {
-	if (strcmp(p->declarator->text, "...") != 0) {
-	    if (proto_style != PROTO_ABSTRACT || proto_comments ||
-	     where != FUNC_PROTO ||
-	     strcmp(p->declarator->text, p->declarator->name) != 0)
+	if (strcmp(p->declarator->text, "...") == 0) {
+	    put_string(outf, "...");
+	} else {
+	    if (proto_style != PROTO_ABSTRACT || proto_comments
+	     || where != FUNC_PROTO
+	     || strcmp(p->declarator->text, p->declarator->name) != 0)
 		put_char(outf, gap);
+	    put_declarator(outf, p->declarator, commented);
 	}
-	put_declarator(outf, p->declarator, commented);
     }
     return (TRUE);
 }

@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.1.1.1 1994/10/22 23:18:19 tom Exp $
+/* $Id: cproto.c,v 4.3 1995/01/01 19:34:59 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.1.1.1 1994/10/22 23:18:19 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.3 1995/01/01 19:34:59 cthuang Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -112,9 +112,9 @@ char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
 /* Run the C preprocessor */
 #ifdef CPP
 # if !HAVE_POPEN_PROTOTYPE
-extern	FILE *	popen  ARGS((const char *c, const char *m));
+extern FILE *popen ARGS((const char *c, const char *m));
 # endif
-extern	int	pclose ARGS((FILE *p));
+extern int pclose ARGS((FILE *p));
 static char *cpp = CPP, *cpp_opt, *cpp_cmd;
 #endif
 
@@ -271,9 +271,9 @@ is_path_sep (ch)
 int ch;
 {
 #if defined(MSDOS) || defined(OS2)
-    return (ch == '/' || ch == '\\');
+    return ch == '/' || ch == '\\';
 #else
-    return (ch == '/');
+    return ch == '/';
 #endif
 }
 
@@ -609,10 +609,10 @@ char **argv;
      * for readability.
      */
     progname = xstrdup(argv[0]);
-#ifdef VMS
+#ifdef vms
     for (i = strlen(progname)-1; i >= 0; i--) {
     	if (progname[i] == SQUARE_R
-	||  progname[i] == ':') {
+	 || progname[i] == ':') {
 	    progname += (i + 1);
 	    break;
 	} else if (progname[i] == '.') {
@@ -624,12 +624,11 @@ char **argv;
 	if (is_path_sep(progname[i])) {
 	    progname += (i + 1);
 	    break;
-	}
 # if defined(MSDOS) || defined(OS2)
-	  else if (progname[i] == '.') {
+	} else if (progname[i] == '.') {
 	    progname[i] = '\0';
-	}
 # endif
+	}
     }
 #endif
     argv[0] = progname;	/* do this so getopt is consistent with us */
