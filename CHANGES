@@ -1,5 +1,19 @@
 Version 4
 
+Patchlevel 3
+
+- check for a special case in lint-library generation, i.e., prototype
+  arguments of the form "*()", which need more parentheses for SunOS's lint.
+
+- modified configure.in, aclocal.m4, makefile.in to work with autoconf 2.1
+  (also added install.sh - note that "install-sh" is not an MS-DOS-compatible
+  filename).
+
+- derive the program-name from the argv[0] entry, in case it's installed
+  under a different name.
+
+- use 'sed' rather than 'flip' to apply trailing CR's to MS-DOS scripts.
+
 Patchlevel 2
 
 - modified grammar to recognize C++ ref-variables (i.e., '&' as a prefix to
@@ -68,6 +82,8 @@ Patchlevel 0 (dickey, September 1994)
 - added configuration-test to avoid conflict with prototype for 'popen()'
 
 - added several function-pointer regression test-cases
+
+Version 3
 
 Patchlevel 9 (dickey, August 1994)
 
