@@ -1,8 +1,8 @@
-/* $Id: cproto.h,v 4.2 1994/10/22 21:42:10 cthuang Exp $
+/* $Id: cproto.h,v 4.1.1.1 1994/10/21 00:12:54 tom Exp $
  *
  * Declarations for C function prototype generator
  */
-#ifdef HAVE_CONFIG_H
+#ifdef	HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -167,7 +167,7 @@ extern char *inc_dir[];
 extern FuncFormat fmt[4];
 
 /* Global declarations */
-extern char progname[];
+extern char *progname;
 extern int varargs_num;		/* supports varargs-comment */
 extern char *varargs_str;	/* additional info, such as PRINTFLIKEnn */
 extern int extern_in;		/* supports "LINT_EXTERNnn" */

@@ -1,2 +1,2 @@
-/* $Id: config_h.in,v 4.1 1994/10/22 21:41:10 cthuang Exp $ */
+/* $Id: config_h.in,v 3.2 1994/07/26 22:35:07 tom Exp $ */
 @DEFS@

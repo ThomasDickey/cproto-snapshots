@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.3 1994/10/22 21:53:14 cthuang Exp $
+/* $Id: grammar.y,v 4.1.1.1 1994/10/15 18:00:00 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -58,7 +58,8 @@
 %type <parameter> parameter_declaration
 %type <param_list> opt_identifier_list identifier_list
 %type <text> struct_or_union pointer opt_type_qualifiers type_qualifier_list
-	any_id identifier_or_ref
+	any_id
+	any_identifier
 %type <text> enumeration
 
 %{
@@ -537,7 +538,7 @@ enumeration
 	;
 
 any_id
-	: T_IDENTIFIER
+	: any_identifier
 	| T_TYPEDEF_NAME
 	;
 
@@ -555,7 +556,7 @@ declarator
 	;
 
 direct_declarator
-	: identifier_or_ref
+	: any_identifier
 	{
 	    $$ = new_declarator($1.text, $1.text, $1.begin);
 	}
@@ -675,18 +676,18 @@ opt_identifier_list
 	;
 
 identifier_list
-	: T_IDENTIFIER
+	: any_identifier
 	{
 	    new_ident_list(&$$);
 	    add_ident_list(&$$, &$$, $1.text);
 	}
-	| identifier_list ',' T_IDENTIFIER
+	| identifier_list ',' any_identifier
 	{
 	    add_ident_list(&$$, &$1, $3.text);
 	}
 	;
 
-identifier_or_ref
+any_identifier
 	: T_IDENTIFIER
 	{
 	    $$ = $1;
@@ -779,7 +780,7 @@ direct_abs_declarator
 
 %%
 
-#if defined(MSDOS) || defined(OS2) || defined(vms)
+#if defined(MSDOS) || defined(OS2) || defined(VMS)
 # ifdef USE_flex
 #  include "lexyy.c"
 # else
@@ -806,7 +807,7 @@ init_parser ()
 {
     static char *keywords[] = {
 	"const", "volatile", "interrupt",
-#ifdef vms
+#ifdef VMS
 	"noshare", "readonly",
 #endif
 #if defined(MSDOS) || defined(OS2)
