@@ -1,4 +1,4 @@
-/* $Id: strstr.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: strstr.c,v 4.2 2004/03/24 20:03:59 tom Exp $
  *
  * Simple implementation of the ANSI strstr() function
  */
@@ -12,8 +12,7 @@
  */
 #if !HAVE_STRSTR
 char *
-strstr (src, key)
-char *src, *key;
+strstr (char *src, char *key)
 {
     char *s;
     int keylen;

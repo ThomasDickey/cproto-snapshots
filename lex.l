@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.6.1.1 2003/04/05 15:52:39 tom Exp $
+/* $Id: lex.l,v 4.6.1.2 2004/03/24 21:32:54 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -84,34 +84,34 @@ static int inc_depth;				/* include nesting level */
 static IncludeStack inc_stack[MAX_INC_DEPTH];	/* stack of included files */
 static SymbolTable *included_files;		/* files already included */
 
-static int  type_of_name      ARGS((char *name));
-static void startCpp          ARGS((int level));
-static void finishCpp         ARGS((void));
+static int  type_of_name      (char *name);
+static void startCpp          (int level);
+static void finishCpp         (void);
 #if defined(apollo) || !OPT_LINTLIBRARY
-static void absorb_special    ARGS((void));
+static void absorb_special    (void);
 #endif
 #if OPT_LINTLIBRARY
-static void gcc_attribute     ARGS((void));
+static void gcc_attribute     (void);
 #endif
-static void update_line_num   ARGS((void));
-static void save_text         ARGS((void));
-static void save_text_offset  ARGS((void));
-static void get_quoted        ARGS((void));
-static void get_comment       ARGS((void));
-static void get_cpp_directive ARGS((char *dest, unsigned n));
-static void do_include        ARGS((char *f));
-static void include_file      ARGS((char *name, int convert));
-static void put_file          ARGS((FILE *outf));
-static void put_quoted        ARGS((int c));
+static void update_line_num   (void);
+static void save_text         (void);
+static void save_text_offset  (void);
+static void get_quoted        (void);
+static void get_comment       (void);
+static void get_cpp_directive (char *dest, unsigned n);
+static void do_include        (char *f);
+static void include_file      (char *name, int convert);
+static void put_file          (FILE *outf);
+static void put_quoted        (int c);
 
 #if OPT_LINTLIBRARY
-static int decipher_comment   ARGS((char *keyword, int len));
+static int decipher_comment   (char *keyword, int len);
 #endif
 
 #ifdef yywrap
 #undef yywrap
 #endif
-int yywrap ARGS((void));
+int yywrap (void);
 %}
 
 WS		[ \t]
@@ -334,8 +334,7 @@ QUOTE		[\"\']
 %%
 
 static void
-startCpp (level)
-int level;
+startCpp (int level)
 {
     save_cpp = level;
     in_cpp = TRUE;
@@ -343,7 +342,7 @@ int level;
 }
 
 static void
-finishCpp()
+finishCpp(void)
 {
     in_cpp = FALSE;
     if (save_cpp)
@@ -357,7 +356,7 @@ finishCpp()
  */
 #if defined(apollo) || !OPT_LINTLIBRARY
 static void
-absorb_special ()
+absorb_special (void)
 {
     int	c;
     int	nest	= 0;
@@ -383,11 +382,11 @@ absorb_special ()
  * avoid spurious matches with non-gcc compilers).
  */
 static void
-gcc_attribute ()
+gcc_attribute (void)
 {
     int	c, num1, num2;
     int	nest = 0;
-    int	len = 0;
+    unsigned len = 0;
     char bfr[BUFSIZ];
 
     while ((c = input()) > 0) {
@@ -416,8 +415,7 @@ gcc_attribute ()
 /* Decode the current token according to the type-of-name
  */
 static int
-type_of_name (name)
-char *name;
+type_of_name (char *name)
 {
     if (find_symbol(type_qualifiers, name) != NULL)
 	return T_TYPE_QUALIFIER;
@@ -430,8 +428,7 @@ char *name;
 }
 
 boolean
-is_typedef_name (name)
-char *name;
+is_typedef_name (char *name)
 {
     return (find_symbol(typedef_names, name) != NULL);
 }
@@ -440,7 +437,7 @@ char *name;
  * current line number.
  */
 static void
-update_line_num ()
+update_line_num (void)
 {
     char *p = yytext;
     while (*p != '\0') {
@@ -452,7 +449,7 @@ update_line_num ()
 /* Save the matched text in the temporary file.
  */
 static void
-save_text ()
+save_text (void)
 {
 #if OPT_LINTLIBRARY
     if (!in_cpp)
@@ -467,7 +464,7 @@ save_text ()
  * to the file.
  */
 static void
-save_text_offset ()
+save_text_offset (void)
 {
     (void)strcpy(yylval.text.text, yytext);
 #if OPT_LINTLIBRARY
@@ -491,9 +488,7 @@ static struct {
 } cmtVal;
 
 static int
-decipher_comment (keyword, len)
-char *keyword;
-int len;
+decipher_comment (char *keyword, int len)
 {
     if (len != 0) {
 	int value;
@@ -534,8 +529,7 @@ int len;
 #endif
 
 static void
-put_quoted (c)
-int c;
+put_quoted (int c)
 {
     /* Modifying 'yytext[]' doesn't work well with FLEX, which simply
      * maintains 'yytext' as a pointer into its input buffer.  LEX copies
@@ -579,7 +573,7 @@ int c;
  * we don't try to eat them in the lexical rules.
  */
 static void
-get_quoted ()
+get_quoted (void)
 {
     int	delim = *yytext;
     int	c;
@@ -610,12 +604,12 @@ get_quoted ()
 /* Scan to end of comment.
  */
 static void
-get_comment ()
+get_comment (void)
 {
     int c, lastc = '\0';
 
 #if OPT_LINTLIBRARY
-    int len = 0;
+    unsigned len = 0;
     char keyword[BUFSIZ];
 
     keyword[len] = '\0';
@@ -695,9 +689,9 @@ get_comment ()
  * the text in the buffer pointed to by <dest> having size <n>.
  */
 static void
-get_cpp_directive (dest, n)
-char *dest;		/* buffer to store directive text */
-unsigned n;		/* size of buffer to store directive text */
+get_cpp_directive (
+char *dest,		/* buffer to store directive text */
+unsigned n)		/* size of buffer to store directive text */
 {
     char c, lastc[4];
 
@@ -737,7 +731,7 @@ unsigned n;		/* size of buffer to store directive text */
 /* Return a pointer to the current file name.
  */
 char *
-cur_file_name ()
+cur_file_name (void)
 {
     return cur_file->file_name;
 }
@@ -745,7 +739,7 @@ cur_file_name ()
 /* Return the current line number.
  */
 unsigned
-cur_line_num ()
+cur_line_num (void)
 {
     return cur_file->line_num;
 }
@@ -753,7 +747,7 @@ cur_line_num ()
 /* Return the current temporary output file.
  */
 FILE *
-cur_tmp_file ()
+cur_tmp_file (void)
 {
     return cur_file->tmp_file;
 }
@@ -761,7 +755,7 @@ cur_tmp_file ()
 /* Set the modify flag for the current file.
  */
 void
-cur_file_changed ()
+cur_file_changed (void)
 {
     cur_file->changed = TRUE;
 }
@@ -769,7 +763,7 @@ cur_file_changed ()
 /* Return the temporary file offset of beginning of the current comment.
  */
 long
-cur_begin_comment ()
+cur_begin_comment (void)
 {
     return cur_file->begin_comment;
 }
@@ -777,7 +771,7 @@ cur_begin_comment ()
 /* Return the text of the current lexical token.
  */
 char *
-cur_text ()
+cur_text (void)
 {
     return yytext;
 }
@@ -789,10 +783,10 @@ cur_text ()
  *
  * Not all systems have the ANSI tmpfile() function yet...
  *
- * DaviD W. Sanderson (dws@cs.wisc.edu)
+ * David W. Sanderson (dws@cs.wisc.edu)
  */
 FILE *
-tmpfile ()
+tmpfile (void)
 {
     char name[MAX_TEXT_SIZE];
     char *tmpdir;
@@ -824,9 +818,8 @@ tmpfile ()
  * point to the file.
  */
 static void
-include_file (name, convert)
-char *name;		/* file name */
-int convert;		/* if TRUE, convert function definitions */
+include_file (char *name,	/* file name */
+	      int convert)	/* if TRUE, convert function definitions */
 {
     ++inc_depth;
     cur_file = inc_stack + inc_depth;
@@ -857,8 +850,7 @@ int convert;		/* if TRUE, convert function definitions */
 /* Copy converted C source from the temporary file to the output stream.
  */
 static void
-put_file (outf)
-FILE *outf;
+put_file (FILE *outf)
 {
     char block[BLOCK_SIZE];
     long filesize;
@@ -879,8 +871,7 @@ FILE *outf;
 /* Remove the top of the include stack.
  */
 void
-pop_file (closed)
-int closed;
+pop_file (int closed)
 {
     FILE *outf;
 
@@ -922,8 +913,7 @@ int closed;
 /* Process include directive.
  */
 static void
-do_include (file_spec)
-char *file_spec; 	/* path surrounded by "" or <> */
+do_include (char *file_spec) 	/* path surrounded by "" or <> */
 {
     int stdinc; 	/* 1 = path surrounded by <> */
     char file[MAX_TEXT_SIZE], path[MAX_TEXT_SIZE];
@@ -981,7 +971,7 @@ char *file_spec; 	/* path surrounded by "" or <> */
  * nested include file.
  */
 int
-yywrap ()
+yywrap (void)
 {
     if (inc_depth > 0) {
 	pop_file(FALSE);

@@ -1,4 +1,4 @@
-/* $Id: symbol.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: symbol.h,v 4.2 2004/03/24 19:56:11 tom Exp $
  *
  * A symbol table is a collection of string identifiers stored in a
  * hash table.
@@ -21,12 +21,12 @@ typedef struct symbol_table {
 } SymbolTable;
 
 extern SymbolTable *new_symbol_table	/* Create symbol table */
-	ARGS((void));
+	(void);
 extern void free_symbol_table		/* Destroy symbol table */
-	ARGS((SymbolTable *s));
+	(SymbolTable *s);
 extern Symbol *find_symbol		/* Lookup symbol name */
-	ARGS((SymbolTable *s, char *n));
+	(SymbolTable *s, char *n);
 extern Symbol *new_symbol		/* Define new symbol */
-	ARGS((SymbolTable *s, char *n, char *v, int f));
+	(SymbolTable *s, char *n, char *v, int f);
 
 #endif

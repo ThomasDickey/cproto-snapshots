@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.4.1.1 2003/04/05 18:10:01 tom Exp $
+/* $Id: yyerror.c,v 4.4.1.2 2004/03/24 21:27:06 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -93,38 +93,35 @@
  * Any way we define it, 'yyerror()' is a real function (that we provide,
  * rather than use the one from a library).
  */
-static void yaccError    ARGS((char *));
+static void yaccError    (char *);
 
 #ifdef yyerror
-static int  compar       ARGS((const void *a, const void *b));
-static void yaccExpected ARGS((const char *, int count));
-
-static
-int compar(p1, p2)
-const void *p1;
-const void *p2;
+static int
+compar(const void *p1, const void *p2)
 {
-    return (strcmp(*(char **)p1, *(char **)p2));
+    const char *a = *(const char *const *)p1;
+    const char *b = *(const char *const *)p2;
+    return strcmp(a, b);
 }
 
 #define MSGLEN 80
 
-static
-void yaccExpected (s, count)
-const char *s;
-int count;
+static void
+yaccExpected (const char *s, int count)
 {
     static struct {
-	char *actual, *name;
+	const char *actual, *name;
     } tbl[] = {
 	{"...",	"T_ELLIPSIS"},
 	{"[]",	"T_BRACKETS"},
 	{"{",	"T_LBRACE"},
 	{"}",	"T_MATCHRBRACE"},
     };
-    register int j, k, x;
+    unsigned j;
+    int k, x;
     unsigned n;
-    char *t = (char *)s;
+    const char *t = s;
+    char *tt;
     char *tag;
     char tmp[MSGLEN];
     static unsigned have;
@@ -158,8 +155,8 @@ int count;
 	}
 	used = 0;
     } else {
+	int found = FALSE;
 	if (!strncmp(t, "T_", 2)) {
-	    int	found = FALSE;
 	    for (j = 0; j < sizeof(tbl)/sizeof(tbl[0]); j++) {
 		if (!strcmp(t, tbl[j].name)) {
 		    t = tbl[j].actual;
@@ -168,16 +165,16 @@ int count;
 		}
 	    }
 	    if (!found) {
-		t = strncpy(tmp, t + 2, sizeof(tmp)-1);
-		for (k = 0; t[k] != '\0'; k++) {
-		    if (t[k] == '_')
-			t[k] = '-';
-		    else if (isalpha(t[k]) && isupper(t[k]))
-			t[k] = tolower(t[k]);
+		tt = strncpy(tmp, t + 2, sizeof(tmp)-1);
+		for (k = 0; tt[k] != '\0'; k++) {
+		    if (tt[k] == '_')
+			tt[k] = '-';
+		    else if (isalpha(tt[k]) && isupper(tt[k]))
+			tt[k] = tolower(tt[k]);
 		}
 	    }
 	}
-	if (count >= have) {
+	if ((unsigned) count >= have) {
 	    have = (count + 10);
 	    if (vec == 0) {
 		vec = malloc(have * sizeof(*vec));
@@ -190,7 +187,7 @@ int count;
 	if (vec[count] != 0) {
 	    free(vec[count]);
 	}
-	vec[count] = xstrdup(t);
+	vec[count] = xstrdup(found ? t : tmp);
 	used = count + 1;
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.5.1.2 2004/03/09 23:13:45 tom Exp $
+/* $Id: semantic.c,v 4.5.1.4 2004/03/24 23:20:28 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -8,31 +8,12 @@
 #include "semantic.h"
 
 #if OPT_LINTLIBRARY
-static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
 #define	putParameter(fp,p,f,n,c)		put_parameter(fp, p, f, n, c)
 #else
-static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int commented));
 #define	putParameter(fp,p,f,n,c)		put_parameter(fp, p, c)
 #endif
 
-static	char *		concat_string		ARGS((char *a, char *b));
-#if OPT_LINTLIBRARY
-static	char *		glue_strings		ARGS((char *a, char *b));
-#endif
-static	boolean		is_void_parameter	ARGS((Parameter *p));
-static	Parameter *	search_parameter_list	ARGS((ParameterList *params, char *name));
-static	void		put_param_list		ARGS((FILE *outf, Declarator *declarator, int commented));
-static	void		put_parameters		ARGS((FILE *outf, Declarator *declarator, int commented));
-static	void		put_func_declarator	ARGS((FILE *outf, Declarator *declarator, int commented));
-static	void		put_declarator		ARGS((FILE *outf, Declarator *declarator, int commented));
-static	void		put_decl_spec		ARGS((FILE *outf, DeclSpec *decl_spec));
-#if OPT_LINTLIBRARY
-static	void		put_llib_params		ARGS((Declarator *d, int c));
-#endif
-static	int		uses_varargs		ARGS((Declarator *declarator));
-static	void		check_void_param	ARGS((Declarator *declarator));
-static	void		set_param_decl_spec	ARGS((Declarator *declarator));
-static	void		put_param_decl		ARGS((Declarator *declarator, int commented));
+static	void		put_declarator		(FILE *outf, Declarator *declarator, int commented);
 
 /* Head function declarator in a prototype or function definition */
 static Declarator *func_declarator;
@@ -54,11 +35,7 @@ static int nestedParams;
 /* Initialize a new declaration specifier part.
  */
 void
-new_decl_spec (decl_spec, text, offset, flags)
-DeclSpec *decl_spec;
-char *text;
-long offset;
-int flags;
+new_decl_spec (DeclSpec *decl_spec, char *text, long offset, int flags)
 {
 #if OPT_LINTLIBRARY
     if (lintLibrary()) {
@@ -74,8 +51,7 @@ int flags;
 /* Free storage used by a declaration specifier part.
  */
 void
-free_decl_spec (decl_spec)
-DeclSpec *decl_spec;
+free_decl_spec (DeclSpec *decl_spec)
 {
     free(decl_spec->text);
 }
@@ -85,8 +61,7 @@ DeclSpec *decl_spec;
  * If out of memory, output an error message and exit.
  */
 static char *
-concat_string (a, b)
-char *a, *b;
+concat_string (char *a, char *b)
 {
     char *result;
 
@@ -98,9 +73,9 @@ char *a, *b;
 }
 
 #if OPT_LINTLIBRARY
+/* concatenate w/o embedded blank */
 static char *
-glue_strings (a, b)	/* concatenate w/o embedded blank */
-char *a, *b;
+glue_strings (char *a, char *b)
 {
     char *result;
 
@@ -114,8 +89,7 @@ char *a, *b;
 /* Append two declaration specifier parts together.
  */
 void
-join_decl_specs (result, a, b)
-DeclSpec *result, *a, *b;
+join_decl_specs (DeclSpec *result, DeclSpec *a, DeclSpec *b)
 {
     result->text = concat_string(a->text, b->text);
     result->flags = a->flags | b->flags;
@@ -126,8 +100,7 @@ DeclSpec *result, *a, *b;
  * struct, union or enum.
  */
 void
-check_untagged (decl_spec)
-DeclSpec *decl_spec;
+check_untagged (DeclSpec *decl_spec)
 {
     if (strstr(decl_spec->text, "struct {}") != NULL) {
 	put_error();
@@ -144,9 +117,7 @@ DeclSpec *decl_spec;
 /* Allocate and initialize a declarator.
  */
 Declarator *
-new_declarator (text, name, offset)
-char *text, *name;
-long offset;
+new_declarator (char *text, char *name, long offset)
 {
     Declarator *d;
 
@@ -166,8 +137,7 @@ long offset;
 /* Free storage used by a declarator.
  */
 void
-free_declarator (d)
-Declarator *d;
+free_declarator (Declarator *d)
 {
     free(d->text);
     free(d->name);
@@ -180,9 +150,7 @@ Declarator *d;
 /* Initialize a declarator list and add the given declarator to it.
  */
 void
-new_decl_list (decl_list, declarator)
-DeclaratorList *decl_list;
-Declarator *declarator;
+new_decl_list (DeclaratorList *decl_list, Declarator *declarator)
 {
     decl_list->first = decl_list->last = declarator;
     declarator->next = NULL;
@@ -191,8 +159,7 @@ Declarator *declarator;
 /* Free storage used by the declarators in the declarator list.
  */
 void
-free_decl_list (decl_list)
-DeclaratorList *decl_list;
+free_decl_list (DeclaratorList *decl_list)
 {
     Declarator *d, *next;
 
@@ -207,9 +174,7 @@ DeclaratorList *decl_list;
 /* Add the declarator to the declarator list.
  */
 void
-add_decl_list (to, from, declarator)
-DeclaratorList *to, *from;
-Declarator *declarator;
+add_decl_list (DeclaratorList *to, DeclaratorList *from, Declarator *declarator)
 {
     to->first = from->first;
     from->last->next = declarator;
@@ -220,9 +185,7 @@ Declarator *declarator;
 /* Create a new parameter structure.
  */
 Parameter *
-new_parameter (decl_spec, declarator)
-DeclSpec *decl_spec;
-Declarator *declarator;
+new_parameter (DeclSpec *decl_spec, Declarator *declarator)
 {
     Parameter *param;
     param = NEW(Parameter);
@@ -245,8 +208,7 @@ Declarator *declarator;
 /* Free the storage used by the parameter.
  */
 void
-free_parameter (param)
-Parameter *param;
+free_parameter (Parameter *param)
 {
     free_decl_spec(&param->decl_spec);
     free_declarator(param->declarator);
@@ -258,8 +220,7 @@ Parameter *param;
 /* Return TRUE if the parameter is void.
  */
 static boolean
-is_void_parameter (p)
-Parameter *p;
+is_void_parameter (Parameter *p)
 {
     return p == NULL || (strcmp(p->decl_spec.text, "void") == 0 &&
      p->declarator->text[0] == '\0');
@@ -268,9 +229,7 @@ Parameter *p;
 /* Initialize a list of function parameters.
  */
 void
-new_param_list (param_list, param)
-ParameterList *param_list;
-Parameter *param;
+new_param_list (ParameterList *param_list, Parameter *param)
 {
     param_list->first = param_list->last = param;
     param->next = NULL;
@@ -282,8 +241,7 @@ Parameter *param;
 /* Free storage used by the elements in the function parameter list.
  */
 void
-free_param_list (param_list)
-ParameterList *param_list;
+free_param_list (ParameterList *param_list)
 {
     Parameter *p, *next;
 
@@ -301,9 +259,7 @@ ParameterList *param_list;
 /* Add the parameter to the function parameter list.
  */
 void
-add_param_list (to, from, param)
-ParameterList *to, *from;
-Parameter *param;
+add_param_list (ParameterList *to, ParameterList *from, Parameter *param)
 {
     to->first = from->first;
     from->last->next = param;
@@ -314,8 +270,7 @@ Parameter *param;
 /* Initialize an empty list of function parameter names.
  */
 void
-new_ident_list (param_list)
-ParameterList *param_list;
+new_ident_list (ParameterList *param_list)
 {
     param_list->first = param_list->last = NULL;
     param_list->begin_comment = param_list->end_comment = 0;
@@ -326,9 +281,7 @@ ParameterList *param_list;
  * the parameter name field.
  */
 void
-add_ident_list (to, from, name)
-ParameterList *to, *from;
-char *name;
+add_ident_list (ParameterList *to, ParameterList *from, char *name)
 {
     Parameter *p;
     Declarator *declarator;
@@ -350,9 +303,7 @@ char *name;
  * Return a pointer to the matching parameter or NULL if not found.
  */
 static Parameter *
-search_parameter_list (params, name)
-ParameterList *params;
-char *name;
+search_parameter_list (ParameterList *params, char *name)
 {
     Parameter *p;
 
@@ -370,10 +321,7 @@ char *name;
  * "int".  Parameters of type "float" are promoted to "double".
  */
 void
-set_param_types (params, decl_spec, declarators)
-ParameterList *params;
-DeclSpec *decl_spec;
-DeclaratorList *declarators;
+set_param_types (ParameterList *params, DeclSpec *decl_spec, DeclaratorList *declarators)
 {
     Declarator *d;
     Parameter *p;
@@ -404,18 +352,14 @@ DeclaratorList *declarators;
 /* Output a function parameter.
  */
 static int
-put_parameter (outf, p,
+put_parameter (
+FILE *outf,
+Parameter *p,
 #if OPT_LINTLIBRARY
-	name_only, count,
+int	name_only,	/* nonzero if we only show the parameter name */
+int	count,		/* index in parameter list if we haven't names */
 #endif
-	commented)
-FILE *outf;
-Parameter *p;
-#if OPT_LINTLIBRARY
-int	name_only;	/* nonzero if we only show the parameter name */
-int	count;		/* index in parameter list if we haven't names */
-#endif
-int	commented;	/* comment-delimiters already from higher level */
+int	commented)	/* comment-delimiters already from higher level */
 {
     char	*s;
     char	gap = ' ';
@@ -527,10 +471,7 @@ int	commented;	/* comment-delimiters already from higher level */
 /* Output a parameter list.
  */
 static void
-put_param_list (outf, declarator, commented)
-FILE *outf;
-Declarator *declarator;
-int commented;
+put_param_list (FILE *outf, Declarator *declarator, int commented)
 {
 #if OPT_LINTLIBRARY
     int count = 0;
@@ -598,10 +539,7 @@ int commented;
 /* Output function parameters.
  */
 static void
-put_parameters (outf, declarator, commented)
-FILE *outf;
-Declarator *declarator;
-int commented;
+put_parameters (FILE *outf, Declarator *declarator, int commented)
 {
     Parameter *p;
 
@@ -647,10 +585,7 @@ int commented;
 /* Output a function declarator.
  */
 static void
-put_func_declarator (outf, declarator, commented)
-FILE *outf;
-Declarator *declarator;
-int commented;
+put_func_declarator (FILE *outf, Declarator *declarator, int commented)
 {
     char *s, *t, *decl_text;
     int f;
@@ -740,10 +675,7 @@ int commented;
 /* Output a declarator.
  */
 static void
-put_declarator (outf, declarator, commented)
-FILE *outf;
-Declarator *declarator;
-int commented;
+put_declarator (FILE *outf, Declarator *declarator, int commented)
 {
     char *s;
 
@@ -773,9 +705,7 @@ int commented;
 /* Output a declaration specifier for an external declaration.
  */
 static void
-put_decl_spec (outf, decl_spec)
-FILE *outf;
-DeclSpec *decl_spec;
+put_decl_spec (FILE *outf, DeclSpec *decl_spec)
 {
     /* An "extern func()" is legal, but we want to be explicit for lint libs */
 #if OPT_LINTLIBRARY
@@ -794,9 +724,7 @@ DeclSpec *decl_spec;
  */
 #if OPT_LINTLIBRARY
 static void
-put_llib_params(declarator, commented)
-Declarator *declarator;
-int commented;
+put_llib_params(Declarator *declarator, int commented)
 {
 	Parameter *p;
 	int	count = 0;
@@ -820,9 +748,8 @@ int commented;
 /* Generate variable declarations.
  */
 void
-gen_declarations (decl_spec, decl_list)
-DeclSpec *decl_spec;		/* declaration specifier */
-DeclaratorList *decl_list;	/* list of declared variables */
+gen_declarations (DeclSpec *decl_spec,	/* declaration specifier */
+		DeclaratorList *decl_list)	/* list of declared variables */
 {
     Declarator *d;
     int	commented = FALSE;
@@ -917,8 +844,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 /* Return TRUE if the function uses varargs.
  */
 static int
-uses_varargs (declarator)
-Declarator *declarator;
+uses_varargs (Declarator *declarator)
 {
     Parameter *p;
 
@@ -930,8 +856,7 @@ Declarator *declarator;
 /* If the parameter list is empty, then replace it with "void".
  */
 static void
-check_void_param (declarator)
-Declarator *declarator;
+check_void_param (Declarator *declarator)
 {
     DeclSpec decl_spec;
     Parameter *p;
@@ -948,8 +873,7 @@ Declarator *declarator;
  * then assign it the default type "int".
  */
 static void
-set_param_decl_spec (declarator)
-Declarator *declarator;
+set_param_decl_spec (Declarator *declarator)
 {
     Parameter *p;
 
@@ -965,9 +889,7 @@ Declarator *declarator;
 /* Generate a function prototype.
  */
 void
-gen_prototype (decl_spec, declarator)
-DeclSpec *decl_spec;
-Declarator *declarator;
+gen_prototype (DeclSpec *decl_spec, Declarator *declarator)
 {
     Parameter *p;
     int	commented = FALSE;
@@ -980,10 +902,12 @@ Declarator *declarator;
 	return;
     if (!inline_out && (decl_spec->flags & DS_INLINE))
 	return;
+#if OPT_LINTLIBRARY
     if ((decl_spec->flags & DS_INLINE)) {
 	if (in_include > extern_in)	/* -x option not set? */
 	    return;
     }
+#endif
 
     /*
      * Trim pathological keywords (which are legal, but unnecessary) from the
@@ -1035,8 +959,7 @@ Declarator *declarator;
 /* Generate a declarator for a function pointer declarator or prototype.
  */
 void
-gen_func_declarator (declarator)
-Declarator *declarator;
+gen_func_declarator (Declarator *declarator)
 {
     /* Go to the beginning of the function declarator in the temporary
      * file and overwrite it with the converted declarator.
@@ -1055,9 +978,7 @@ Declarator *declarator;
 /* Output parameter declarations for old style function definition.
  */
 static void
-put_param_decl (declarator, commented)
-Declarator *declarator;
-int commented;
+put_param_decl (Declarator *declarator, int commented)
 {
 #if OPT_LINTLIBRARY
     int count = 0;
@@ -1086,9 +1007,7 @@ int commented;
 /* Generate a function definition head.
  */
 void
-gen_func_definition (decl_spec, declarator)
-DeclSpec *decl_spec;
-Declarator *declarator;
+gen_func_definition (DeclSpec *decl_spec, Declarator *declarator)
 {
     Parameter *p;
     ParameterList *params;
