@@ -15,6 +15,9 @@ Patchlevel 9 (dickey, July 1994)
 - corrected logic that macroizes (e.g., with P_) functions like 'Sigdisp'
   (it wasn't doing anything about the trailing "(int sig)").
 
+- corrected handling of K&R conversion of mixed-mode functions (K&R style
+  with prototypes in arguments) to avoid losing comments.
+
 - modified logic for options -c -f2 so that cproto inserts a space before
   the beginning of a comment when it immediately follows an '*'.
 

@@ -13,8 +13,8 @@ extern_junk *foo(void);
 void_junk *foo2a(void);
 void_junk *foo2(void);
 void_junk *foo_void(void_junk void_int);
-void (*Sigdisp(int sig, void (*func)(int sig)))(int sig);
-void (*sigdisp2(int sig, void (*func)(int sig)))(int sig);
+void (*Sigdisp(int sig, void (*func)(int sig)))(int sig1);
+void (*sigdisp2(int sig, void (*func)(int sig)))(int sig2);
 ... edited case16.c ...
 /*
  * Define:
@@ -249,12 +249,12 @@ foo_void2 (void) { }
 
 extern void (*sigdisp(int sig, void (*func)(int sig)))(int sig);
 
-void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)
+void (*Sigdisp(int sig, void (*func)(int sig)))(int sig1)
 { /* nothing */ }
 
 void (*
 sigdisp2 (
     int sig,		/* the signal value */
     void (*func)(int sig)	/* the function pointer */
-))(int sig)
+))(int sig2)
 { /* nothing again! */ }

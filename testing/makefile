@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.4 1994/08/02 00:23:24 tom Exp $
+# $Id: makefile,v 3.5 1994/08/04 00:04:56 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -32,4 +32,5 @@ clean:
 	rm -f *.log *.out *.dcl *.err *.tmp case*.c
 
 run_test:	$(SOURCES)
-	sh -c '(run_test.sh 2>&1)' >$@
+	date >>$@.out
+	sh -c '(run_test.sh 2>&1)' |tee -a $@.out

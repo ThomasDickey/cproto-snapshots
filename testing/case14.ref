@@ -193,19 +193,17 @@ void_junk *foo_void(void_int)
 		void_junk void_int;
 		{ return(*(void_junk **)0); }
 
-void	(*sigdisp(sig, func))
+void	(*sigdisp(sig, func))(sig)
 		int	sig;
-		void	(*func)(sig)
-		int	sig;;(sig)
-		int	sig;
+		void	(*func)(sig);
 		{ /* void */ }
 
-void	(*Sigdisp(sig, func))
+void	(*Sigdisp(sig, func))(/*sig1*/)
 		int	sig;
-		void	(*func)();
+		void	(*func)(/*sig*/);
 		{ /* void */ }
 
-void	(*sigdisp2(sig, func))
+void	(*sigdisp2(sig, func))(/*sig2*/)
 		int	sig;
-		void	(*func)();
+		void	(*func)(/*sig*/);
 		{ /* void */ }

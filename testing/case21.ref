@@ -68,8 +68,8 @@ void_junk *foo_void(
 void (*Sigdisp(
 	int sig,
 	void (*func)(int sig)
-	))(int sig);
+	))(int sig1);
 void (*sigdisp2(
 	int sig,
 	void (*func)(int sig)
-	))(int sig);
+	))(int sig2);

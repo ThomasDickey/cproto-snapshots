@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.16 1994/07/31 20:44:17 tom Exp $
+/* $Id: grammar.y,v 3.17 1994/08/04 23:56:29 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -115,6 +115,7 @@ typedef struct {
 static IncludeStack *cur_file;	/* current input file */
 
 extern void yyerror ARGS((char *));
+static int  HaveAnsiParam ARGS((void));
 
 
 /* Flags to enable us to find if a procedure returns a value.
@@ -137,6 +138,19 @@ dft_decl_spec()
 #define dft_decl_spec() ""
 #endif
 
+static
+int	HaveAnsiParam()
+{
+	Parameter *p;
+	if (func_params != 0) {
+		for (p = func_params->first; p != 0; p = p->next) {
+			if (p->declarator->func_def == FUNC_ANSI) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
 %}
 %%
 
@@ -262,6 +276,18 @@ function_definition
 	}
 	  opt_declaration_list T_LBRACE
 	{
+	    /*
+	     * If we're converting to K&R and we've got a nominally K&R
+	     * function which has a parameter which is ANSI (i.e., a prototyped
+	     * function pointer), then we must override the deciphered value of
+	     * 'func_def' so that the parameter will be converted.
+	     */
+	    if (func_style == FUNC_TRADITIONAL
+	     && HaveAnsiParam()
+	     && $2->head->func_def == func_style) {
+		$2->head->func_def = FUNC_BOTH;
+	    }
+
 	    func_params = NULL;
 
 	    if (cur_file->convert)
