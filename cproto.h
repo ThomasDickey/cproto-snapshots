@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.4.1.2 1995/12/03 20:21:55 tom Exp $
+/* $Id: cproto.h,v 4.4.1.3 1995/12/27 15:00:15 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -263,7 +263,7 @@ extern FILE *cur_tmp_file   ARGS((void));
 extern void cur_file_changed ARGS((void));
 extern long cur_begin_comment ARGS((void));
 extern char *cur_text       ARGS((void));
-extern void pop_file        ARGS((void));
+extern void pop_file        ARGS((int closed));
 extern void init_parser     ARGS((void));
 extern void process_file    ARGS((FILE *infile, char *name));
 #ifdef NO_LEAKS

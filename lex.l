@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.4.1.1 1995/11/19 21:40:41 tom Exp $
+/* $Id: lex.l,v 4.4.1.2 1995/12/27 15:03:35 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -872,11 +872,12 @@ FILE *outf;
 /* Remove the top of the include stack.
  */
 void
-pop_file ()
+pop_file (closed)
+int closed;
 {
     FILE *outf;
 
-    if (yyin != stdin)
+    if (!closed && (yyin != stdin))
 	fclose(yyin);
 
     if (cur_file->convert) {
@@ -976,7 +977,7 @@ int
 yywrap ()
 {
     if (inc_depth > 0) {
-	pop_file();
+	pop_file(FALSE);
 	return 0;
     } else {
 	return 1;
