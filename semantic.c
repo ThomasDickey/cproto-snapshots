@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.8 1993/05/26 01:36:41 cthuang Exp $
+/* $Id: semantic.c,v 3.9 1993/06/09 14:42:00 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -28,6 +28,10 @@ char *text;
 long offset;
 int flags;
 {
+    if (LintLibrary()) {
+	if (!strcmp(text, "register"))
+	    text = "";
+    }
     decl_spec->text = xstrdup(text);
     decl_spec->begin = offset;
     decl_spec->flags = flags;
@@ -98,7 +102,7 @@ long offset;
 {
     Declarator *d;
 
-    d = (Declarator *)xmalloc(sizeof(Declarator));
+    d = ALLOC(Declarator);
     d->text = xstrdup(text);
     d->name = xstrdup(name);
     d->begin = offset;
@@ -173,7 +177,7 @@ DeclSpec *decl_spec;
 Declarator *declarator;
 {
     Parameter *param;
-    param = (Parameter *)xmalloc(sizeof(Parameter));
+    param = ALLOC(Parameter);
 
     if (decl_spec == NULL) {
 	new_decl_spec(&param->decl_spec, "", 0L, DS_NONE);
@@ -282,7 +286,7 @@ char *name;
     Declarator *declarator;
 
     declarator = new_declarator(name, name, 0L);
-    p = new_parameter(NULL, declarator);
+    p = new_parameter((DeclSpec *)0, declarator);
 
     to->first = from->first;
     if (to->first == NULL) {
@@ -353,21 +357,63 @@ static void put_declarator();
 
 /* Output a function parameter.
  */
-static void
-put_parameter (outf, p)
+static int
+put_parameter (outf, p, name_only, count)
 FILE *outf;
 Parameter *p;
+int	name_only;	/* nonzero if we only show the parameter name */
+int	count;		/* index in parameter list if we haven't names */
 {
-    fputs(p->decl_spec.text, outf);
+    char	*s;
+    char	gap = ' ';
+
+    if (name_only) {
+	s = p->declarator->name;
+	if (LintLibrary()) {
+	    while (*s == '*')
+		s++;
+	    if (*s == '\0' && !is_void_parameter(p))
+		s = supply_parm(count);
+	}
+	put_string(outf, s);	/* ... remainder of p->declarator.name */
+	return (TRUE);
+    }
+
+    s = p->decl_spec.text;
+    if (LintLibrary()) {
+	if (is_void_parameter(p))
+	    return (FALSE);
+	indent(outf);
+	if (!*s)
+	    s = "int";
+	if (strlen(s) < 8)
+	    gap = '\t';
+    }
+
+    put_string(outf, s);
+
+    if (LintLibrary()) {
+    	s = p->declarator->text;
+	while (*s == '*')
+	    s++;
+	if (*s == '\0') {
+	    int len = s - p->declarator->text;
+	    char *t = supply_parm(count);
+    	    p->declarator->text = concat_string(p->declarator->text, t);
+	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
+	}
+    }
+
     if (p->declarator->text[0] != '\0') {
 	if (strcmp(p->declarator->text, "...") != 0) {
 	    if (proto_style != PROTO_ABSTRACT || proto_comments ||
 	     where != FUNC_PROTO ||
 	     strcmp(p->declarator->text, p->declarator->name) != 0)
-		fputc(' ', outf);
+		put_char(outf, gap);
 	}
 	put_declarator(outf, p->declarator);
     }
+    return (TRUE);
 }
 
 /* Output a parameter list.
@@ -379,33 +425,36 @@ Declarator *declarator;
 {
     Parameter *p;
     int f;
+    int count = 0;
 
     p = declarator->params.first;
     if (is_void_parameter(p)) {
-	if (p != NULL)
-	    fputs("void", outf);
+	if (p != NULL && !LintLibrary())
+	    put_string(outf, "void");
     } else {
 	f = (declarator == func_declarator) ? format : FMT_OTHER;
 
 	if (where == FUNC_DEF && declarator->params.comment != NULL)
-	    fputs(declarator->params.comment, outf);
+	    put_string(outf, declarator->params.comment);
 		
-	fputs(fmt[f].first_param_prefix, outf);
-	put_parameter(outf, p);
+	put_string(outf, fmt[f].first_param_prefix);
+	(void)put_parameter(outf, p, LintLibrary(), ++count);
 
 	while (p->next != NULL) {
-	    fputc(',', outf);
+	    if (lint_ellipsis(p->next))
+	    	break;
+	    put_char(outf, ',');
 	    if (where == FUNC_DEF && p->comment != NULL)
-		fputs(p->comment, outf);
+		put_string(outf, p->comment);
 
 	    p = p->next;
-	    fputs(fmt[f].middle_param_prefix, outf);
-	    put_parameter(outf, p);
+	    put_string(outf, fmt[f].middle_param_prefix);
+	    (void)put_parameter(outf, p, LintLibrary(), ++count);
 	}
 	if (where == FUNC_DEF && p->comment != NULL)
-	    fputs(p->comment, outf);
+	    put_string(outf, p->comment);
 
-	fputs(fmt[f].last_param_suffix, outf);
+	put_string(outf, fmt[f].last_param_suffix);
     }
 }
 
@@ -425,16 +474,16 @@ Declarator *declarator;
 
 	/* Output paramter name list only for head function declarator. */
 	if (!is_void_parameter(p) && declarator == func_declarator) {
-	    fputs(fmt[format].first_param_prefix, outf);
-	    fputs(p->declarator->name, outf);
+	    put_string(outf, fmt[format].first_param_prefix);
+	    put_string(outf, p->declarator->name);
 	    p = p->next;
 	    while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
-		fputc(',', outf);
-		fputs(fmt[format].middle_param_prefix, outf);
-		fputs(p->declarator->name, outf);
+		put_char(outf, ',');
+		put_string(outf, fmt[format].middle_param_prefix);
+		put_string(outf, p->declarator->name);
 		p = p->next;
 	    }
-	    fputs(fmt[format].last_param_suffix, outf);
+	    put_string(outf, fmt[format].last_param_suffix);
 	}
     } else {
 
@@ -442,9 +491,9 @@ Declarator *declarator;
 	if (where == FUNC_PROTO && proto_style == PROTO_TRADITIONAL &&
 	 declarator == func_declarator) {
 	    if (proto_comments) {
-		fputs("/*", outf);
+		put_string(outf, "/*");
 		put_param_list(outf, declarator);
-		fputs("*/", outf);
+		put_string(outf, "*/");
 	    }
 	} else {
 	    put_param_list(outf, declarator);
@@ -466,45 +515,45 @@ Declarator *declarator;
     if ((s = strstr(declarator->text, "%s")) == NULL)
 	return;
     *s = '\0';
-    fputs(declarator->text, outf);
+    put_string(outf, declarator->text);
 
     /* Substitute place holder with function declarator. */
     if (declarator->func_stack->func_def == FUNC_NONE) {
 
 	decl_text = declarator->func_stack->text;
 	if (declarator->name[0] == '\0') {
-	    fputs(decl_text, outf);
+	    put_string(outf, decl_text);
 	} else {
 
 	    /* Output the declarator text before the declarator name. */
 	    if ((t = strstr(decl_text, declarator->name)) == NULL)
 		return;
 	    *t = '\0';
-	    fputs(decl_text, outf);
+	    put_string(outf, decl_text);
 	    *t = declarator->name[0];
 
 	    /* Output the declarator prefix before the name. */
 	    f = (declarator == func_declarator) ? format : FMT_OTHER;
 	    if (strcmp(fmt[f].declarator_prefix, " ") != 0)
-		fputs(fmt[f].declarator_prefix, outf);
+		put_string(outf, fmt[f].declarator_prefix);
 
 	    /* Output the declarator name. */
 	    if (where == FUNC_PROTO && proto_style == PROTO_ABSTRACT &&
 	     declarator != func_declarator) {
 		if (proto_comments) {
-		    fputs("/*", outf);
-		    fputs(declarator->name, outf);
-		    fputs("*/", outf);
+		    put_string(outf, "/*");
+		    put_string(outf, declarator->name);
+		    put_string(outf, "*/");
 		}
 	    } else {
-		fputs(declarator->name, outf);
+		put_string(outf, declarator->name);
 	    }
 
 	    /* Output the remaining declarator text. */
-	    fputs(t + strlen(declarator->name), outf);
+	    put_string(outf, t + strlen(declarator->name));
 
 	    /* Output the declarator suffix. */
-	    fputs(fmt[f].declarator_suffix, outf);
+	    put_string(outf, fmt[f].declarator_suffix);
 	}
     } else {
 	put_func_declarator(outf, declarator->func_stack);
@@ -516,19 +565,31 @@ Declarator *declarator;
     if ((t = strstr(s, "()")) == NULL)
 	return;
     *t = '\0';
-    fputs(s, outf);
+    put_string(outf, s);
 
     if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
 	fprintf(outf, " %s(", macro_name);
     }
 
     /* Substitute place holder with function parameters. */
-    fputc(*t++ = '(', outf);
+    put_char(outf, *t++ = '(');
     put_parameters(outf, declarator);
-    fputs(t, outf);
+    put_string(outf, t);
 
     if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
-	fputc(')', outf);
+	put_char(outf, ')');
+    }
+
+    if (LintLibrary()) {
+	Parameter	*p = declarator->params.first;
+	int		count = 0;
+	while (p != 0) {
+		if (lint_ellipsis(p))
+			break;
+		if (put_parameter(outf, p, FALSE, ++count))
+			putchar(';');
+		p = p->next;
+	}
     }
 }
 
@@ -556,7 +617,7 @@ Declarator *declarator;
 	    }
 	    *s = declarator->name[0];
 	} else {
-	    fputs(declarator->text, outf);
+	    put_string(outf, declarator->text);
 	}
     } else {
 	put_func_declarator(outf, declarator);
@@ -571,10 +632,9 @@ FILE *outf;
 DeclSpec *decl_spec;
 {
     if (extern_out && !(decl_spec->flags & DS_STATIC) &&
-     strstr(decl_spec->text, "extern") == NULL)
-	fputs("extern ", outf);
-    fputs(decl_spec->text, outf);
-    fputc(' ', outf);
+     strkey(decl_spec->text, "extern") == NULL)
+	put_padded(outf, "extern");
+    put_padded(outf, decl_spec->text);
 }
 
 /* Generate variable declarations.
@@ -585,9 +645,23 @@ DeclSpec *decl_spec;		/* declaration specifier */
 DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
+    boolean	defines = (strchr(decl_spec->text, '{') != 0);
 
-    if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_JUNK)))
+    /* special treatment for -l, -T options */
+    if ((!variables_out && types_out && defines) || (decl_list == 0)) {
+	strcut(decl_spec->text, "static");
+	strcut(decl_spec->text, "extern");
+	fmt_library((decl_list == 0) ? 1 : 2);
+	put_string(stdout, decl_spec->text);
+	put_string(stdout, ";\n");
 	return;
+    }
+
+    if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_JUNK))) {
+	if (in_include >= extern_in)	/* -x option not set? */
+	    return;
+	strcut(decl_spec->text, "extern");
+    }
     if (!static_out && (decl_spec->flags & DS_STATIC))
 	return;
 
@@ -596,11 +670,17 @@ DeclaratorList *decl_list;	/* list of declared variables */
     where = FUNC_OTHER;
     format = FMT_OTHER;
     for (d = decl_list->first; d != NULL; d = d->next) {
-	if (d->func_def == FUNC_NONE || d->head->func_stack->pointer) {
-	    fputs(fmt[FMT_PROTO].decl_spec_prefix, stdout);
+	if (d->func_def == FUNC_NONE
+	 || d->head->func_stack->pointer
+	 || (in_include < extern_in)) {
+	    if (LintLibrary() && d->func_def != FUNC_NONE)
+		ellipsis_varargs(d);
+	    else if (types_out)
+	    	fmt_library(2);
+	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
 	    put_declarator(stdout, d);
-	    fputs(";\n", stdout);
+	    put_body(stdout, decl_spec, d);
 	}
     }
 }
@@ -628,7 +708,7 @@ Declarator *declarator;
 
     if (declarator->params.first == NULL) {
 	new_decl_spec(&decl_spec, "void", 0L, DS_NONE);
-	p = new_parameter(&decl_spec, NULL);
+	p = new_parameter(&decl_spec, (Declarator *)0);
 	new_param_list(&declarator->params, p);
     }
 }
@@ -659,10 +739,27 @@ gen_prototype (decl_spec, declarator)
 DeclSpec *decl_spec;
 Declarator *declarator;
 {
+    Parameter *p;
+
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
     if (!static_out && (decl_spec->flags & DS_STATIC))
 	return;
+
+    /*
+     * Trim pathological keywords (which are legal, but unnecessary) from the
+     * function and its parameters.
+     */
+    strcut(decl_spec->text, "extern");
+    for (p = declarator->params.first; p != NULL; p = p->next) {
+	strcut(p->decl_spec.text, "extern");
+	strcut(p->decl_spec.text, "auto");
+    }
+
+    if (LintLibrary())
+	ellipsis_varargs(declarator);
+    else if (types_out)
+    	fmt_library(0);
 
     func_declarator = declarator->head;
     if (uses_varargs(func_declarator)) {
@@ -678,10 +775,10 @@ Declarator *declarator;
 
     where = FUNC_PROTO;
     format = FMT_PROTO;
-    fputs(fmt[format].decl_spec_prefix, stdout);
+    put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator);
-    fputs(";\n", stdout);
+    put_body(stdout, decl_spec, declarator);
 }
 
 /* Generate a declarator for a function pointer declarator or prototype.
@@ -708,16 +805,17 @@ put_param_decl (declarator)
 Declarator *declarator;
 {
     Parameter *p;
+    int count = 0;
 
     p = declarator->params.first;
     if (!is_void_parameter(p)) {
 	fputc('\n', cur_tmp_file());
-	put_parameter(cur_tmp_file(), p);
+	(void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count);
 	fputc(';', cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
 	    fputc('\n', cur_tmp_file());
-	    put_parameter(cur_tmp_file(), p);
+	    (void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count);
 	    fputc(';', cur_tmp_file());
 	    p = p->next;
 	}

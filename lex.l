@@ -1,9 +1,67 @@
 %{
-/* $Id: lex.l,v 3.10 1993/05/26 01:36:04 cthuang Exp $
+/* $Id: lex.l,v 3.11 1993/06/09 18:08:36 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
+ *
+ *	This is designed to parse lexically at the top level (e.g., of extern
+ *	objects such as procedures).  The corresponding yacc-grammar expects
+ *	that curly-braces (for function bodies) are recognized as a single
+ *	token, BRACES.  Similarly, square-brackets and their contents are
+ *	passed back as BRACKETS.
+ *
+ *	Assignments at the top level are data-initialization statements.
+ *	These are returned as INITIALIZER.
+ *
+ *	The logic here recognizes tokens inside curly-braces, but does not
+ *	pass them back to the grammar.
+ *
+ * Apollo extensions:
+ *	"&" is ignored because we ignore expressions of all kinds.  Note that
+ *	function-prototypes may use "&" to denote reference-parameters.  By
+ *	ignoring that as well, we make the output compatible with lint (kludge).
+ *
+ *	Similarly, ignore "std_$call", since it is not compatible with lint.
+ *
+ *	CPP_INLINE handles a special case of the Apollo CC 6.7 compiler that
+ *	uses inline attribute declarations, e.g.
+ *
+ *		int	foo #attribute[aligned(1)];
+ *
+ *	In CC 6.8 this behavior is hidden by a macro.
+ *
+ * VAX/VMS extensions:
+ *	Treat the keywords 'globalref', etc., as 'extern'.
+ *
+ *	The keywords 'noshare' and 'readonly' are type-qualifiers.
  */
 
+#define	result(nn)	count(); if (!brackets && unnested()) return(nn)
+
+#define	is_IDENTIFIER	    save_text_offset();\
+			    return type_of_name(yytext);
+
+#ifdef	apollo
+#define	apollo_keyword
+#define	apollo_special	absorb_special()
+#else
+#define	apollo_keyword	is_IDENTIFIER
+#define	apollo_special	is_IDENTIFIER
+#endif
+
+#ifdef	vms
+#define	vms_extern	save_text_offset(); return(T_EXTERN);
+#define	vms_keyword	save_text_offset();
+#else	/* unix */
+#define	vms_extern	is_IDENTIFIER
+#define	vms_keyword	is_IDENTIFIER
+#endif	/* vms/unix */
+
+int	varargs_num;		/* code to save "VARARGS" */
+int	debug_trace;		/* true if we trace token-level stuff */
+char	base_file[BUFSIZ];	/* top-level file name */
+
+static int save_cpp;	/* true if cpp-text within curly braces */
+static int in_cpp;	/* true while we are within cpp-text */
 static int curly;	/* number of curly brace nesting levels */
 static int ly_count;	/* number of occurances of %% */
 
@@ -16,6 +74,9 @@ static int inc_depth;				/* include nesting level */
 static IncludeStack inc_stack[MAX_INC_DEPTH];	/* stack of included files */
 static SymbolTable *included_files;		/* files already included */
 
+static int  type_of_name();
+static void StartCpp();
+static void FinishCpp();
 static void update_line_num();
 static void save_text();
 static void save_text_offset();
@@ -30,13 +91,13 @@ extern void yyerror();
 %}
 
 WS		[ \t]
-LETTER		[A-Za-z_]
+LETTER		[A-Za-z$_]
 DIGIT		[0-9]
 ID		{LETTER}({LETTER}|{DIGIT})*
 STRING		\"(\\.|\\\n|[^"\\])*\"
 QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 
-%s CPP1 INIT1 INIT2 CURLY LEXYACC ASM
+%s CPP1 INIT1 INIT2 CURLY LEXYACC ASM CPP_INLINE
 %%
 
 \n			{ save_text(); cur_file->line_num++;
@@ -45,14 +106,20 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 "/*"			{ save_text(); get_comment(); }
 "//".*$ 		save_text();
 
+"&"			{ /* ignored (apollo) */ }
+
 <LEXYACC>^"%%"		{ save_text(); if (++ly_count >= 2) BEGIN INITIAL; }
 <LEXYACC>^"%{"		{ save_text(); BEGIN INITIAL; }
 <LEXYACC>{QUOTED}	{ save_text(); update_line_num(); }
 <LEXYACC>.		save_text();
 <INITIAL>^"%}"		{ save_text(); BEGIN LEXYACC; }
 
-<INITIAL>#{WS}* 	{ save_text(); BEGIN CPP1; }
-<INITIAL>"??="{WS}* 	{ save_text(); BEGIN CPP1; }
+<INITIAL>#{WS}* 	{ save_text(); StartCpp(0); }
+<INITIAL>"??="{WS}* 	{ save_text(); StartCpp(0); }
+
+<CPP1>attribute		{ BEGIN CPP_INLINE; /* apollo */}
+<CPP1>options		{ BEGIN CPP_INLINE; /* apollo */}
+<CPP_INLINE>[^;]*	FinishCpp();
 
 <CPP1>define{WS}+{ID}	{
 			    char name[MAX_TEXT_SIZE], value[MAX_TEXT_SIZE];
@@ -84,20 +151,23 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 			    sscanf(yytext, "line %d \"%[^\"]\"",
 			     &cur_file->line_num, cur_file->file_name);
 			    cur_file->line_num--;
-			    BEGIN INITIAL;
+			    track_in();
+			    FinishCpp();
 			}
 <CPP1>[0-9]+{WS}+\".*$  {
 			    save_text();
 			    sscanf(yytext, "%d \"%[^\"]\"", &cur_file->line_num,
 			     cur_file->file_name);
 			    cur_file->line_num--;
-			    BEGIN INITIAL;
+			    track_in();
+			    FinishCpp();
 			}
 <CPP1>[0-9]+.*$ 	{
 			    save_text();
 			    sscanf(yytext, "%d ", &cur_file->line_num);
 			    cur_file->line_num--;
-			    BEGIN INITIAL;
+			    track_in();
+			    FinishCpp();
 			}
 
 <CPP1>. 		{ save_text(); get_cpp_directive(NULL, 0); }
@@ -154,17 +224,14 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 <INITIAL>union		{ save_text_offset(); return T_UNION; }
 <INITIAL>va_dcl		{ save_text_offset(); return T_VA_DCL; }
 
-<INITIAL>{ID}		{
-			    save_text_offset();
-			    if (find_symbol(type_qualifiers, yytext) != NULL)
-				return T_TYPE_QUALIFIER;
-			    else if (find_symbol(typedef_names, yytext) != NULL)
-				return T_TYPEDEF_NAME;
-			    else if (find_symbol(define_names, yytext) != NULL)
-				return T_DEFINE_NAME;
-			    else
-				return T_IDENTIFIER;
-			}
+<INITIAL>globalvalue	{ vms_extern; }
+<INITIAL>globalref	{ vms_extern; }
+<INITIAL>globaldef	{ vms_extern; }
+
+<INITIAL>"std_$call"	{ apollo_keyword; }
+<INITIAL>"__attribute"	{ apollo_special; }
+
+<INITIAL>{ID}		{ is_IDENTIFIER }
 
 <INITIAL>\[[^\]]*\]	{
 			    /* This can't handle the case where a comment
@@ -204,6 +271,8 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 <INITIAL>"{"		{
 			    save_text();
 			    curly = 1;
+			    return_val =
+			    returned_at = FALSE;
 			    BEGIN CURLY;
 			    return T_LBRACE;
 			}
@@ -216,7 +285,11 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 			    }
 			}
 <CURLY>{QUOTED}		{ save_text(); update_line_num(); }
-<CURLY>.		save_text();
+<CURLY>"return"		{ save_text(); returned_at = TRUE; }
+<CURLY>";"		{ save_text(); returned_at = FALSE; }
+<CURLY>#{WS}* 		{ save_text(); StartCpp(1); }
+<CURLY>"??="{WS}* 	{ save_text(); StartCpp(1); }
+<CURLY>.		{ save_text(); return_val |= returned_at; }
 
 [ \t\f]+		save_text();
 .			{
@@ -225,6 +298,64 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 			    fprintf(stderr, "bad character '%c'\n", yytext[0]);
 			}
 %%
+
+static void
+StartCpp(level)
+int	level;
+{
+    save_cpp = level;
+    in_cpp = TRUE;
+    BEGIN CPP1;
+}
+
+static void
+FinishCpp()
+{
+    in_cpp = FALSE;
+    if (save_cpp)
+    	BEGIN CURLY;
+    else
+	BEGIN INITIAL;
+}
+
+#ifdef	apollo
+static
+absorb_special()
+{
+	int	c;
+	int	nest	= 0;
+	while ((c = input()) > 0) {
+		if (c == '(')
+			nest++;
+		else if (c == ')') {
+			if (--nest <= 0)
+				break;
+		}
+	}
+}
+#endif
+
+/* Decode the current token according to the type-of-name
+ */
+static int
+type_of_name(name)
+char *name;
+{
+    if (find_symbol(type_qualifiers, name) != NULL)
+	return T_TYPE_QUALIFIER;
+    else if (find_symbol(typedef_names, name) != NULL)
+	return T_TYPEDEF_NAME;
+    else if (find_symbol(define_names, name) != NULL)
+	return T_DEFINE_NAME;
+    else
+	return T_IDENTIFIER;
+}
+
+boolean	is_typedef_name (name)
+	char	*name;
+{
+    return (find_symbol(typedef_names, name) != NULL);
+}
 
 /* If the matched text contains any new line characters, then update the
  * current line number.
@@ -244,6 +375,8 @@ update_line_num ()
 static void
 save_text ()
 {
+    if (!in_cpp)
+    	copy_typedef(yytext);
     if (cur_file->convert) {
 	fputs(yytext, cur_file->tmp_file);
     }
@@ -255,11 +388,43 @@ save_text ()
 static void
 save_text_offset ()
 {
-    strcpy(yylval.text.text, yytext);
+    copy_typedef(strcpy(yylval.text.text, yytext));
     if (cur_file->convert) {
 	yylval.text.begin = ftell(cur_file->tmp_file);
 	fputs(yytext, cur_file->tmp_file);
     }
+}
+
+/* Decipher comments that are useful for lint (and making lint-libraries)
+ */
+static	struct	{
+	int	Varargs;
+	int	Externs;
+	int	Preproz;
+	} CmtVal;
+
+static int
+decipher_comment (keyword, len)
+char	*keyword;
+int	len;
+{
+	if (len != 0) {
+		keyword[len] = '\0';
+
+		if (!strcmp(keyword, "VARARGS"))
+			CmtVal.Varargs = -1;
+		else if (sscanf(keyword, "VARARGS%d", &CmtVal.Varargs) == 1)
+			;
+		else if (!strcmp(keyword, "LINT_EXTERN"))
+			CmtVal.Externs = MAX_INC_DEPTH;
+		else if (sscanf(keyword, "LINT_EXTERN%d", &CmtVal.Externs) == 1)
+			;
+		else if (!strcmp(keyword, "LINT_PREPRO"))
+			CmtVal.Preproz = 1;
+		else if (sscanf(keyword, "LINT_PREPRO%d", &CmtVal.Preproz) == 1)
+			;
+	}
+	return 0;
 }
 
 /* Scan to end of comment.
@@ -267,14 +432,29 @@ save_text_offset ()
 static void
 get_comment ()
 {
-    int c, lastc = '\0';
+    char keyword[BUFSIZ];
+    int c, lastc = '\0', len = 0;
+
+    keyword[len] = '\0';
+    CmtVal.Varargs = 0;
+    CmtVal.Externs = -1;
+    CmtVal.Preproz = 0;
 
     while ((c = input()) != 0) {
 	if (cur_file->convert)
 	    fputc(c, cur_file->tmp_file);
+
+	if (CmtVal.Preproz > 0)
+	    fputc(c, stdout); 
+	if (isspace(c))
+	    len = decipher_comment(keyword, len);
+	else if (len+1 < sizeof(keyword))
+	    keyword[len++] = c;
+
 	switch (c) {
 	case '\n':
 	    cur_file->line_num++;
+	    CmtVal.Preproz -= 1;
 	    break;
 	case '/':
 	    if (lastc == '*') {
@@ -288,9 +468,13 @@ get_comment ()
 			cur_file->end_comment = ftell(cur_file->tmp_file);
 		    }
 		}
+		(void)decipher_comment(keyword, len);
+		if (CmtVal.Varargs != 0)
+		    varargs_num = CmtVal.Varargs;
+		if (CmtVal.Externs != -1)
+		    extern_in = CmtVal.Externs;
 		return;
 	    }
-	    break;
 	}
 	lastc = c;
     }
@@ -318,7 +502,7 @@ unsigned n;		/* size of buffer to store directive text */
 	case '\n':
 	    cur_file->line_num++;
 	    if (lastc[2] != '\\' && strcmp(lastc, "?\?/") != 0) {
-		BEGIN INITIAL;
+		FinishCpp();
 		return;
 	    }
 	    break;
@@ -553,7 +737,7 @@ char *file_spec; 	/* path surrounded by "" or <> */
     }
     s = strchr(file_spec+1, match);
     n = (s != NULL) ? (unsigned)(s - file_spec - 1) : 0;
-    strncpy(file, file_spec+1, n);
+    strncpy(file, file_spec+1, (SIZE_T)n);
     file[n] = '\0';
 
     /* Do nothing if the file was already included. */

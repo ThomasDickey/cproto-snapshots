@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 3.3 1993/05/26 01:36:41 cthuang Exp $
+/* $Id: symbol.c,v 3.4 1993/06/09 13:39:02 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -16,7 +16,7 @@ new_symbol_table ()
     SymbolTable *symtab;
     int i;
 
-    if ((symtab = (SymbolTable *)xmalloc(sizeof(SymbolTable))) != NULL) {
+    if ((symtab = ALLOC(SymbolTable)) != NULL) {
 	for (i = 0; i < SYM_MAX_HASH; ++i)
 	    symtab->bucket[i] = NULL;
     }
@@ -108,7 +108,7 @@ int flags;		/* symbol attributes */
     int i;
 
     if ((sym = find_symbol(symtab, name)) == NULL) {
-	sym = (Symbol *)xmalloc(sizeof(Symbol));
+	sym = ALLOC(Symbol);
 	sym->name = xstrdup(name);
 	i = hash(name);
 	sym->next = symtab->bucket[i];

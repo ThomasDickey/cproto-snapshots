@@ -1,5 +1,49 @@
 Version 3
 
+Patchlevel 8
+
+- added files 'lintlibs.c' and 'strkey.c'
+
+- Allow dollar signs in identifiers
+
+- Defined FAIL, SUCCESS to use in 'exit()' calls (VMS is approximately the
+  reverse of UNIX).
+
+- Added option "-o" to force redirection without shell operations (useful for
+  VAX/VMS in particular).
+
+- Added options "-l" (lintlibrary format), "-T" (typedefs), "-x" (externs
+  in include-files).
+
+- Added "-C" option to cpp-invocation (to support VARARGS-decoding for -l
+  option).
+
+- Modified grammar.y so that if -T option is turned on, instances of untagged
+  struct, union or enum are shown with the contents of the curly braces.
+
+- Modified lex.l so that it sets 'return_val' iff at least one return statement
+  within curly braces returns an expression.  Use this to support -l option.
+
+- Modified semantic.c (for -l option) to put tabs after short names for better
+  readability.  Also (only -l option), put a blank line before function
+  definitions and typedefs.
+
+- Corrected lex.l so that it recognizes preprocessor lines within curly braces.
+
+- Modified 'gen_prototype()' to trim 'extern' and 'auto' keywords from the text
+  (so that 'extern' is emitted in this function only if the -e option is
+  specified).  Do this to support -l option (and to correct normal usage, which
+  implies that -e option is needed to put an 'extern' before declaration).
+
+- Corrected test in 'put_decl_spec()' by using 'strkey()' (which tests for a
+  name, not simply a substring).
+
+- Modified semantic.c to use 'put_string()' and related procedures to simplify
+  pretty-printing of lint-library text (mainly to control blank lines).  (See
+  'fmt_library()').
+
+- linted some xmalloc calls using ALLOC macro.
+
 Patchlevel 7
 
 - Fix: The processing of string literals is now more robust.

@@ -1,4 +1,4 @@
-# $Id: Makefile.msc,v 3.5 1993/05/26 01:36:04 cthuang Exp $
+# $Id: Makefile.msc,v 3.6 1993/06/09 18:14:02 tom Exp $
 #
 # Microsoft C makefile for C prototype generator
 
@@ -16,9 +16,9 @@ LDFLAGS = /F 1000
 DIST1 = README CHANGES cproto.man
 DIST2 = cproto.1 Makefile.bc Makefile.msc Makefile.uni lex.l grammar.y
 DIST3 = config.h cproto.h patchlev.h semantic.h symbol.h
-DIST4 = cproto.c popen.c semantic.c strstr.c symbol.c
+DIST4 = cproto.c lintlibs.c popen.c semantic.c strkey.c strstr.c symbol.c
 
-OBJECTS = cproto.obj getopt.obj semantic.obj symbol.obj y_tab.obj popen.obj
+OBJECTS = cproto.obj lintlibs.obj getopt.obj semantic.obj strkey.obj symbol.obj y_tab.obj popen.obj
 
 all: cproto.exe
 
@@ -56,7 +56,9 @@ shar:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 cproto.obj: config.h cproto.h
+lintlibs.obj: config.h cproto.h symbol.h semantic.h
 popen.obj: config.h cproto.h
 semantic.obj: config.h cproto.h symbol.h semantic.h
+strkey.obj: cproto.h config.h
 strstr.obj: config.h
 symbol.obj: config.h cproto.h symbol.h
