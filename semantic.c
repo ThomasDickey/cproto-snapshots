@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.3.1.2 1995/12/03 20:38:53 tom Exp $
+/* $Id: semantic.c,v 4.4 1996/04/13 04:29:18 cthuang Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -905,7 +905,9 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    put_body(stdout, decl_spec, d);
 	    nestedParams = saveNest;
 	}
+#if OPT_LINTLIBRARY
 	flush_varargs();
+#endif
     }
     exitlike_func = FALSE;
 }

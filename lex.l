@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.4.1.2 1995/12/27 15:03:35 tom Exp $
+/* $Id: lex.l,v 4.5 1996/04/13 04:29:18 cthuang Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -249,7 +249,7 @@ QUOTE		[\"\']
 <INITIAL>__signed__ 	{ save_text_offset(); return T_SIGNED; }
 <INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
 <INITIAL>__inline__ 	{ save_text_offset(); return T_INLINE; }
-<INITIAL>"__attribute__" { gcc_attribute(); }
+<INITIAL>__attribute__	{ gcc_attribute(); }
 
 <INITIAL>globalvalue	{ vms_extern; }
 <INITIAL>globalref	{ vms_extern; }

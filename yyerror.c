@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.2.1.1 1995/12/03 00:58:13 tom Exp $
+/* $Id: yyerror.c,v 4.3 1996/04/13 04:29:18 cthuang Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment

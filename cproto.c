@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.4.1.3 1995/12/27 15:03:29 tom Exp $
+/* $Id: cproto.c,v 4.5 1996/04/13 04:29:18 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.4.1.3 1995/12/27 15:03:29 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.5 1996/04/13 04:29:18 cthuang Exp $";
 
 #include <stdio.h>
 #include <ctype.h>

@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.2.1.1 1995/12/02 22:36:32 tom Exp $
+/* $Id: system.h,v 4.3 1996/04/13 04:29:18 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
