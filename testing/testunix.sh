@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: testunix.sh,v 3.2 1994/07/30 22:09:04 tom Exp $
+# $Id: testunix.sh,v 3.4 1994/07/31 00:21:32 tom Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
@@ -15,28 +15,41 @@ do
 	cp syntax.c $I.c
 	chmod +w $I.c
 
-	( . ./$I.dcl ) 2>$I.err
+	. ./$I.dcl 2>$I.err
+
 	if [ -f $I.ref ]
 	then
+		# When we select either the -a or -t options, CPROTO will edit
+		# the input file.  It also writes to the standard output the
+		# prototypes that it is extracting.  Since there's only one
+		# reference for each test, I simply concatenate the edited file
+		# after the test output, for use as a combined reference.
+		if ( cmp -s $I.c syntax.c )
+		then
+			rm -f $I.c
+		else
+			echo '... edited '$I.c' ...' >>$I.out
+			cat $I.c >>$I.out
+			rm -f $I.c
+		fi
+
 		if [ -f $I.out ]
 		then
 			diff -b -c $I.ref $I.out >$I.tmp
 			if [ -s $I.tmp ]
 			then
+				cat $I.err
 				cat $I.tmp
 			else
 				echo '... ok'
 				rm -f $I.out $I.tmp $I.err
 			fi
-		elif ( cmp -s $I.c syntax.c )
-		then
-			echo '?? no output'
-			cat $I.err
 		else
-			echo edited $I.c
+			echo '? no output '$I
 		fi
 	else
 		echo '...saving reference for '$i
 		mv $I.out $I.ref
+		rm -f $I.err
 	fi
 done

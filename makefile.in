@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.8 1994/07/30 23:27:47 tom Exp $
+# $Id: makefile.in,v 3.9 1994/07/31 16:31:56 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -24,10 +24,8 @@ DOC_FILES = \
 	cproto.1
 
 MAK_FILES = \
-	makefile.in configure.in \
-	turboc.mak \
-	borland.mak \
-	micrsoft.mak
+	makefile.in \
+	configure.in
 
 H_FILES = \
 	system.h \
@@ -38,7 +36,6 @@ H_FILES = \
 
 C_FILES = \
 	cproto.c \
-	popen.c \
 	lintlibs.c \
 	semantic.c \
 	strkey.c \
@@ -105,8 +102,8 @@ lint: $(C_FILES)
 llib: $(C_FILES)
 	./cproto -l $(CPP_OPTS) $(C_FILES) y.tab.c >$@.out
 
-tags: $(H_FILES) $(C_FILES) $(JUNK)
-	ctags -t $(C_FILES) $(H_FILES)
+tags: $(H_FILES) $(C_FILES) $(AUX_FILES)
+	ctags -t $(C_FILES) $(AUX_FILES) $(H_FILES)
 
 depend:
 	makedepend -- $(CFLAGS) -- $(C_FILES) y.tab.c

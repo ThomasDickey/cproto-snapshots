@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.4 1994/07/30 18:34:27 tom Exp $
+/* $Id: lintlibs.c,v 3.5 1994/07/31 21:07:22 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -200,6 +200,24 @@ int	already_included (path)
 		return TRUE;
 	new_symbol(list, path, NULL, DS_NONE);
 	return FALSE;
+}
+
+/*
+ * Keep track of variables that may have been implicitly declared via
+ * include-files so that we declare them only once in the lint library
+ * output.
+ */
+int	already_declared (name)
+	char	*name;
+{
+	static SymbolTable *my_symtab;
+	if (my_symtab == 0)
+		my_symtab = new_symbol_table ();
+	if (find_symbol (my_symtab, name) == 0) {
+		(void)new_symbol (my_symtab, name, 0, 0);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 /*

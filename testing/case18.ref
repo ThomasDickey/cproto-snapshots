@@ -1,0 +1,20 @@
+/* case18.c */
+int dots_0();
+int dots_1();
+int dots_3();
+_FIRST *func1();
+_FIRST *func2();
+int *(func_func)();
+int main();
+int program();
+int junk0();
+int junk1();
+int junk2();
+int junk3();
+BONG *junk4();
+extern_junk *foo();
+void_junk *foo2a();
+void_junk *foo2();
+void_junk *foo_void();
+void (*Sigdisp())();
+void (*sigdisp2())();

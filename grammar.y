@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.13 1994/07/30 19:06:05 tom Exp $
+/* $Id: grammar.y,v 3.16 1994/07/31 20:44:17 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -132,6 +132,7 @@ dft_decl_spec()
 			? ""
 			: "int";
 }
+
 #else
 #define dft_decl_spec() ""
 #endif
@@ -183,7 +184,7 @@ declaration
 	: decl_specifiers ';'
 	{
 #if OPT_LINTLIBRARY
-	    if (types_out)
+	    if (types_out && want_typedef())
 		gen_declarations(&$1, (DeclaratorList *)0);
 #endif
 	    free_decl_spec(&$1);
@@ -427,7 +428,7 @@ struct_or_union_specifier
 	}
 	| struct_or_union any_id
 	{
-	    sprintf(buf, "%s %s", $1.text, $2.text);
+	    (void)sprintf(buf, "%s %s", $1.text, $2.text);
 	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
 	}
 	;
@@ -492,7 +493,7 @@ enum_specifier
 	}
 	| enumeration any_id
 	{
-	    sprintf(buf, "enum %s", $2.text);
+	    (void)sprintf(buf, "enum %s", $2.text);
 	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
 	}
 	;
@@ -514,7 +515,7 @@ declarator
 	: pointer direct_declarator
 	{
 	    $$ = $2;
-	    sprintf(buf, "%s%s", $1.text, $$->text);
+	    (void)sprintf(buf, "%s%s", $1.text, $$->text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	    $$->begin = $1.begin;
@@ -531,7 +532,7 @@ direct_declarator
 	| '(' declarator ')'
 	{
 	    $$ = $2;
-	    sprintf(buf, "(%s)", $$->text);
+	    (void)sprintf(buf, "(%s)", $$->text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	    $$->begin = $1.begin;
@@ -539,7 +540,7 @@ direct_declarator
 	| direct_declarator T_BRACKETS
 	{
 	    $$ = $1;
-	    sprintf(buf, "%s%s", $$->text, $2.text);
+	    (void)sprintf(buf, "%s%s", $$->text, $2.text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	}
@@ -564,12 +565,12 @@ direct_declarator
 pointer
 	: '*' opt_type_qualifiers
 	{
-	    sprintf($$.text, "*%s", $2.text);
+	    (void)sprintf($$.text, "*%s", $2.text);
 	    $$.begin = $1.begin;
 	}
 	| '*' opt_type_qualifiers pointer
 	{
-	    sprintf($$.text, "*%s%s", $2.text, $3.text);
+	    (void)sprintf($$.text, "*%s%s", $2.text, $3.text);
 	    $$.begin = $1.begin;
 	}
 	;
@@ -586,13 +587,13 @@ opt_type_qualifiers
 type_qualifier_list
 	: type_qualifier
 	{
-	    sprintf($$.text, "%s ", $1.text);
+	    (void)sprintf($$.text, "%s ", $1.text);
 	    $$.begin = $1.begin;
 	    free($1.text);
 	}
 	| type_qualifier_list type_qualifier
 	{
-	    sprintf($$.text, "%s%s ", $1.text, $2.text);
+	    (void)sprintf($$.text, "%s%s ", $1.text, $2.text);
 	    $$.begin = $1.begin;
 	    free($2.text);
 	}
@@ -663,7 +664,7 @@ abs_declarator
 	| pointer direct_abs_declarator
 	{
 	    $$ = $2;
-	    sprintf(buf, "%s%s", $1.text, $$->text);
+	    (void)sprintf(buf, "%s%s", $1.text, $$->text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	    $$->begin = $1.begin;
@@ -675,7 +676,7 @@ direct_abs_declarator
 	: '(' abs_declarator ')'
 	{
 	    $$ = $2;
-	    sprintf(buf, "(%s)", $$->text);
+	    (void)sprintf(buf, "(%s)", $$->text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	    $$->begin = $1.begin;
@@ -683,7 +684,7 @@ direct_abs_declarator
 	| direct_abs_declarator T_BRACKETS
 	{
 	    $$ = $1;
-	    sprintf(buf, "%s%s", $$->text, $2.text);
+	    (void)sprintf(buf, "%s%s", $$->text, $2.text);
 	    free($$->text);
 	    $$->text = xstrdup(buf);
 	}
@@ -833,8 +834,6 @@ char *name;
     free_symbol_table(define_names);
     free_symbol_table(typedef_names);
     free_symbol_table(included_files);
-    free(cur_file->base_name);
-    free(cur_file->file_name);
 }
 
 #ifdef NO_LEAKS

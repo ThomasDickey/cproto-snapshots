@@ -198,8 +198,8 @@ char	**argv;
 /*VARARGS*/
 /*VARARGS3*/
 program(argv, y, zz, z1, z2, z3)
-string	argv[];
-struct	alpha { int x,z; } y;
+string	argv[];	/* first argument */
+struct	alpha { int x,z; } y;	/* second argument */
 {
 	return(0);
 }
@@ -220,3 +220,13 @@ extern void_junk	*foo2a();
 void_junk	*foo2() { }
 void_junk	*foo_void(void_junk void_int) { }
 static	void_junk	*foo_void2() { }
+
+extern void (*sigdisp(int sig, void (*func)(int sig)))(int sig);
+
+void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)
+{ /* nothing */ }
+
+void (*sigdisp2(sig, func))(int sig)
+	int sig;		/* the signal value */
+	void (*func)(int sig);	/* the function pointer */
+{ /* nothing again! */ }
