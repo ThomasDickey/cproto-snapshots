@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.1.1.1 1994/10/22 22:51:07 tom Exp $
+/* $Id: system.h,v 4.2 1994/10/13 17:26:04 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -40,16 +40,16 @@
 /* Turbo C preprocessor */
 #ifdef __TURBOC__
 #define YY_READ_BUF_SIZE 256	/* patch */
-#define alloca xmalloc		/* patch */
 #define HAVE_TMPFILE 1
 #define HAVE_GETOPT_H 1	/* use the one from porting-directory */
-#include <io.h>		/* defines 'read()' for flex */
+#include <io.h>		/* declares 'read()' for flex */
 #endif
 
 #ifdef TURBO_CPP
 #define CPP "cpp -P-"
 #else
 #ifdef OS2
+#define HAVE_POPEN_PROTOTYPE 1
 #define popen _popen
 #define pclose _pclose
 #endif
@@ -123,15 +123,14 @@ extern char *realloc ARGS((char *p, size_t n));
 #include <stsdef.h>
 #define	EXIT_SUCCESS	(STS$M_INHIB_MSG | STS$K_SUCCESS)
 #define	EXIT_FAILURE	(STS$M_INHIB_MSG | STS$K_ERROR)
-#endif /* vms */
-
+#else
 #ifndef EXIT_SUCCESS
-#define	EXIT_SUCCESS	(0)		/* if no error */
+#define	EXIT_SUCCESS	(0)
 #endif
-
 #ifndef EXIT_FAILURE
-#define	EXIT_FAILURE	(1)		/* if any error */
+#define	EXIT_FAILURE	(1)
 #endif
+#endif /* vms */
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

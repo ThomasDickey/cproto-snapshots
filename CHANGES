@@ -1,5 +1,11 @@
 Version 4
 
+Patchlevel 4 (january 1995)
+
+- update test-cases for the -f2 fix in patch 3.
+
+- remove dependency on GNU-make from makefile.in
+
 Patchlevel 3
 
 - check for a special case in lint-library generation, i.e., prototype
