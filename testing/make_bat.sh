@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: make_bat.sh,v 3.10 1994/08/16 23:52:52 tom Exp $
+# $Id: make_bat.sh,v 3.11 1994/09/24 21:39:25 tom Exp $
 #
 # This makes a special ".bat" file for testing CPROTO on MSDOS.
 # It won't work properly if /bin/echo tries to expand the backslash sequences.
@@ -30,7 +30,7 @@ copy syntax.c $I.c
 EOF
 		CASE="`grep \"CASE[ 	]$i\" run_test.txt`"
 		OPTS=`$ECHO "$CASE"|sed -e 's/^.*=/CPROTO/'`
-		$ECHO "..\\$OPTS -o$I.out -O$I.err $I.c" >>$I.bat
+		$ECHO "..\\$OPTS -o$I.out -O$I.err $I.c" |sed -e s/\"//g >>$I.bat
 		TEST=`$ECHO $OPTS | sed -e 's/-[at]//'`
 		if [ ".$OPTS" !=  ".$TEST" ]
 		then

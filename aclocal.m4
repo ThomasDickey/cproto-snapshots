@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 3.4 1994/09/24 19:42:22 tom Exp $
+dnl $Id: aclocal.m4,v 3.5 1994/09/24 21:34:07 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -54,8 +54,8 @@ define([TD_POPEN_TEST],
 [AC_COMPILE_CHECK(conflicting prototype for popen,
 [#include <stdio.h>
 #include "system.h"
-extern FILE *popen ARGS((const char *c, const char *m));],,
-[AC_DEFINE(OK_POPEN_PROTOTYPE)])])dnl
+extern FILE *popen ARGS((const char *c, const char *m));],,,
+[AC_DEFINE(HAVE_POPEN_PROTOTYPE)])])dnl
 dnl
 dnl	This should have been in autoconf 1.11
 dnl

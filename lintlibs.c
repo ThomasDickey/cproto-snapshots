@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.19 1994/09/24 14:30:43 tom Exp $
+/* $Id: lintlibs.c,v 3.20 1994/09/24 20:42:29 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -467,6 +467,7 @@ void	ellipsis_varargs(d)
 				put_char(stdout, ' ');
 				put_string(stdout, varargs_str);
 				free(varargs_str);
+				varargs_str = 0;
 			}
 		}
 		put_string(stdout, " */\n");
