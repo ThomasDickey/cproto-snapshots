@@ -1,12 +1,14 @@
-dnl $Id: aclocal.m4,v 4.3 1995/08/23 21:29:04 cthuang Exp $
+dnl $Id: aclocal.m4,v 4.3.1.2 2000/08/10 11:10:34 tom Exp $
 dnl
+dnl Macros for cproto configure script (T.Dickey)
+dnl ---------------------------------------------------------------------------
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
 dnl
 dnl	Also, test the preprocessor to see if it will handle non-C files.
 dnl	(gcc 2.5.8 doesn't).
 dnl
-AC_DEFUN([TD_YACC_ERROR],
+AC_DEFUN([CF_YACC_ERROR],
 [
 rm -f yacctest.y
 cat >yacctest.y <<EOF
@@ -54,11 +56,11 @@ fi
 done
 rm -f y.tab.c
 ])dnl
-dnl
+dnl ---------------------------------------------------------------------------
 dnl	Check to ensure that our prototype for 'popen()' doesn't conflict
 dnl	with the system's (this is a problem on AIX and CLIX).
 dnl
-AC_DEFUN([TD_POPEN_TEST],
+AC_DEFUN([CF_POPEN_TEST],
 [AC_MSG_CHECKING(for conflicting prototype for popen)
 AC_CACHE_VAL(ac_cv_td_popen,
 AC_TRY_LINK([
@@ -73,24 +75,23 @@ if test $ac_cv_td_popen = yes; then
 	AC_DEFINE(HAVE_POPEN_PROTOTYPE)
 fi
 ])dnl
-dnl
-dnl	This is a more stringent test for size_t than the one distributed with
-dnl	autoconf 2.1: some systems (CLIX, Ultrix) define size_t in <stdio.h>
-dnl
-AC_DEFUN([TD_SIZE_T],
-[AC_REQUIRE([AC_HEADER_STDC])dnl
+dnl ---------------------------------------------------------------------------
+dnl	On both Ultrix and CLIX, I find size_t defined in <stdio.h>
+AC_DEFUN([CF_SIZE_T],
+[
 AC_MSG_CHECKING(for size_t in <sys/types.h> or <stdio.h>)
-AC_CACHE_VAL(ac_cv_td_size_t,
-AC_TRY_LINK([
+AC_CACHE_VAL(cf_cv_type_size_t,[
+	AC_TRY_COMPILE([
 #include <sys/types.h>
-#if STDC_HEADERS
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#include <stddef.h>
 #endif
-#include <stdio.h>],[size_t f = 0],
-ac_cv_td_size_t=yes,
-ac_cv_td_size_t=no))
-AC_MSG_RESULT($ac_cv_td_size_t)
-if test $ac_cv_td_size_t = no; then
-	AC_DEFINE(size_t, unsigned)
-fi
+#include <stdio.h>],
+		[size_t x],
+		[cf_cv_type_size_t=yes],
+		[cf_cv_type_size_t=no])
+	])
+AC_MSG_RESULT($cf_cv_type_size_t)
+test $cf_cv_type_size_t = no && AC_DEFINE(size_t, unsigned)
 ])dnl
