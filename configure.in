@@ -1,10 +1,11 @@
 dnl Process this file with 'autoconf' to produce a 'configure' script
-dnl $Id: configure.in,v 4.5 1998/01/21 01:05:08 cthuang Exp $
-AC_REVISION($Revision: 4.5 $)
+dnl $Id: configure.in,v 4.6 1998/01/24 01:42:05 cthuang Exp $
+AC_REVISION($Revision: 4.6 $)
 AC_INIT(cproto.c)
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_LEX
+AC_PROG_MAKE_SET
 AC_PROG_YACC
 AC_PROG_INSTALL
 AC_GCC_TRADITIONAL

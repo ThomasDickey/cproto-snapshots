@@ -1,5 +1,5 @@
 # @configure_input@
-# $Id: Makefile.in,v 4.6 1998/01/19 00:49:23 cthuang Exp $
+# $Id: Makefile.in,v 4.7 1998/01/24 01:42:00 cthuang Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -36,7 +36,7 @@ manext		= 1
 #### End of system configuration section. ####
 
 SHELL		= /bin/sh
-MAKE		= make
+@SET_MAKE@
 
 LDFLAGS		= @LDFLAGS@
 
@@ -46,7 +46,7 @@ DOC_FILES = \
 	$(THIS).1
 
 MAK_FILES = \
-	makefile.in \
+	Makefile.in \
 	configure.in \
 	aclocal.m4 \
 	config_h.in
@@ -114,7 +114,7 @@ clean : mostlyclean
 	cd testing; $(MAKE) $@
 
 distclean : clean
-	- rm -f stamp-h config.log config.cache config.status config.h makefile
+	- rm -f stamp-h config.log config.cache config.status config.h Makefile
 	- rm -f .version .fname
 	cd testing; $(MAKE) $@
 
@@ -130,7 +130,7 @@ config.h : stamp-h
 stamp-h : config.status
 	./config.status
 
-makefile: makefile.in config.status
+Makefile: Makefile.in config.status
 	./config.status
 
 config.status : configure
