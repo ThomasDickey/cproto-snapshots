@@ -4,6 +4,8 @@ Patchlevel 9
 
 - use 'autoconf' to make a UNIX configure-script.
 
+- recognize GCC extensions '__inline' and '__attribute__'
+
 Patchlevel 8 (internal)
 
 - added files 'lintlibs.c' and 'strkey.c'

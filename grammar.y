@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.10 1994/02/08 16:30:28 tom Exp $
+/* $Id: grammar.y,v 3.11 1994/07/26 00:22:56 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -63,6 +63,7 @@
 
 %{
 #include <stdio.h>
+#include <ctype.h>
 #include "cproto.h"
 #include "symbol.h"
 #include "semantic.h"
@@ -113,7 +114,9 @@ typedef struct {
 
 static IncludeStack *cur_file;	/* current input file */
 
-extern void yyerror();
+extern void yyerror ARGS((char *));
+
+static	char *	dft_decl_spec ARGS((void));
 
 /* Flags to enable us to find if a procedure returns a value.
  */

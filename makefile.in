@@ -1,8 +1,9 @@
-# $Id: makefile.in,v 3.2 1994/07/25 23:35:05 tom Exp $
+# $Id: makefile.in,v 3.3 1994/07/26 22:43:53 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 CC		= @CC@
+CPP		= @CPP@
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
@@ -76,10 +77,10 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-cproto.o: system.h cproto.h symbol.h
-lintlibs.o: system.h cproto.h symbol.h semantic.h
-semantic.o: system.h cproto.h symbol.h semantic.h
-strkey.o: cproto.h system.h
-strstr.o: system.h
-symbol.o: system.h cproto.h symbol.h
-y.tab.o: system.h cproto.h symbol.h semantic.h lex.yy.c
+cproto.o: cproto.h config.h system.h patchlev.h
+lintlibs.o: cproto.h config.h system.h semantic.h symbol.h
+semantic.o: cproto.h config.h system.h semantic.h
+strkey.o: cproto.h config.h system.h 
+strstr.o: config.h
+symbol.o: cproto.h config.h system.h symbol.h
+y.tab.o: cproto.h config.h system.h symbol.h semantic.h lex.yy.c

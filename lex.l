@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.12 1994/02/08 17:28:14 tom Exp $
+/* $Id: lex.l,v 3.14 1994/07/26 23:40:09 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -33,6 +33,9 @@
  *	Treat the keywords 'globalref', etc., as 'extern'.
  *
  *	The keywords 'noshare' and 'readonly' are type-qualifiers.
+ *
+ * GCC extensions:
+ *	The keywords '__inline', '__attribute__'.
  */
 
 #define	result(nn)	count(); if (!brackets && unnested()) return(nn)
@@ -74,18 +77,23 @@ static int inc_depth;				/* include nesting level */
 static IncludeStack inc_stack[MAX_INC_DEPTH];	/* stack of included files */
 static SymbolTable *included_files;		/* files already included */
 
-static int  type_of_name();
-static void StartCpp();
-static void FinishCpp();
-static void update_line_num();
-static void save_text();
-static void save_text_offset();
-static void get_quoted();
-static void get_comment();
-static void get_cpp_directive();
-static void do_include();
+static int  type_of_name      ARGS((char *name));
+static void StartCpp          ARGS((int level));
+static void FinishCpp         ARGS((void));
+static void absorb_special    ARGS((void));
+static void update_line_num   ARGS((void));
+static void save_text         ARGS((void));
+static void save_text_offset  ARGS((void));
+static void get_quoted        ARGS((void));
+static void get_comment       ARGS((void));
+static void get_cpp_directive ARGS((char *dest, unsigned n));
+static void do_include        ARGS((char *f));
+static int decipher_comment   ARGS((char *keyword, int len));
+static void include_file      ARGS((char *name, boolean convert));
+static void put_file          ARGS((FILE *outf));
+static void put_quoted        ARGS((int c));
 
-extern void yyerror();
+extern void yyerror ARGS((char *s));
 #ifdef yywrap
 #undef yywrap
 #endif
@@ -223,6 +231,9 @@ QUOTE		[\"\']
 <INITIAL>union		{ save_text_offset(); return T_UNION; }
 <INITIAL>va_dcl		{ save_text_offset(); return T_VA_DCL; }
 
+<INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
+<INITIAL>"__attribute__" { absorb_special(); }
+
 <INITIAL>globalvalue	{ vms_extern; }
 <INITIAL>globalref	{ vms_extern; }
 <INITIAL>globaldef	{ vms_extern; }
@@ -317,9 +328,11 @@ FinishCpp()
 	BEGIN INITIAL;
 }
 
-#ifdef	apollo
+/*
+ * Skip over embedded __attribute/__attribute_ syntax.
+ */
 static
-absorb_special()
+void absorb_special()
 {
 	int	c;
 	int	nest	= 0;
@@ -332,7 +345,6 @@ absorb_special()
 		}
 	}
 }
-#endif
 
 /* Decode the current token according to the type-of-name
  */
@@ -428,9 +440,12 @@ int	len;
 }
 
 static
-put_quoted (c)
+void put_quoted (c)
 int	c;
 {
+#ifndef	YYLMAX
+#define	YYLMAX	256	/* FIXME */
+#endif
 	if ((c == 0) || (yyleng+1 >= YYLMAX)) {
 		save_text();
 		update_line_num();
@@ -781,7 +796,7 @@ char *file_spec; 	/* path surrounded by "" or <> */
     }
     s = strchr(file_spec+1, match);
     n = (s != NULL) ? (unsigned)(s - file_spec - 1) : 0;
-    strncpy(file, file_spec+1, (SIZE_T)n);
+    strncpy(file, file_spec+1, (size_t)n);
     file[n] = '\0';
 
     /* Do nothing if the file was already included. */
