@@ -1,11 +1,11 @@
-/* $Id: grammar.y,v 4.2 1994/10/13 17:26:04 cthuang Exp $
+/* $Id: grammar.y,v 4.1.1.1 1994/10/15 18:00:00 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
  * "The C Programming Language" by Kernighan and Ritchie.
  */
 
-%token <text> '(' '*'
+%token <text> '(' '*' '&'
 	/* identifiers that are not reserved words */
 	T_IDENTIFIER T_TYPEDEF_NAME T_DEFINE_NAME
 
@@ -59,6 +59,7 @@
 %type <param_list> opt_identifier_list identifier_list
 %type <text> struct_or_union pointer opt_type_qualifiers type_qualifier_list
 	any_id
+	any_identifier
 %type <text> enumeration
 
 %{
@@ -537,7 +538,7 @@ enumeration
 	;
 
 any_id
-	: T_IDENTIFIER
+	: any_identifier
 	| T_TYPEDEF_NAME
 	;
 
@@ -555,7 +556,7 @@ declarator
 	;
 
 direct_declarator
-	: T_IDENTIFIER
+	: any_identifier
 	{
 	    $$ = new_declarator($1.text, $1.text, $1.begin);
 	}
@@ -675,14 +676,31 @@ opt_identifier_list
 	;
 
 identifier_list
-	: T_IDENTIFIER
+	: any_identifier
 	{
 	    new_ident_list(&$$);
 	    add_ident_list(&$$, &$$, $1.text);
 	}
-	| identifier_list ',' T_IDENTIFIER
+	| identifier_list ',' any_identifier
 	{
 	    add_ident_list(&$$, &$1, $3.text);
+	}
+	;
+
+any_identifier
+	: T_IDENTIFIER
+	{
+	    $$ = $1;
+	}
+	| '&' T_IDENTIFIER
+	{
+#if OPT_LINTLIBRARY
+	    if (lintLibrary()) { /* Lint doesn't grok C++ ref variables */
+		$$ = $2;
+	    } else
+#endif
+		(void)sprintf($$.text, "&%s", $2.text);
+	    $$.begin = $1.begin;
 	}
 	;
 
@@ -789,7 +807,7 @@ init_parser ()
 {
     static char *keywords[] = {
 	"const", "volatile", "interrupt",
-#ifdef vms
+#ifdef VMS
 	"noshare", "readonly",
 #endif
 #if defined(MSDOS) || defined(OS2)

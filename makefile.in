@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 4.1 1994/10/13 17:23:20 cthuang Exp $
+# $Id: makefile.in,v 4.1.1.1 1994/10/15 20:15:15 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -35,6 +35,7 @@ manext		= 1
 #### End of system configuration section. ####
 
 SHELL		= /bin/sh
+MAKE		= make
 
 LDFLAGS		= 
 
@@ -89,41 +90,45 @@ installdirs:
 	- $(SHELL) ${srcdir}/mkdirs.sh $(mandir)
 
 uninstall:
-	rm -f $(bindir)/$(THIS) $(mandir)/$(THIS).$(manext)
+	- rm -f $(bindir)/$(THIS) $(mandir)/$(THIS).$(manext)
 
 $(THIS) : $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
-	$(YACC) $(srcdir)/grammar.y
+	$(YACC) grammar.y
 
 lex.yy.c : lex.l
-	$(LEX) $(srcdir)/lex.l
+	$(LEX) lex.l
 
 $(THIS).man : $(THIS).1
-	- nroff -man $(srcdir)/$(THIS).1 >$@
+	- nroff -man $(THIS).1 >$@
 
 mostlyclean :
-	rm -f core .nfs* *.o *.bak *.log *.man *.out $(JUNK) default.h
+	- rm -f core .nfs* *.o *.bak *.BAK *.log *.man *.out $(JUNK) default.h
+	- rm -f Part?? part.*
 
 clean : mostlyclean
-	rm -f $(THIS)
+	- rm -f $(THIS)
+	cd testing; $(MAKE) $@
 
 distclean : clean
-	rm -f stamp-h config.status config.h makefile
-	rm -f .version .fname
+	- rm -f stamp-h config.status config.h makefile
+	- rm -f .version .fname
+	cd testing; $(MAKE) $@
 
 realclean: distclean
-	rm -f tags
+	- rm -f tags
+	cd testing; $(MAKE) $@
 
 check:	$(THIS)
-	cd testing; make run_test
+	cd testing; $(MAKE) run_test
 
 # configure might not change config.h
-#config.h : stamp-h
-#stamp-h : config.status
-#	./config.status
-#	touch stamp-h
+config.h : stamp-h
+stamp-h : config.status
+	./config.status
+	touch stamp-h
 
 makefile: makefile.in config.status
 	./config.status
@@ -137,31 +142,37 @@ configure : configure.in aclocal.m4
 # I keep my sources in RCS, and assign a symbolic release to the current patch
 # level.  The 'manifest' script knows how to build a list of files for a given
 # revision.
-MANIFEST: CHANGES
-	rm -f .version
-	rlog -h CHANGES | \
-		sed	-e '1,/symbolic names:/d' \
-			-e 's/[ 	]//g' \
-			-e 's/:.*//' |\
-		head -1 >.version
-	manifest -r`cat .version`
-	rm -f .version
+MANIFEST: patchlev.h
+	manifest -rv$(RELEASE)`fgrep PATCHLEVEL patchlev.h | sed -e s'/^[^0-9]*/_/'` \
+		testing/case*.dcl testing/case*.bat
 
 dist:
-	make MANIFEST
-	rm -f .fname .files
+	$(MAKE) MANIFEST
+	- rm -f .fname .files
 	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
-	cat MANIFEST | grep ' ' | sed -e 's/\ .*//' | uniq >.files
+	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
 	rm -rf `cat .fname`
 	TOP=`cat .fname`; mkdir $$TOP `cat .files | grep / | sed -e 's@/.*@@' | sed -e s@\^@$$TOP/@ | uniq`
 	for file in `cat .files`; do \
 	  ln $(srcdir)/$$file `cat .fname`/$$file \
-	    || { echo copying $$file instead; cp -p $$file `cat .fname`/$$file; }; \
+	    || { echo copying $$file instead; cp $$file `cat .fname`/$$file; }; \
 	done
 	tar -cf - `cat .fname` | gzip >`cat .fname`.tgz
 	rm -rf `cat .fname` .fname .files
 
-shar:
+# Some of the output will be uuencoded because the test scripts include
+# <CR><LF> terminated ".bat" files for MS-DOS.
+dist-shar: MANIFEST
+	- rm -f .fname .files
+	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
+	shar -M -n`cat .fname` -opart -l50 `cat .files`
+	- rm -f .fname .files
+
+# This uses Rick Salz's cshar to make a set of shar-files.
+# (It'll clobber the version info in MANIFEST, and doesn't restore timestamps,
+# but that's another bag of worms).
+dist-cshar: MANIFEST
 	makekit -m
 
 default.h: $(C_FILES) lex.yy.c
@@ -185,6 +196,6 @@ cproto.o: cproto.h config.h system.h patchlev.h
 lintlibs.o: cproto.h config.h system.h semantic.h symbol.h
 semantic.o: cproto.h config.h system.h semantic.h
 strkey.o: cproto.h config.h system.h 
-strstr.o: config.h
+strstr.o: cproto.h config.h system.h
 symbol.o: cproto.h config.h system.h symbol.h
 y.tab.o: cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c
