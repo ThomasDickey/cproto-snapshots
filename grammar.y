@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.1 1994/10/12 14:14:56 cthuang Exp $
+/* $Id: grammar.y,v 4.2 1994/10/13 17:26:04 cthuang Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -789,7 +789,7 @@ init_parser ()
 {
     static char *keywords[] = {
 	"const", "volatile", "interrupt",
-#ifdef VMS
+#ifdef vms
 	"noshare", "readonly",
 #endif
 #if defined(MSDOS) || defined(OS2)

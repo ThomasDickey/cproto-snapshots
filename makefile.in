@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.21 1994/09/03 12:15:27 tom Exp $
+# $Id: makefile.in,v 4.1 1994/10/13 17:23:20 cthuang Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -95,13 +95,13 @@ $(THIS) : $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
-	$(YACC) grammar.y
+	$(YACC) $(srcdir)/grammar.y
 
 lex.yy.c : lex.l
-	$(LEX) lex.l
+	$(LEX) $(srcdir)/lex.l
 
 $(THIS).man : $(THIS).1
-	- nroff -man $(THIS).1 >$@
+	- nroff -man $(srcdir)/$(THIS).1 >$@
 
 mostlyclean :
 	rm -f core .nfs* *.o *.bak *.log *.man *.out $(JUNK) default.h
