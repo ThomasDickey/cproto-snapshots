@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.7.1.2 1999/12/20 00:04:19 tom Exp $
+/* $Id: grammar.y,v 4.7.1.4 1999/12/27 12:44:01 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -20,6 +20,8 @@
 	T_CHAR T_DOUBLE T_FLOAT T_INT T_VOID
 	T_LONG T_SHORT T_SIGNED T_UNSIGNED
 	T_ENUM T_STRUCT T_UNION
+	/* C9X new types */
+	T_Bool T_Complex T_Imaginary
 
 	/* type qualifiers */
 	T_TYPE_QUALIFIER
@@ -430,6 +432,18 @@ type_specifier
 	{
 	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
 	}
+	| T_Bool
+	{
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_CHAR);
+	}
+	| T_Complex
+	{
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	}
+	| T_Imaginary
+	{
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	}
 	| T_TYPEDEF_NAME
 	{
 	    Symbol *s;
@@ -827,25 +841,61 @@ init_parser ()
 	"volatile",
 	"interrupt",
 #ifdef vms
-	"noshare", "readonly",
+	"noshare",
+	"readonly",
 #endif
 #if defined(MSDOS) || defined(OS2)
-	"cdecl", "far", "huge", "near", "pascal",
-	"_cdecl", "_export", "_far", "_fastcall", "_fortran", "_huge",
-	"_interrupt", "_loadds", "_near", "_pascal", "_saveregs", "_segment",
-	"_cs", "_ds", "_es", "_ss", "_seg",
-	"__cdecl", "__export", "__far", "__fastcall", "__fortran", "__huge",
-	"__inline", "__interrupt", "__loadds", "__near", "__pascal",
-	"__saveregs", "__segment", "__stdcall", "__syscall",
+	"__cdecl",
+	"__export",
+	"__far",
+	"__fastcall",
+	"__fortran",
+	"__huge",
+	"__inline",
+	"__interrupt",
+	"__loadds",
+	"__near",
+	"__pascal",
+	"__saveregs",
+	"__segment",
+	"__stdcall",
+	"__syscall",
+	"_cdecl",
+	"_cs",
+	"_ds",
+	"_es",
+	"_export",
+	"_far",
+	"_fastcall",
+	"_fortran",
+	"_huge",
+	"_interrupt",
+	"_loadds",
+	"_near",
+	"_pascal",
+	"_saveregs",
+	"_seg",
+	"_segment",
+	"_ss",
+	"cdecl",
+	"far",
+	"huge",
+	"near",
+	"pascal",
 #ifdef OS2
 	"__far16",
 #endif
-#else
+#endif
+#ifdef __GNUC__
 	/* gcc aliases */
-	"__const__",    "__const",
-	"__volatile__", "__volatile",
-	"__inline__",   "__inline",
-	"__restrict__", "__restrict",
+	"__const",
+	"__const__",
+	"__inline",
+	"__inline__",
+	"__restrict",
+	"__restrict__",
+	"__volatile",
+	"__volatile__",
 #endif
     };
     int i;

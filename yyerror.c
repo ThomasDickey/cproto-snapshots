@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.3.1.1 1999/12/14 22:33:05 tom Exp $
+/* $Id: yyerror.c,v 4.3.1.2 1999/12/27 13:23:27 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -15,13 +15,14 @@
 #define	yyerror(text) {\
     register int n, c1, count = 0;\
     yaccError(text);\
-    if (yypact[yystate] != YYFLAG)\
+    if (yypact[yystate] != YYFLAG) { \
 	for (c1 = 0; c1 < YYLAST; c1++) {\
 	    n = yypact[yystate] + c1;\
 	    if (n >= 0 && n < YYLAST\
 	     && yycheck[n] == c1 && yytname[c1] != 0)\
 		yaccExpected(yytname[c1], count++);\
 	}\
+    }\
     yaccExpected("", -1);\
 }
 #endif
@@ -119,6 +120,7 @@ int count;
 	{"}",	"T_MATCHRBRACE"},
     };
     register int j, k, x;
+    unsigned n;
     char *t = (char *)s;
     char *tag;
     char tmp[MSGLEN];
@@ -146,8 +148,10 @@ int count;
 		fprintf(stderr, "%s%s", tag, s);
 	    }
 	    fprintf(stderr, "\n");
-	    while (used-- != 0)
+	    while (used-- != 0) {
 	    	free(vec[used]);
+		vec[used] = 0;
+	    }
 	}
 	used = 0;
     } else {
@@ -177,9 +181,10 @@ int count;
 	    } else {
 		vec = realloc(vec, have * sizeof(*vec));
 	    }
+	    for (n = used; n < have; n++)
+		vec[n] = 0;
 	}
-	if (count > (sizeof(vec)/sizeof(vec[0]))-1) {
-	    count = (sizeof(vec)/sizeof(vec[0]))-1;
+	if (vec[count] != 0) {
 	    free(vec[count]);
 	}
 	vec[count] = xstrdup(t);
