@@ -1,7 +1,7 @@
 /* case19.c */
 int dots_0(int);
-int dots_1(int, );
-int dots_3(int, char, );
+int dots_1(int, ...);
+int dots_3(int, char, ...);
 _FIRST *func1(void);
 _FIRST *func2(_FIRST *, int [], float);
 int *(func_func)(void);
