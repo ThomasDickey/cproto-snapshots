@@ -347,3 +347,7 @@ extern GenFunc(int *, int *());
 extern void * (*__glob_opendir_hook) (const char *__directory);
 extern const char *(*__glob_readdir_hook) (void * __stream);
 extern void (*__glob_closedir_hook) (void * __stream);
+
+/* inline function */
+int inline inline_func(double x) { return(0); }
+static int inline local_inline_func(double x) { return(0); }

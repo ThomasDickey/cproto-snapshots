@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.8.1.2 2003/04/05 16:41:14 tom Exp $
+/* $Id: grammar.y,v 4.8.1.3 2004/03/09 01:31:56 pronovic Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -391,7 +391,7 @@ storage_class
 	}
 	| T_INLINE
 	{
-	    new_decl_spec(&$$, $1.text, $1.begin, DS_JUNK);
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_INLINE);
 	}
 	| T_EXTENSION
 	{

@@ -1,4 +1,12 @@
--- $Id: CHANGES,v 4.8.1.4 2003/04/05 18:12:43 tom Exp $
+-- $Id: CHANGES,v 4.8.1.6 2004/03/09 23:21:16 tom Exp $
+
+Version 4.7b
+
+2004/3/9
+- added new -X option to limit the levels of include-files from which an
+  extern can come (Debian #235824).
+- added new -i option to support inline function prototypes (Debian #228801,
+  patch by Kenneth Pronovici).
 
 Version 4.7a
 

@@ -1,4 +1,4 @@
-.\" $Id: cproto.1,v 4.6.1.1 2002/01/26 00:46:59 tom Exp $
+.\" $Id: cproto.1,v 4.7 2004/03/09 23:27:05 tom Exp $
 .\"
 .de EX		\"Begin example
 .ne 5
@@ -13,7 +13,7 @@
 .if n .sp 1
 .if t .sp .5
 ..
-.TH CPROTO 1 "January 1998"
+.TH CPROTO 1 "March 2004"
 .
 .SH NAME
 cproto \- generate C function prototypes and convert function definitions
@@ -214,6 +214,14 @@ declarations as well.
 .B \-S
 Output only static declarations.
 .TP
+.B \-i
+By default,
+.B cproto
+only generates declarations for functions and variables having global scope.
+This option will output
+.B inline
+declarations as well.
+.TP
 .B \-T
 Copy type definitions from each file.
 (Definitions in included-files are copied, unlike the "-l" option).
@@ -224,6 +232,10 @@ Also output declarations for variables defined in the source.
 .B \-x
 This option causes procedures and variables which are declared "extern"
 to be included in the output.
+.TP
+.BI \-X " level"
+This option limits the include-file level from which declarations are extracted
+by examining the preprocessor output.
 .TP
 .B \-a
 Convert function definitions from the old style to the ANSI C style.

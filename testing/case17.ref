@@ -345,3 +345,11 @@ extern GenFunc();
 extern void *(*__glob_opendir_hook)();
 extern const char *(*__glob_readdir_hook)();
 extern void (*__glob_closedir_hook)();
+
+/* inline function */
+int inline 
+inline_func (x)
+double x; { return(0); }
+static int inline 
+local_inline_func (x)
+double x; { return(0); }
