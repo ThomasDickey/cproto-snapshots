@@ -1,4 +1,20 @@
--- $Id: CHANGES,v 4.8.1.6 2004/03/09 23:21:16 tom Exp $
+-- $Id: CHANGES,v 4.8.1.7 2004/03/26 00:20:24 tom Exp $
+
+Version 4.7c
+2004/3/25
+- fix a couple of places where valgrind reported a sscanf's result was not
+  always initialized.
+- modify behavior of "-X" option so it does not cause preprocessor lines to
+  be written to the output.  Preprocessor lines are needed for lint-library
+  text, but are inconsistent with other uses of cproto (patch by Kenneth
+  Pronovici).
+- add configure option "--enable-llib", which allows one to configure cproto
+  without support for lint-library "llib" files.  Since the "-X" option shares
+  the include-file tracking, this option can also be enabled (or disabled)
+  (discussion with Kenneth Pronovici, Bob Van der Poel).
+- require an ANSI C compiler for building.
+- update configure script, using autoconf 2.52 + patch, along with macros from
+  vile/lynx/etc.
 
 Version 4.7b
 

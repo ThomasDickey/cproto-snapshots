@@ -2,8 +2,6 @@
 
 /* case22.c */
 
-#include "<built-in>"
-
 typedef int x4t;
 
 #undef x6

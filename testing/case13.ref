@@ -2,8 +2,6 @@
 
 /* case13.c */
 
-#include "<built-in>"
-
 static	x2;
 
 typedef int x4t;
