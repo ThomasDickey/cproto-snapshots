@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.20 1994/08/01 00:41:45 tom Exp $
+/* $Id: semantic.c,v 3.23 1994/08/04 23:54:35 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -26,6 +26,9 @@ static	void		put_parameters		ARGS((FILE *outf, Declarator *declarator, int comme
 static	void		put_func_declarator	ARGS((FILE *outf, Declarator *declarator, int commented));
 static	void		put_declarator		ARGS((FILE *outf, Declarator *declarator, int commented));
 static	void		put_decl_spec		ARGS((FILE *outf, DeclSpec *decl_spec));
+#if OPT_LINTLIBRARY
+static	void		put_llib_params		ARGS((Declarator *d, int c));
+#endif
 static	int		uses_varargs		ARGS((Declarator *declarator));
 static	void		check_void_param	ARGS((Declarator *declarator));
 static	void		set_param_decl_spec	ARGS((Declarator *declarator));
@@ -482,6 +485,13 @@ int commented;
     } else {
 	f = (declarator == func_declarator) ? format : FMT_OTHER;
 
+#if OPT_LINTLIBRARY
+	if (where == FUNC_PROTO
+	 && LintLibrary()
+	 && (func_declarator != declarator)) {
+	    do_cmt = TRUE;	/* patch: shouldn't have gotten here at all */
+	}
+#endif
 	if (where == FUNC_DEF && declarator->params.comment != NULL)
 	    put_string(outf, declarator->params.comment);
 	else if (do_cmt && !commented)
@@ -527,7 +537,7 @@ int commented;
 	/* Output parameter name list for traditional function definition. */
 	p = declarator->params.first;
 
-	/* Output paramter name list only for head function declarator. */
+	/* Output parameter name list only for head function declarator. */
 	if (!is_void_parameter(p) && declarator == func_declarator) {
 	    put_string(outf, fmt[format].first_param_prefix);
 	    put_string(outf, p->declarator->name);
@@ -644,20 +654,6 @@ int commented;
      && proto_macro) {
 	put_char(outf, ')');
     }
-
-#if OPT_LINTLIBRARY
-    if (LintLibrary()) {
-	Parameter	*p = declarator->params.first;
-	int		count = 0;
-	while (p != 0) {
-		if (lint_ellipsis(p))
-			break;
-		if (PutParameter(outf, p, FALSE, ++count, commented))
-			putchar(';');
-		p = p->next;
-	}
-    }
-#endif
 }
 
 /* Output a declarator.
@@ -706,6 +702,31 @@ DeclSpec *decl_spec;
     put_padded(outf, decl_spec->text);
 }
 
+/* Output the list of parameters in K&R style, for lint-library
+ */
+#if OPT_LINTLIBRARY
+static void
+put_llib_params(declarator, commented)
+Declarator *declarator;
+int commented;
+{
+	Parameter *p;
+	int	count = 0;
+
+	p = (declarator->func_stack->func_def != FUNC_NONE)
+		? declarator->func_stack->params.first
+		: declarator->params.first;
+
+	while (p != 0) {
+		if (lint_ellipsis(p))
+			break;
+		if (PutParameter(stdout, p, FALSE, ++count, commented))
+			putchar(';');
+		p = p->next;
+	}
+}
+#endif
+
 /* Generate variable declarations.
  */
 void
@@ -715,6 +736,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
     int	commented = FALSE;
+    int save_where = where;
 
 #if OPT_LINTLIBRARY
     boolean	defines = (strchr(decl_spec->text, '{') != 0);
@@ -765,9 +787,14 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
 	    put_declarator(stdout, d, commented);
+#if OPT_LINTLIBRARY
+	    if (d->func_def != FUNC_NONE)
+		put_llib_params(d, commented);
+#endif
 	    put_body(stdout, decl_spec, d);
 	}
     }
+    where = save_where;
 }
 
 /* Return TRUE if the function uses varargs.
@@ -778,8 +805,9 @@ Declarator *declarator;
 {
     Parameter *p;
 
-    return (p = declarator->params.first) != NULL && p->next == NULL &&
-	strcmp(p->declarator->name, "va_alist") == 0;
+    return (p = declarator->params.first) != NULL
+    	&& (p->next == NULL)
+	&& (!strcmp(p->declarator->name, "va_alist"));
 }
 
 /* If the parameter list is empty, then replace it with "void".
@@ -826,6 +854,7 @@ Declarator *declarator;
 {
     Parameter *p;
     int	commented = FALSE;
+    int save_where = where;
 
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
@@ -866,7 +895,12 @@ Declarator *declarator;
     put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);
+#if OPT_LINTLIBRARY
+    if (LintLibrary())
+	put_llib_params(declarator, commented);
+#endif
     put_body(stdout, decl_spec, declarator);
+    where = save_where;
 }
 
 /* Generate a declarator for a function pointer declarator or prototype.
@@ -875,6 +909,8 @@ void
 gen_func_declarator (declarator)
 Declarator *declarator;
 {
+    int save_where = where;
+
     /* Go to the beginning of the function declarator in the temporary
      * file and overwrite it with the converted declarator.
      */
@@ -884,6 +920,7 @@ Declarator *declarator;
     format = FMT_FUNC;
     put_func_declarator(cur_tmp_file(), declarator, FALSE);
     cur_file_changed();
+    where = save_where;
 }
 
 /* Output parameter declarations for old style function definition.
@@ -903,11 +940,15 @@ int commented;
 	fputc('\n', cur_tmp_file());
 	(void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
+	if (p->comment != 0)
+	    fputs(p->comment, cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
 	    fputc('\n', cur_tmp_file());
 	    (void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	    fputc(';', cur_tmp_file());
+	    if (p->comment != 0)
+		fputs(p->comment, cur_tmp_file());
 	    p = p->next;
 	}
     }
@@ -949,7 +990,8 @@ Declarator *declarator;
     }
 
     format = FMT_FUNC;
-    if (func_declarator->func_def == FUNC_TRADITIONAL) {
+    if (func_declarator->func_def == FUNC_TRADITIONAL
+     || func_declarator->func_def == FUNC_BOTH) {
 	/* Save the text before the parameter declarations. */
 	params = &func_declarator->params;
 	n = (int)(params->end_comment - params->begin_comment);
@@ -1014,7 +1056,8 @@ Declarator *declarator;
 	fputs("\n#else\n\n", cur_tmp_file());
 
 	/* Output old style function definition head. */
-	if (func_declarator->func_def == FUNC_TRADITIONAL) {
+	if (func_declarator->func_def == FUNC_TRADITIONAL
+	 || func_declarator->func_def == FUNC_BOTH) {
 	    if (func_len != 0)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
