@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.35 1994/09/21 01:17:04 tom Exp $
+/* $Id: semantic.c,v 3.36 1994/09/21 23:32:56 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -854,6 +854,8 @@ DeclaratorList *decl_list;	/* list of declared variables */
 		ellipsis_varargs(d);
 	    else if (types_out)
 		fmt_library(2);
+    	    if (LintLibrary())
+		printf("#undef %s\n", d->name);
 #endif
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
@@ -963,6 +965,10 @@ Declarator *declarator;
     format = FMT_PROTO;
     NestedParams = 0;
 
+#if OPT_LINTLIBRARY
+    if (LintLibrary())
+	printf("#undef %s\n", declarator->name);
+#endif
     put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);

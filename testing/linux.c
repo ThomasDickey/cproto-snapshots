@@ -1,4 +1,8 @@
+/* $Id: linux.c,v 3.2 1994/09/21 23:55:38 tom Exp $ */
 /* LINT_EXTERN */
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <a.out.h>
 #include <alloca.h>
 #include <ansidecl.h>
@@ -19,7 +23,7 @@
 #include <fnmatch.h>
 #include <fpu_control.h>
 #include <ftw.h>
-#include <gdbm.h>
+/* #include <gdbm.h> */
 #include <getopt.h>
 #include <glob.h>
 #include <gnu-stabs.h>
@@ -38,7 +42,7 @@
 #include <memory.h>
 #include <mntent.h>
 #include <nan.h>
-#include <ndbm.h>
+/* #include <ndbm.h> */
 #include <netdb.h>
 #include <nl_types.h>
 #include <nlist.h>
@@ -49,7 +53,9 @@
 #include <posix_opt.h>
 #include <pwd.h>
 #include <regex.h>
-#include <regexp.h>
+/* #include <regexp.h> */
+#include <linux/in.h>
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include <setjmp.h>
 #include <shadow.h>
