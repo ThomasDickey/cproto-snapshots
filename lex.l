@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.4 1995/08/24 01:03:48 cthuang Exp $
+/* $Id: lex.l,v 4.4.1.1 1995/11/19 21:40:41 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -36,7 +36,8 @@
  *	The keywords 'noshare' and 'readonly' are type-qualifiers.
  *
  * GCC extensions:
- *	The keywords '__inline', '__attribute__'.
+ *	The keywords '__attribute__', '__inline', '__inline__', '__signed',
+ *	'__signed__'.
  */
 
 #define	result(nn)	count(); if (!brackets && unnested()) return(nn)
@@ -244,7 +245,10 @@ QUOTE		[\"\']
 <INITIAL>union		{ save_text_offset(); return T_UNION; }
 <INITIAL>va_dcl		{ save_text_offset(); return T_VA_DCL; }
 
+<INITIAL>__signed 	{ save_text_offset(); return T_SIGNED; }
+<INITIAL>__signed__ 	{ save_text_offset(); return T_SIGNED; }
 <INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
+<INITIAL>__inline__ 	{ save_text_offset(); return T_INLINE; }
 <INITIAL>"__attribute__" { gcc_attribute(); }
 
 <INITIAL>globalvalue	{ vms_extern; }
