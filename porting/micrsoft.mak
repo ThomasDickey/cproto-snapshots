@@ -1,4 +1,4 @@
-# $Id: micrsoft.mak,v 3.2 1994/08/31 22:47:28 tom Exp $
+# $Id: micrsoft.mak,v 3.3 1994/09/01 22:14:29 tom Exp $
 #
 # Microsoft C makefile for C prototype generator
 # tested with:
@@ -28,13 +28,19 @@ DIST2 = cproto.1 borland.mak micrsoft.mak makefile.in lex.l grammar.y
 DIST3 = system.h cproto.h patchlev.h semantic.h symbol.h
 DIST4 = cproto.c lintlibs.c popen.c semantic.c strkey.c strstr.c symbol.c
 
-OBJECTS = cproto.obj lintlibs.obj getopt.obj semantic.obj strkey.obj symbol.obj $(Y_TAB).obj popen.obj getopt.obj
+OBJECTS = cproto.obj lintlibs.obj getopt.obj semantic.obj strkey.obj symbol.obj $(Y_TAB).obj popen.obj
 
 all: cproto.exe
 
 cproto.exe: $(OBJECTS) micrsoft.lnk
 	$(LINK) @micrsoft.lnk
-	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) $(LDFLAGS)
+
+micrsoft.lnk:
+	for %%i in ( *.obj ) do echo %%i + >>$@
+	echo >>$@
+	echo cproto.exe >>$@
+	echo >>$@
+	echo $(LIBS); >>$@
 
 $(Y_TAB).obj: $(Y_TAB).c $(LEX_YY).c system.h cproto.h symbol.h semantic.h
 	$(CC) $(CFLAGS) -c $*.c
@@ -54,6 +60,7 @@ clean:
 	erase *.log
 	erase $(LEX_YY).c
 	erase $(Y_TAB).c
+	erase micrsoft.lnk
 	erase cproto.exe
 
 ci:
