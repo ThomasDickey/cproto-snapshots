@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.4 2000/10/29 00:47:16 cthuang Exp $
+/* $Id: yyerror.c,v 4.4.1.1 2003/04/05 18:10:01 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -10,6 +10,9 @@
  * the internal state of 'yyparse()'.
  */
 #if BISON_HAS_YYTNAME	/* bison 1.22 */
+#if !defined(YYFLAG)
+#define YYFLAG YYPACT_NINF	/* yabb (yet-another-bison-bug) */
+#endif
 #if YYDEBUG
 /* this is better than defining YYERROR_VERBOSE */
 #define	yyerror(text) {\

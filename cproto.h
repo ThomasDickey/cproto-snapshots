@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.6 1998/01/19 00:49:16 cthuang Exp $
+/* $Id: cproto.h,v 4.6.1.1 2003/04/05 17:56:02 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -275,6 +275,11 @@ extern void init_parser     ARGS((void));
 extern void process_file    ARGS((FILE *infile, char *name));
 #ifdef NO_LEAKS
 extern void free_parser     ARGS((void));
+#endif
+
+/* workaround for one of the bugs in bison 1.875 */
+#ifdef YYBISON
+#define YYSTYPE YYSTYPE
 #endif
 
 #endif /* CPROTO_H */

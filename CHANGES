@@ -1,4 +1,21 @@
--- $Id: CHANGES,v 4.7.1.11 2002/01/26 00:38:14 tom Exp $
+-- $Id: CHANGES,v 4.8.1.4 2003/04/05 18:12:43 tom Exp $
+
+Version 4.7a
+
+2003/4/5
+
+- add definition of YYFLAG, to enable the error-reporting code with bison 1.875
+- add definition of YYSTYPE, to allow this to build with recent (aka "broken")
+  versions of bison (Debian #166140, Lukas Geyer <lukas@debian.org>).
+- add gcc-specific __builtin_va_arg keyword (Debian #175862, Kenneth Pronovici
+  <pronovic@debian.org>).
+- modify syntax.c to change token after "#endif" to a comment, thereby avoiding
+  deprecation warning from gcc 3.2, which would cause "make check" to show
+  unexpected results.
+- resync with version 4.7 at http://cproto.sourceforge.net/
+
+2003/1/5
+- add gcc-specific __builtin_va_list keyword.
 
 Version 4.6e
 
@@ -13,6 +30,11 @@ Version 4.6e
   demonstrated in numerous packages, it always reflects poor design.
 - remove makefile rules to make shar files (comp.sources.misc is long gone).
 - stop using changequote(), workaround for bugs in autoconf 2.5x
+
+Version 4.7
+
+2000/11/9
+- Report source file and line number in error messages in gcc-style format.
 
 Version 4.6d
 

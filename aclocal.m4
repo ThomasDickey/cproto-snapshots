@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.4 2000/10/29 00:47:16 cthuang Exp $
+dnl $Id: aclocal.m4,v 4.4.1.1 2003/04/05 17:23:48 tom Exp $
 dnl
 dnl Macros for cproto configure script (T.Dickey)
 dnl ---------------------------------------------------------------------------
@@ -29,11 +29,17 @@ dummy
 	;
 %%
 EOF
+
+AC_MSG_CHECKING(if $CPP can handle only .c files)
 $CPP yacctest.y >yacctest.out 2>/dev/null
 if test ! -s yacctest.out
 then
 	AC_DEFINE(CPP_DOES_ONLY_C_FILES)
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
 fi
+
 $YACC yacctest.y
 rm -f yacctest.*
 td_incl='#include "y.tab.c"'

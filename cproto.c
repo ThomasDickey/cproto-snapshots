@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.8.1.5 2002/01/26 00:43:08 tom Exp $
+/* $Id: cproto.c,v 4.9.1.1 2003/04/05 15:53:57 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.6e"
+#define VERSION "4.7a"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -172,7 +172,7 @@ char *xstrdup (src) char *src;
 void
 put_error ()
 {
-    fprintf(stderr, "\"%s\", line %u: ", cur_file_name(), cur_line_num());
+    fprintf(stderr, "%s:%u: ", cur_file_name(), cur_line_num());
 }
 
 /* Scan for options from a string.
