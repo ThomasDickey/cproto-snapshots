@@ -1,10 +1,10 @@
 # @configure_input@
-# $Id: Makefile.in,v 4.7 1998/01/24 01:42:00 cthuang Exp $
+# $Id: Makefile.in,v 4.7.1.1 1999/12/19 23:38:58 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_6
+RELEASE = 4_6a
 
 #### Start of system configuration section. ####
 
