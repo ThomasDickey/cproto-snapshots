@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: testunix.sh,v 3.5 1994/08/14 20:55:43 tom Exp $
+# $Id: testunix.sh,v 4.1 1998/01/20 00:59:47 cthuang Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
