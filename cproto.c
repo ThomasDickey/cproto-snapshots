@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.20 1994/08/14 22:16:23 tom Exp $
+/* $Id: cproto.c,v 3.21 1994/08/15 00:31:35 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.20 1994/08/14 22:16:23 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.21 1994/08/15 00:31:35 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -401,7 +401,7 @@ char ***pargv;
     cpp_cmd = xmalloc(n);
 #endif
 
-    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vvo:Tlx")) != EOF) {
+    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vvo:O:Tlx")) != EOF) {
 	switch (c) {
 	case 'I':
 #ifdef	vms
