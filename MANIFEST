@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19930607
+MANIFEST for cproto, version t19930608
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -35,13 +35,19 @@ testing/case04.ref              test case reference: -c -f2
 testing/case05.com              test cases from 1993 merge of my changes to cproto
 testing/case05.ref              test case reference: -c -f3
 testing/case06.com              test cases from 1993 merge of my changes to cproto
+testing/case06.ref              test case reference: -c -f3 -v
 testing/case07.com              test cases from 1993 merge of my changes to cproto
+testing/case07.ref              test case reference: -c -f3 -v -e
+testing/case08.com              test cases from 1993 merge of my changes to cproto
+testing/case08.ref              test case reference: -c -f3 -v -e -m
 testing/case09.com              test cases from 1993 merge of my changes to cproto
 testing/case09.ref              test case reference: -c -f3 -v + template
 testing/case10.com              test cases from 1993 merge of my changes to cproto
+testing/case11.com              test cases from 1993 merge of my changes to cproto
 testing/case12.com              test cases from 1993 merge of my changes to cproto
 testing/case12.ref              test case reference: -s
 testing/case13.com              test cases from 1993 merge of my changes to cproto
+testing/case14.com              test cases from 1993 merge of my changes to cproto
 testing/descrip.mms             VAX MMS-script for CPROTO/TESTING directory
 testing/makefile                UNIX makefile for CPROTO/TESTING directory
 testing/run                     test cases from 1993 merge of my changes to cproto
