@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.23 1994/09/22 00:22:02 tom Exp $
+/* $Id: cproto.c,v 3.25 1994/09/24 19:44:52 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.23 1994/09/22 00:22:02 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.25 1994/09/24 19:44:52 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -25,6 +25,9 @@ char progname[] = "cproto";
 
 /* If nonzero, output variables declared "extern" in include-files */
 int extern_in = 0;
+
+/* When TRUE, suppress return-statements in function-bodies */
+int exitlike_func = FALSE;
 
 /* If TRUE, output "extern" before global declarations */
 boolean extern_out = FALSE;
@@ -108,7 +111,9 @@ char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
 
 /* Run the C preprocessor */
 #ifdef CPP
+# if OK_POPEN_PROTOTYPE
 extern	FILE *	popen  ARGS((const char *c, const char *m));
+# endif
 extern	int	pclose ARGS((FILE *p));
 static char *cpp = CPP, *cpp_opt, *cpp_cmd;
 #endif

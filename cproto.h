@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.18 1994/09/22 23:53:59 tom Exp $
+/* $Id: cproto.h,v 3.20 1994/09/24 14:28:40 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -169,7 +169,9 @@ extern FuncFormat fmt[4];
 /* Global declarations */
 extern char progname[];
 extern int varargs_num;		/* supports varargs-comment */
+extern char *varargs_str;	/* additional info, such as PRINTFLIKEnn */
 extern int extern_in;		/* supports "LINT_EXTERNnn" */
+extern int exitlike_func;	/* supports noreturn-attribute */
 extern int in_include;		/* current include-level */
 extern int debug_trace;
 extern char base_file[];

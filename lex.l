@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.24 1994/09/22 00:16:36 tom Exp $
+/* $Id: lex.l,v 3.29 1994/09/24 14:59:09 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -43,6 +43,10 @@
 #define	is_IDENTIFIER	    save_text_offset();\
 			    return type_of_name(yytext);
 
+#if !OPT_LINTLIBRARY
+#define gcc_attribute   absorb_special /* otherwise, we don't care */
+#endif
+
 #ifdef	apollo
 #define	apollo_keyword
 #define	apollo_special	absorb_special()
@@ -59,6 +63,7 @@
 #define	vms_keyword	is_IDENTIFIER
 #endif	/* vms/unix */
 
+char *	varargs_str;		/* save printflike/scanflike text */
 int	varargs_num;		/* code to save "VARARGS" */
 int	debug_trace;		/* true if we trace token-level stuff */
 char	base_file[BUFSIZ];	/* top-level file name */
@@ -80,7 +85,12 @@ static SymbolTable *included_files;		/* files already included */
 static int  type_of_name      ARGS((char *name));
 static void StartCpp          ARGS((int level));
 static void FinishCpp         ARGS((void));
+#if defined(apollo) || !OPT_LINTLIBRARY
 static void absorb_special    ARGS((void));
+#endif
+#if OPT_LINTLIBRARY
+static void gcc_attribute     ARGS((void));
+#endif
 static void update_line_num   ARGS((void));
 static void save_text         ARGS((void));
 static void save_text_offset  ARGS((void));
@@ -235,7 +245,7 @@ QUOTE		[\"\']
 <INITIAL>va_dcl		{ save_text_offset(); return T_VA_DCL; }
 
 <INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
-<INITIAL>"__attribute__" { absorb_special(); }
+<INITIAL>"__attribute__" { gcc_attribute(); }
 
 <INITIAL>globalvalue	{ vms_extern; }
 <INITIAL>globalref	{ vms_extern; }
@@ -304,7 +314,7 @@ QUOTE		[\"\']
 <CURLY>"??="{WS}* 	{ save_text(); StartCpp(1); }
 <CURLY>.		{ save_text(); return_val |= returned_at; }
 
-[ \t\f]+		save_text();
+[ \r\t\f]+		save_text();
 .			{
 			    save_text();
 			    put_error();
@@ -334,6 +344,7 @@ FinishCpp()
 /*
  * Skip over embedded __attribute/__attribute_ syntax.
  */
+#if defined(apollo) || !OPT_LINTLIBRARY
 static
 void absorb_special()
 {
@@ -348,6 +359,48 @@ void absorb_special()
 		}
 	}
 }
+#endif
+
+#if OPT_LINTLIBRARY
+/*
+ * This recognizes some of the special attribute macros defined by gcc:
+ *	noreturn
+ *	format(printf,n,m)
+ *	format(scanf,n,m)
+ * and uses that information to construct equivalent lint-library text.
+ * (It's a distinct piece of code from the 'absorb_special()' function to
+ * avoid spurious matches with non-gcc compilers).
+ */
+static
+void gcc_attribute()
+{
+	int	c, num1, num2;
+	int	nest	= 0;
+	int	len	= 0;
+	char	bfr[BUFSIZ];
+
+	while ((c = input()) > 0) {
+		if (len < sizeof(bfr)-1 && !isspace(c))
+			bfr[len++] = c;
+		if (c == '(')
+			nest++;
+		else if (c == ')') {
+			if (--nest <= 0)
+				break;
+		}
+	}
+	bfr[len] = '\0';
+	if (!strcmp(bfr, "((noreturn))")) {
+		exitlike_func = TRUE;
+	} else if (sscanf(bfr, "((format(printf,%d,%d)))", &num1, &num2) == 2) {
+		(void)sprintf(bfr, "PRINTFLIKE%d", varargs_num = num1);
+		varargs_str = xstrdup(bfr);
+	} else if (sscanf(bfr, "((format(scanf,%d,%d)))", &num1, &num2) == 2) {
+		(void)sprintf(bfr, "SCANFLIKE%d", varargs_num = num1);
+		varargs_str = xstrdup(bfr);
+	}
+}
+#endif
 
 /* Decode the current token according to the type-of-name
  */
@@ -419,6 +472,7 @@ save_text_offset ()
 /* Decipher comments that are useful for lint (and making lint-libraries)
  */
 static	struct	{
+	int	VarText;
 	int	Varargs;
 	int	Externs;
 	int	Preproz;
@@ -434,29 +488,34 @@ int	len;
 		keyword[len] = '\0';
 
 		/* these are recognized by some lint-programs */
-		if (!strcmp(keyword, "VARARGS"))
+		if (!strcmp(keyword, "VARARGS")) {
 			CmtVal.Varargs = -1;
-		else if (sscanf(keyword, "VARARGS%d", &value) == 1)
+		} else if (sscanf(keyword, "VARARGS%d", &value) == 1) {
 			CmtVal.Varargs = value;
-		else if (!strcmp(keyword, "PRINTFLIKE"))
+		} else if (!strcmp(keyword, "PRINTFLIKE")) {
 			CmtVal.Varargs = 1;
-		else if (sscanf(keyword, "PRINTFLIKE%d", &value) == 1)
+			CmtVal.VarText = TRUE;
+		} else if (sscanf(keyword, "PRINTFLIKE%d", &value) == 1) {
 			CmtVal.Varargs = value;
-		else if (!strcmp(keyword, "SCANFLIKE"))
+			CmtVal.VarText = TRUE;
+		} else if (!strcmp(keyword, "SCANFLIKE")) {
 			CmtVal.Varargs = 2;
-		else if (sscanf(keyword, "SCANFLIKE%d", &value) == 1)
+			CmtVal.VarText = TRUE;
+		} else if (sscanf(keyword, "SCANFLIKE%d", &value) == 1) {
 			CmtVal.Varargs = value;
+			CmtVal.VarText = TRUE;
 		/* these are extensions added to simplify library-generation */
-		else if (!strcmp(keyword, "LINT_EXTERN"))
+		} else if (!strcmp(keyword, "LINT_EXTERN")) {
 			CmtVal.Externs = MAX_INC_DEPTH;
-		else if (sscanf(keyword, "LINT_EXTERN%d", &value) == 1)
+		} else if (sscanf(keyword, "LINT_EXTERN%d", &value) == 1) {
 			CmtVal.Externs = value;
-		else if (!strcmp(keyword, "LINT_PREPRO"))
-			CmtVal.Preproz = 1;
-		else if (sscanf(keyword, "LINT_PREPRO%d", &value) == 1)
+		} else if (!strcmp(keyword, "LINT_PREPRO")) {
+			CmtVal.Preproz = -1;	/* the whole comment */
+		} else if (sscanf(keyword, "LINT_PREPRO%d", &value) == 1) {
 			CmtVal.Preproz = value;
-		else if (!strcmp(keyword, "LINT_SHADOWED"))
+		} else if (!strcmp(keyword, "LINT_SHADOWED")) {
 			lint_shadowed = TRUE;
+		}
 	}
 	return 0;
 }
@@ -549,6 +608,7 @@ get_comment ()
     char keyword[BUFSIZ];
 
     keyword[len] = '\0';
+    CmtVal.VarText = 0;
     CmtVal.Varargs = 0;
     CmtVal.Externs = -1;
     CmtVal.Preproz = 0;
@@ -559,11 +619,11 @@ get_comment ()
 	    fputc(c, cur_file->tmp_file);
 
 #if OPT_LINTLIBRARY
-	if (CmtVal.Preproz > 0) {
-	    fputc(c, stdout); 
-	}
 	if (!(isalnum(c) || c == '_' || c == '$')) {
+	    int flag = CmtVal.Preproz;
 	    len = decipher_comment(keyword, len);
+	    if (flag != CmtVal.Preproz)
+	    	lastc = '\0';
 	} else if (len+1 < sizeof(keyword)) {
 	    keyword[len++] = c;
 	}
@@ -573,7 +633,10 @@ get_comment ()
 	case '\n':
 	    cur_file->line_num++;
 #if OPT_LINTLIBRARY
-	    CmtVal.Preproz -= 1;
+	    if (CmtVal.Preproz != 0 && lastc != '\0')
+		fputc(lastc, stdout); 
+	    if (CmtVal.Preproz > 0)	/* if negative, we pass everything */
+		CmtVal.Preproz -= 1;
 #endif
 	    break;
 	case '/':
@@ -590,13 +653,28 @@ get_comment ()
 		}
 #if OPT_LINTLIBRARY
 		(void)decipher_comment(keyword, len);
-		if (CmtVal.Varargs != 0)
-		    varargs_num = CmtVal.Varargs;
+		if (CmtVal.Varargs != 0) {
+		    if ((varargs_num = CmtVal.Varargs) != 0
+		     && CmtVal.VarText != 0) {
+			if (varargs_str != 0)
+			    free(varargs_str);
+			varargs_str = xstrdup(keyword);
+		    }
+		}
 		if (CmtVal.Externs != -1)
 		    extern_in = CmtVal.Externs;
+		if (CmtVal.Preproz != 0)
+		    fputc('\n', stdout); 
 #endif
 		return;
 	    }
+	    /* FALLTHRU */
+	default:
+#if OPT_LINTLIBRARY
+	    if (CmtVal.Preproz != 0 && lastc != '\0')
+		fputc(lastc, stdout); 
+#endif
+	    break;
 	}
 	lastc = c;
     }

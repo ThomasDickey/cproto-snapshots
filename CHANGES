@@ -21,9 +21,18 @@ Patchlevel 10 (dickey, September 1994)
 - added PRINTFLIKE and SCANFLIKE to the comments interpreted for the lint
   library translation.
 
+- modified "LINT_PREPRO" comment to pass-thru all comment text if no count is
+  given.
+
 - added new comment keyword "LINT_SHADOWED" to generate "#undef symbol" before
   each function template in lint libraries (useful for processing files that
   define both macros and functions with the same names).
+
+- interpret GCC's __attribute__ noreturn and format for lint-library text
+
+- treat carriage-return (^M) as whitespace where appropriate.
+
+- added configuration-test to avoid conflict with prototype for 'popen()'
 
 - added several function-pointer regression test-cases
 
