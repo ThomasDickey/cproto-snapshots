@@ -1,3 +1,11 @@
+1999/10/21
+- allow identifiers to be the same as typedef names, handle this case:
+  typedef int badStyle; 
+  void badFunc(int *badStyle) { } 
+  (reported by Paul Haas <paulh@iware.com>)
+1999/1/3
+- add '__extension__' keyword
+
 Version 4.6
 
 - Since cproto is no longer being distributed on USENET in shar file format,
