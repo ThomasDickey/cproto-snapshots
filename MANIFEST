@@ -1,12 +1,26 @@
-MANIFEST for cproto, version t19930411
+MANIFEST for cproto, version t19930601
 --------------------------------------------------------------------------------
 MANIFEST                        this file
+CHANGES                         summary of changes made to CPROTO
+Makefile.bc                     v3_7 base
+Makefile.msc                    v3_7 base
+Makefile.uni                    v3_7 base
 README                          overview of the CPROTO program
+config.h                        v3_7 base
+cproto.1                        man-page for CPROTO
+cproto.c                        main program of CPROTO
+cproto.h                        common datatypes and definitions for CPROTO
 getopt.c                        GNU getopt.c
 getopt.h                        GNU getopt.h
+grammar.y                       yacc grammar for CPROTO
+lex.l                           lex rules for CPROTO
+patchlev.h                      current patch level of CPROTO
 popen.c                         v3_7 base
+semantic.c                      functions to support yacc grammar (formatting and translation)
 semantic.h                      interface definitions of semantic.c
 strstr.c                        look for a substring of a string
+symbol.c                        symbol-table support for CPROTO
+symbol.h                        interface definitions for symbol.c
 porting                         subdirectory
 porting/getopt.h                header file for getopt
 testing                         subdirectory
