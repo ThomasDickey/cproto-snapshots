@@ -1,6 +1,6 @@
 Version 3
 
-Patchlevel 9 (dickey, July 1994)
+Patchlevel 9 (dickey, August 1994)
 
 - use 'autoconf' to make a UNIX configure-script.
 
@@ -20,6 +20,14 @@ Patchlevel 9 (dickey, July 1994)
 
 - modified logic for options -c -f2 so that cproto inserts a space before
   the beginning of a comment when it immediately follows an '*'.
+
+- enhanced error reporting with new module yyerror.c which (attempts to)
+  report the expected token type/name when a syntax error is encountered.
+
+- modified the grammar.y file to try to recover from errors at the next
+  semicolon (as well as the next right curly bracket).
+
+- tested on Solaris ? with lex/yacc and flex ? / bison ?
 
 - tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22
 

@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.19 1994/08/05 21:20:38 tom Exp $
+/* $Id: lex.l,v 3.20 1994/08/06 10:36:11 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -88,7 +88,7 @@ static void get_quoted        ARGS((void));
 static void get_comment       ARGS((void));
 static void get_cpp_directive ARGS((char *dest, unsigned n));
 static void do_include        ARGS((char *f));
-static void include_file      ARGS((char *name, boolean convert));
+static void include_file      ARGS((char *name, int convert));
 static void put_file          ARGS((FILE *outf));
 static void put_quoted        ARGS((int c));
 

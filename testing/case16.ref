@@ -1,6 +1,9 @@
 /* case16.c */
+int dots_0(int p1);
 int dots_1(int p1, ...);
 int dots_3(int P1, char P2, ...);
+_FIRST *func1(void);
+_FIRST *func2(_FIRST *P1 , int P2 [], float p);
 int *(func_func)(int p1, int p2, int p3);
 int main(register argc, char **argv);
 int veryfunny(char *a, long b, long c);
@@ -129,7 +132,8 @@ int	array[][10][20];
 
 	/* ellipsis is legal, except in K&R style declaration */
 
-	dots_0(p1)		{ return(1); }
+	int 
+dots_0 (int p1)		{ return(1); }
 
 	dots_1(int p1, ...)	{ return(1); }
 
@@ -152,7 +156,8 @@ extern	xdots_2(p1, ...);
 
 extern	xdots_3(int P1,char P2, ...);
 
-_FIRST	*func1() { }
+_FIRST *
+func1 (void) { }
 _FIRST	*func2(_FIRST *P1,int P2[],float p) { }
 
 int *(

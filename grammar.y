@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.18 1994/08/05 22:43:06 tom Exp $
+/* $Id: grammar.y,v 3.19 1994/08/06 00:20:21 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -116,11 +116,7 @@ typedef struct {
 
 static IncludeStack *cur_file;	/* current input file */
 
-#if 0
-extern void yyerror ARGS((char *));
-#else
 #include "yyerror.c"
-#endif
 
 static int  HaveAnsiParam ARGS((void));
 
@@ -178,6 +174,10 @@ external_declaration
 	| linkage_specification
 	| T_ASM T_ASMARG ';'
 	| error T_MATCHRBRACE
+	{
+	    yyerrok;
+	}
+	| error ';'
 	{
 	    yyerrok;
 	}
