@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t20031129
+MANIFEST for cproto, version t20040309
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -106,6 +106,8 @@ testing/case19.ref              test case reference: -f2
 testing/case20.ref              test case reference: -f3
 testing/case21.ref              test case reference: -f3 -v + template
 testing/case22.ref              test case reference: -l -a
+testing/case23.ref              test case reference: -i
+testing/case24.ref              test case reference: -i -s
 testing/descrip.mms             VAX MMS-script for CPROTO/TESTING directory
 testing/linux.c                 include all linux files, for testing
 testing/make_bat.sh             script for making dos-scripts

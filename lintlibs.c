@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.5 2001/01/26 17:47:20 cthuang Exp $
+/* $Id: lintlibs.c,v 4.5.1.1 2004/03/09 23:16:00 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -283,7 +283,7 @@ static	int	c_suffix(path)
 void	track_in()
 {
 	static	char	old_file[MAX_TEXT_SIZE];	/* from last call */
-	auto	boolean	show = lintLibrary();
+	auto	boolean	show = lintLibrary() || do_tracking;
 
 	if (!show && !debug_trace)
 		return;

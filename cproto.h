@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.6.1.1 2003/04/05 17:56:02 tom Exp $
+/* $Id: cproto.h,v 4.6.1.3 2004/03/09 23:10:05 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -58,7 +58,8 @@ typedef struct parameter_list {
 #define DS_CHAR 	4	/* contains "char" type specifier */
 #define DS_SHORT	8	/* contains "short" type specifier */
 #define DS_FLOAT	16	/* contains "float" type specifier */
-#define DS_JUNK 	32	/* we're not interested in this declaration */
+#define DS_INLINE	32	/* contains "inline" specifier */
+#define DS_JUNK 	64	/* we're not interested in this declaration */
 
 /* This structure stores information about a declaration specifier. */
 typedef struct decl_spec {
@@ -165,6 +166,7 @@ typedef struct func_format {
 /* Program options */
 extern boolean extern_out;
 extern Scope scope_out;
+extern boolean inline_out;
 #if OPT_LINTLIBRARY
 extern boolean types_out;
 extern boolean lint_shadowed;
@@ -189,6 +191,7 @@ extern char *progname;
 extern int varargs_num;		/* supports varargs-comment */
 extern char *varargs_str;	/* additional info, such as PRINTFLIKEnn */
 extern int extern_in;		/* supports "LINT_EXTERNnn" */
+extern int do_tracking;		/* supports "-X" option */
 extern int exitlike_func;	/* supports noreturn-attribute */
 extern int in_include;		/* current include-level */
 extern int debug_trace;

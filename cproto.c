@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.9.1.1 2003/04/05 15:53:57 tom Exp $
+/* $Id: cproto.c,v 4.9.1.4 2004/03/09 23:32:36 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7a"
+#define VERSION "4.7b"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -25,6 +25,9 @@ char *progname;
 /* If nonzero, output variables declared "extern" in include-files */
 int extern_in = 0;
 
+/* When TRUE, track the include-level (works with gcc, not some others) */
+int do_tracking = FALSE;
+
 /* When TRUE, suppress return-statements in function-bodies */
 int exitlike_func = FALSE;
 
@@ -33,6 +36,9 @@ boolean extern_out = FALSE;
 
 /* By default, generate global declarations only */
 Scope scope_out = SCOPE_EXTERN;
+
+/* If TRUE, output definitions for inline functions */
+boolean inline_out = FALSE;
 
 /* If TRUE, export typedef declarations (needed for lint-libs) */
 #if OPT_LINTLIBRARY
@@ -316,11 +322,13 @@ usage ()
     fputs("  -q               Disable include file read failure messages\n", stderr);
     fputs("  -s               Output static declarations also\n", stderr);
     fputs("  -S               Output static declarations only\n", stderr);
+    fputs("  -i               Output inline declarations also\n", stderr);
 #if OPT_LINTLIBRARY
     fputs("  -T               Output type definitions\n", stderr);
 #endif
     fputs("  -v               Output variable declarations\n", stderr);
     fputs("  -x               Output variables and functions declared \"extern\"\n", stderr);
+    fputs("  -X level         Limit externs to given include-level\n", stderr);
     fputs("  -m               Put macro around prototype parameters\n", stderr);
     fputs("  -M name          Set name of prototype macro\n", stderr);
     fputs("  -d               Omit prototype macro definition\n", stderr);
@@ -431,6 +439,38 @@ char *s;
 
 #define MAX_OPTIONS 40
 
+#define ALL_OPTIONS "\
+B:\
+C:\
+D:\
+E:\
+F:\
+I:\
+M:\
+O:\
+P:\
+S\
+T\
+U:\
+V\
+X:\
+a\
+b\
+c\
+d\
+e\
+f:\
+i\
+l\
+m\
+o:\
+p\
+q\
+s\
+t\
+v\
+x\
+"
 /* Process the command line options.
  */
 static void
@@ -484,7 +524,7 @@ char ***pargv;
     *(cpp_cmd = xmalloc(n)) = '\0';
 #endif
 
-    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqSstU:Vvo:O:Tlx")) != EOF) {
+    while ((c = getopt(argc, argv, ALL_OPTIONS)) != EOF) {
 	switch (c) {
 	case 'I':
 #ifdef	vms
@@ -614,6 +654,9 @@ char ***pargv;
 	case 's':
 	    scope_out = SCOPE_ALL;
 	    break;
+	case 'i':
+	    inline_out = TRUE;
+	    break;
 	case 't':
 	    func_style = FUNC_TRADITIONAL;
 	    break;
@@ -650,6 +693,12 @@ char ***pargv;
 # endif
 	    break;
 #endif
+	case 'X':
+	    extern_in = atoi(optarg);
+	    do_tracking = TRUE;
+	    if (extern_in < 0 || extern_in > MAX_INC_DEPTH)
+		usage();
+	    break;
 	case 'x':
 	    extern_in = MAX_INC_DEPTH;
 	    break;

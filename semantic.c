@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.5 1998/01/19 00:49:26 cthuang Exp $
+/* $Id: semantic.c,v 4.5.1.2 2004/03/09 23:13:45 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -845,7 +845,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
     }
 #endif
 
-    if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_JUNK))) {
+    if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_INLINE|DS_JUNK))) {
 #if OPT_LINTLIBRARY
 	if (in_include >= extern_in)	/* -x option not set? */
 #endif
@@ -857,6 +857,8 @@ DeclaratorList *decl_list;	/* list of declared variables */
     if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
 	return;
     if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
+	return;
+    if (!inline_out && (decl_spec->flags & DS_INLINE))
 	return;
 
     check_untagged(decl_spec);
@@ -976,6 +978,12 @@ Declarator *declarator;
 	return;
     if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
 	return;
+    if (!inline_out && (decl_spec->flags & DS_INLINE))
+	return;
+    if ((decl_spec->flags & DS_INLINE)) {
+	if (in_include > extern_in)	/* -x option not set? */
+	    return;
+    }
 
     /*
      * Trim pathological keywords (which are legal, but unnecessary) from the
