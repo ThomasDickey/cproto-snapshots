@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.6 2000/10/29 00:47:16 cthuang Exp $
+/* $Id: lex.l,v 4.5.1.3 2002/01/26 00:18:31 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -832,7 +832,7 @@ int convert;		/* if TRUE, convert function definitions */
     cur_file = inc_stack + inc_depth;
     cur_file->file = yyin;
     cur_file->base_name = xstrdup(name);
-    cur_file->file_name = strcpy(xmalloc(MAX_TEXT_SIZE), name);
+    cur_file->file_name = strcpy(xmalloc(strlen(name) + MAX_TEXT_SIZE), name);
     cur_file->line_num = 1;
     cur_file->convert = convert;
     cur_file->changed = FALSE;

@@ -1,4 +1,4 @@
-/* $Id: trace.h,v 4.2 1998/01/19 00:49:35 cthuang Exp $ */
+/* $Id: trace.h,v 4.2.1.1 2002/01/26 00:19:28 tom Exp $ */
 
 #ifndef TRACE_H
 #define TRACE_H
@@ -7,6 +7,7 @@
 #define __attribute__(p)
 #endif
 
+extern void Where(char *f, int n);
 extern void Trace(char *f, ...) __attribute__((format (printf,1,2)));
 extern void show_alloc(void);
 extern void Elapsed(char *msg);

@@ -1,30 +1,61 @@
-Version 4.7
+-- $Id: CHANGES,v 4.7.1.11 2002/01/26 00:38:14 tom Exp $
 
-- Report source file and line number in error messages in gcc-style format.
+Version 4.6e
+
+2002/2/25
+- correct length allocated for filename in include_file(), which was not big
+  enough if the $CPROTO environment variable was corrupted.  From report by
+  <Sweasel18@aol.com>, using sharefuzz:
+	http://www.atstake.com/research/tools/sharefuzz1.0.tar.gz
+- update configure.in to generate config.h directly using autoconf patch from
+	http://invisible-island.net/autoconf/
+- remove makefile rules that attempt to recreate the configure script.  As
+  demonstrated in numerous packages, it always reflects poor design.
+- remove makefile rules to make shar files (comp.sources.misc is long gone).
+- stop using changequote(), workaround for bugs in autoconf 2.5x
+
+Version 4.6d
+
+2000/8/10
 - use newer versions of mkdirs.sh and install.sh
 - regenerate configure script with autoconf 2.13
 - restructure aclocal.m4
 - modify Makefile.in to allow $(bindir) and $(mandir) to be altered
   independently of $(prefix) and $(exec_prefix) (patch by Carsten Leonhardt
   <leo@debian.org>).
+
+Version 4.6c
+
+2000/7/8
 - add a clause to handle "__extension__" before extern declarations.
   (report by Bob van der Poel <bvdpoel@uniserve.com>)
+
+Version 4.6b
+
+1999/12/27
 - correct check for size of vec[] array in yaccExpected(), broken in 4.6a
   changes.
   (report by Wolfgang Wander)
+1999/12/19
 - add keywords "restrict", "_Bool", "_Complex", "_Imaginary" based on c9x
   draft.
 - add keywords "__restrict__" and "__restrict", for gcc.
   (report by Wolfgang Wander <wwc@rentec.com>)
+
+Version 4.6a
+
+1999/12/14
 - change vec[] array in yaccExpected() to be dynamically allocated.  It was a
   fixed-size (10 entries) array before.  Also fix problem reported by Wolfgang
   Wander <wwc@rentec.com>, which is that if the array were empty, it was passed
   to qsort() with a zero-size, causing a core dump.
 - add to syntax.c & corresponding test-cases the typedef/identifier example.
+1999/10/21
 - allow identifiers to be the same as typedef names, handle this case:
   typedef int badStyle; 
   void badFunc(int *badStyle) { } 
   (reported by Paul Haas <paulh@iware.com>)
+1999/1/3
 - add '__extension__' keyword
 
 Version 4.6

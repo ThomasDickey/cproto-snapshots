@@ -8,7 +8,7 @@ double x11;
 signed x12;
 unsigned x13;
 x4t x17;
-const x18;
+const x18 = {0};
 volatile x19;
 void badFunc(int *badStyle);
 _FIRST first;
