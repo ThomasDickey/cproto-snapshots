@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.3.1.1 1995/02/24 11:19:46 tom Exp $
+/* $Id: grammar.y,v 4.4 1995/08/23 21:29:04 cthuang Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
