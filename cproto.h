@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.6.1.3 2004/03/09 23:10:05 tom Exp $
+/* $Id: cproto.h,v 4.6.1.4 2004/03/24 21:08:29 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -7,6 +7,34 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifndef BISON_HAS_YYTNAME
+#define BISON_HAS_YYTNAME 0
+#endif
+
+#ifndef YACC_HAS_YYNAME
+#define YACC_HAS_YYNAME 0
+#endif
+
+#ifndef YACC_HAS_YYTOKS
+#define YACC_HAS_YYTOKS 0
+#endif
+
+#ifndef YACC_HAS_YYTOKS_2
+#define YACC_HAS_YYTOKS_2 0
+#endif
+
+#ifndef HAVE_POPEN_PROTOTYPE
+#define HAVE_POPEN_PROTOTYPE 0
+#endif
+
+#ifndef HAVE_LIBDBMALLOC
+#define HAVE_LIBDBMALLOC 0
+#endif
+
+#ifndef HAVE_LIBDMALLOC
+#define HAVE_LIBDMALLOC 0
 #endif
 
 #include "system.h"
@@ -199,54 +227,54 @@ extern char base_file[];
 
 /* cproto.c */
 #if HAVE_LIBDBMALLOC
-extern void ExitProgram     ARGS((int code));
+extern void ExitProgram     (int code);
 #define exit(code) ExitProgram(code)
 #endif
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-extern char *xMalloc        ARGS((unsigned n, char *f, int l));
-extern char *xStrdup        ARGS((char *s,    char *f, int l));
+extern char *xMalloc        (unsigned n, char *f, int l);
+extern char *xStrdup        (char *s,    char *f, int l);
 #define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
 #define xstrdup(s)          xStrdup(s, __FILE__, __LINE__)
 #else
-extern char *xmalloc        ARGS((unsigned n));
-extern char *xstrdup        ARGS((char *src));
+extern char *xmalloc        (unsigned n);
+extern char *xstrdup        (char *src);
 #endif
 #endif /* !HAVE_LIBDMALLOC */
-extern void put_error       ARGS((void));
-extern int is_path_sep      ARGS((int ch));
-extern char *trim_path_sep  ARGS((char *s));
+extern void put_error       (void);
+extern int is_path_sep      (int ch);
+extern char *trim_path_sep  (char *s);
 
 /* lintlibs.c */
 #if OPT_LINTLIBRARY
-extern void put_string      ARGS((FILE *outf, char *s));
-extern void put_char        ARGS((FILE *outf, int c));
-extern void put_newline     ARGS((FILE *outf));
-extern void put_blankline   ARGS((FILE *outf));
-extern void put_padded      ARGS((FILE *outf, char *s));
-extern void fmt_library     ARGS((int code));
-extern void begin_tracking  ARGS((void));
-extern int already_declared ARGS((char *name));
-extern void track_in        ARGS((void));
-extern int want_typedef     ARGS((void));
-extern void begin_typedef   ARGS((void));
-extern void copy_typedef    ARGS((char *s));
-extern void end_typedef     ARGS((void));
-extern void imply_typedef   ARGS((char *s));
-extern char *implied_typedef ARGS((void));
-extern void indent          ARGS((FILE *outf));
-extern int lint_ellipsis    ARGS((Parameter *p));
+extern void put_string      (FILE *outf, char *s);
+extern void put_char        (FILE *outf, int c);
+extern void put_newline     (FILE *outf);
+extern void put_blankline   (FILE *outf);
+extern void put_padded      (FILE *outf, char *s);
+extern void fmt_library     (int code);
+extern void begin_tracking  (void);
+extern int already_declared (char *name);
+extern void track_in        (void);
+extern int want_typedef     (void);
+extern void begin_typedef   (void);
+extern void copy_typedef    (char *s);
+extern void end_typedef     (void);
+extern void imply_typedef   (char *s);
+extern char *implied_typedef (void);
+extern void indent          (FILE *outf);
+extern int lint_ellipsis    (Parameter *p);
 #if OPT_LINTLIBRARY
-extern void flush_varargs   ARGS((void));
+extern void flush_varargs   (void);
 #else
 #define flush_varargs() /* nothing */
 #endif
-extern void ellipsis_varargs ARGS((Declarator *d));
-extern char *supply_parm    ARGS((int count));
-extern int is_actual_func   ARGS((Declarator *d));
-extern void put_body        ARGS((FILE *outf, DeclSpec *decl_spec, Declarator *declarator));
+extern void ellipsis_varargs (Declarator *d);
+extern char *supply_parm    (int count);
+extern int is_actual_func   (Declarator *d);
+extern void put_body        (FILE *outf, DeclSpec *decl_spec, Declarator *declarator);
 # ifdef NO_LEAKS
-extern void free_lintlibs   ARGS((void));
+extern void free_lintlibs   (void);
 # endif
 #else
 #define put_string(fp,S)    fputs(S, fp)
@@ -262,22 +290,22 @@ extern void free_lintlibs   ARGS((void));
 #endif
 
 /* strkey.c */
-extern char *strkey         ARGS((char *src, char *key));
-extern void strcut          ARGS((char *src, char *key));
+extern char *strkey         (char *src, char *key);
+extern void strcut          (char *src, char *key);
 
 /* grammar.y */
-extern boolean is_typedef_name ARGS((char *name));
-extern char *cur_file_name  ARGS((void));
-extern unsigned cur_line_num ARGS((void));
-extern FILE *cur_tmp_file   ARGS((void));
-extern void cur_file_changed ARGS((void));
-extern long cur_begin_comment ARGS((void));
-extern char *cur_text       ARGS((void));
-extern void pop_file        ARGS((int closed));
-extern void init_parser     ARGS((void));
-extern void process_file    ARGS((FILE *infile, char *name));
+extern boolean is_typedef_name (char *name);
+extern char *cur_file_name  (void);
+extern unsigned cur_line_num (void);
+extern FILE *cur_tmp_file   (void);
+extern void cur_file_changed (void);
+extern long cur_begin_comment (void);
+extern char *cur_text       (void);
+extern void pop_file        (int closed);
+extern void init_parser     (void);
+extern void process_file    (FILE *infile, char *name);
 #ifdef NO_LEAKS
-extern void free_parser     ARGS((void));
+extern void free_parser     (void);
 #endif
 
 /* workaround for one of the bugs in bison 1.875 */

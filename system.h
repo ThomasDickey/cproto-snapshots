@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.8 2000/10/29 19:20:35 cthuang Exp $
+/* $Id: system.h,v 4.8.1.2 2004/03/24 21:46:51 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -35,13 +35,6 @@
 #ifndef WIN32
 #define WIN32
 #endif
-#endif
-
-/* don't use continuation-lines -- breaks on VAXC */
-#if defined(__STDC__) || defined(__GNUC__) || defined(__WATCOMC__) || defined(vms)
-#define ARGS(p) p
-#else
-#define ARGS(p) ()
 #endif
 
 /* Turbo C preprocessor */
@@ -137,8 +130,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #else
-extern char *malloc  ARGS((size_t n));
-extern char *realloc ARGS((char *p, size_t n));
+extern char *malloc  (size_t n);
+extern char *realloc (char *p, size_t n);
+extern char *getenv  (const char *v);
 #endif
 
 /* Declare argument for exit() function */
@@ -169,11 +163,9 @@ extern char *realloc ARGS((char *p, size_t n));
 #  include <strings.h>
 #  define strchr index
 #  define strrchr rindex
+extern char *strstr  (const char *s, const char *p);
 /* memory.h and strings.h conflict on some systems.  */
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
-
-extern char *getenv  ARGS((const char *v));
-extern char *strstr  ARGS((const char *s, const char *p));
 
 /*
  * The DOALLOC symbol controls whether we compile in the simple memory tests
@@ -189,9 +181,7 @@ extern char *strstr  ARGS((const char *s, const char *p));
  * support.
  */
 #ifndef OPT_LINTLIBRARY
-# if HAVE_PROG_LINT
-#  define OPT_LINTLIBRARY 1
-# endif
+# define OPT_LINTLIBRARY 0
 #endif
 
 #if BISON_HAS_YYTNAME || YACC_HAS_YYTOKS || YACC_HAS_YYTOKS_2 || YACC_HAS_YYNAME

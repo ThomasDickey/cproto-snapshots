@@ -1,16 +1,22 @@
-/* $Id: trace.c,v 4.2.1.1 2002/01/26 00:01:29 tom Exp $
+/* $Id: trace.c,v 4.3 2004/03/24 23:43:42 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  *
  * This is a cut-down version of a module I wrote originally for 'vile', it
  * requires an ANSI compiler.  Its main purpose is to allow tracing problems in
- * a repeatable test, including malloc/free bugs -- dickey@clark.net
+ * a repeatable test, including malloc/free bugs -- T.Dickey
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <trace.h>	/* interface of this module */
+
+#if	DOALLOC
+#undef	malloc
+#undef	realloc
+#undef	free
+#endif	/* DOALLOC */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,17 +32,14 @@
 # endif
 #endif
 
+#include <stdarg.h>
+
 #define	BEFORE	0	/* padding "before" allocated area */
 #define AFTER   0	/* padding "after" allocated area */
 
-#include <stdarg.h>
+#define BEFORE_PTR(ptr) (void *)((char *)(ptr) - BEFORE)
 
-#if	DOALLOC
-#undef	malloc
-#undef	realloc
-#undef	free
-#endif	/* DOALLOC */
-
+void
 Where(char *file, int line)
 {
 	fflush(stderr);
@@ -86,8 +89,8 @@ Elapsed(char *msg)
 }
 
 #ifdef	apollo
-static
-int contains(char *ref, char *tst)
+static int
+contains(char *ref, char *tst)
 {
 	size_t	len	= strlen(ref);
 	while (*tst) {
@@ -135,7 +138,7 @@ fail_alloc(char *msg, char *ptr)
 	Trace("%s: %p\n", msg, ptr);
 	Trace("allocs %ld, frees %ld\n", count_alloc, count_freed);
 	WalkBack();
-#if NO_LEAKS
+#ifdef NO_LEAKS
 	show_alloc();
 #endif
 	Trace((char *)0);
@@ -160,8 +163,8 @@ static	long	maxAllocated,	/* maximum # of bytes allocated */
 		nowPending,	/* current end of 'area[]' table */
 		maxPending;	/* maximum # of segments allocated */
 
-static
-int FindArea(char *ptr)
+static int
+FindArea(char *ptr)
 {
 	register int j;
 	for (j = 0; j < DOALLOC; j++)
@@ -176,8 +179,8 @@ int FindArea(char *ptr)
 	return -1;
 }
 
-static
-int record_freed(char *ptr)
+static int
+record_freed(char *ptr)
 {
 	register int j;
 	if ((j = FindArea(ptr)) >= 0) {
@@ -195,8 +198,8 @@ int record_freed(char *ptr)
 	return j;
 }
 
-static
-int record_alloc(char *newp, char *oldp, unsigned len)
+static int
+record_alloc(char *newp, char *oldp, unsigned len)
 {
 	register int	j;
 
@@ -232,8 +235,8 @@ int record_alloc(char *newp, char *oldp, unsigned len)
 #endif	/* DOALLOC */
 
 #ifdef	DEBUG2
-#define	LOG_PTR(msg,num)	Trace("%s %p\n", msg, num);
-#define	LOG_LEN(msg,num)	Trace("%s %d\n", msg, num);
+#define	LOG_PTR(msg,num)	Trace("%s %p\n", msg, num)
+#define	LOG_LEN(msg,num)	Trace("%s %d\n", msg, num)
 #else
 #define LOG_PTR(msg,num)
 #define	LOG_LEN(msg,num)
@@ -246,10 +249,10 @@ int record_alloc(char *newp, char *oldp, unsigned len)
 void *
 doalloc (void *oldp, unsigned amount)
 {
-	register void	*newp;
+	char	*newp;
 
 	if (oldp != 0)
-		oldp -= BEFORE;
+		oldp = BEFORE_PTR(oldp);
 	count_alloc += (oldp == 0);
 #if 0
 	if ((count_alloc > 99914 && count_alloc < 99920)) {
@@ -257,8 +260,8 @@ doalloc (void *oldp, unsigned amount)
 		WalkBack();
 	}
 #endif
-	LOG_LEN("allocate", amount)
-	LOG_PTR("  old = ", oldp)
+	LOG_LEN("allocate", amount);
+	LOG_PTR("  old = ", oldp);
 	amount += (BEFORE+AFTER);	/* patch */
 
 	newp = (oldp != 0) ? realloc(oldp, amount) : malloc(amount);
@@ -268,8 +271,8 @@ doalloc (void *oldp, unsigned amount)
 		/*NOT REACHED*/
 	}
 
-	LOG_PTR("  new = ", newp)
-	return (newp+BEFORE);
+	LOG_PTR("  new = ", newp);
+	return (void *)(newp+BEFORE);
 }
 
 /*
@@ -278,9 +281,9 @@ doalloc (void *oldp, unsigned amount)
 void
 dofree(void *oldp)
 {
-	oldp -= BEFORE;
+	oldp = BEFORE_PTR(oldp);
 	count_freed++;
-	LOG_PTR("dealloc ", oldp)
+	LOG_PTR("dealloc ", oldp);
 
 	if (OK_FREE(oldp)) {
 		free(oldp);

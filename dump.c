@@ -1,4 +1,4 @@
-/* $Id: dump.c,v 4.1.1.1 1996/04/27 12:59:46 tom Exp $
+/* $Id: dump.c,v 4.2 2004/03/24 23:31:46 tom Exp $
  *
  * useful dumps for cproto
  */
@@ -12,15 +12,18 @@ static char *flagsDeclSpec(int flags);
 
 #define PAD char pad[80]; sprintf(pad, "%-*s", level * 3, ".")
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 #if DEBUG > 1
 #define SHOW_CMTS(p) Trace p;
 #else
 #define SHOW_CMTS(p)
 #endif
 
-static
-char *whatFuncDefStyle(func_def)
-	FuncDefStyle func_def;		/* style of function definition */
+static char *
+whatFuncDefStyle(FuncDefStyle func_def)	/* style of function definition */
 {
 	switch (func_def) {
 	case FUNC_NONE:		return "FUNC_NONE";
@@ -31,17 +34,15 @@ char *whatFuncDefStyle(func_def)
 	return "?";
 }
 
-void dump_parameter(p, level)
-	Parameter *p;
-	int level;
+void
+dump_parameter(Parameter *p, int level)
 {
 	dump_declarator(p->declarator, level+1);
 	dump_decl_spec(&(p->decl_spec), level+1);
 }
 
-void dump_param_list(p, level)
-	ParameterList *p;
-	int level;
+void
+dump_param_list(ParameterList *p, int level)
 {
 	struct parameter *q;
 
@@ -50,9 +51,8 @@ void dump_param_list(p, level)
 	}
 }
 
-void dump_declarator(d, level)
-	Declarator *d;
-	int	level;
+void
+dump_declarator(Declarator *d, int	level)
 {
 	PAD;
 	Trace("%sdeclarator %p\n",		pad, d);
@@ -85,9 +85,8 @@ void dump_declarator(d, level)
 	}
 }
 
-static
-char *flagsDeclSpec(flags)
-	int flags;
+static char *
+flagsDeclSpec(int flags)
 {
 	static	char	temp[100];
 	static	struct	{
@@ -101,7 +100,7 @@ char *flagsDeclSpec(flags)
 		{DS_FLOAT,	"float"},
 		{DS_JUNK ,	"junk"},
 	};
-	register int j;
+	unsigned j;
 	*temp = 0;
 	for (j = 0; j < sizeof(table)/sizeof(table[0]); j++) {
 		if (flags & table[j].mask) {
@@ -113,9 +112,8 @@ char *flagsDeclSpec(flags)
 	return temp;
 }
 
-void dump_decl_spec(d, level)
-	DeclSpec *d;
-	int level;
+void
+dump_decl_spec(DeclSpec *d, int level)
 {
 	PAD;
 	Trace("%sdecl_spec %p\n",	pad, d);

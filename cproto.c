@@ -1,4 +1,4 @@
-/* $Id: cproto.c,v 4.9.1.4 2004/03/09 23:32:36 tom Exp $
+/* $Id: cproto.c,v 4.9.1.6 2004/03/24 23:26:59 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
@@ -12,7 +12,7 @@
 #if HAVE_GETOPT_H
 #include <getopt.h>
 #else
-extern int getopt ARGS((int argc, char *const *argv, const char *shortopts));
+extern int getopt (int argc, char *const *argv, const char *shortopts);
 extern char *optarg;
 extern int optind;
 #endif
@@ -26,7 +26,9 @@ char *progname;
 int extern_in = 0;
 
 /* When TRUE, track the include-level (works with gcc, not some others) */
+#if OPT_LINTLIBRARY
 int do_tracking = FALSE;
+#endif
 
 /* When TRUE, suppress return-statements in function-bodies */
 int exitlike_func = FALSE;
@@ -117,25 +119,20 @@ char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
 /* Run the C preprocessor */
 #ifdef CPP
 # if !HAVE_POPEN_PROTOTYPE
-extern FILE *popen ARGS((const char *c, const char *m));
+extern FILE *popen (const char *c, const char *m);
 # endif
-extern int pclose ARGS((FILE *p));
+extern int pclose (FILE *p);
 static char *cpp = CPP, *cpp_opt, *cpp_cmd;
 #endif
-
-static	char *	escape_string   ARGS((char *src));
-static	void	usage           ARGS((void));
-static	void	process_options ARGS((int *pargc, char ***pargv));
-static	void	parse_options   ARGS((char *src, int maxargc, int *pargc, char **argv));
 
 /* Try to allocate some memory.
  * If unsuccessful, output an error message and exit.
  */
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-char *xMalloc(n,f,l) unsigned n; char *f; int l;
+char *xMalloc(unsigned n, char *f, int l)
 #else
-char *xmalloc (n) unsigned n;
+char *xmalloc (unsigned n)
 #endif
 {
     char *p;
@@ -160,9 +157,9 @@ char *xmalloc (n) unsigned n;
  */
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-char *xStrdup(src, f, l) char *src; char *f; int l;
+char *xStrdup(char *src, char *f, int l)
 #else
-char *xstrdup (src) char *src;
+char *xstrdup (char *src)
 #endif
 {
 #if defined(NO_LEAKS)
@@ -176,7 +173,7 @@ char *xstrdup (src) char *src;
 /* Output the current source file name and line number.
  */
 void
-put_error ()
+put_error (void)
 {
     fprintf(stderr, "%s:%u: ", cur_file_name(), cur_line_num());
 }
@@ -184,10 +181,7 @@ put_error ()
 /* Scan for options from a string.
  */
 static void
-parse_options (src, maxargc, pargc, argv)
-char *src;
-int maxargc, *pargc;
-char **argv;
+parse_options (char *src, int maxargc, int *pargc, char **argv)
 {
     char *g, *p, c;
     int argc;
@@ -236,8 +230,7 @@ char **argv;
  * This function knows only a few escape sequences.
  */
 static char *
-escape_string (src)
-char *src;
+escape_string (char *src)
 {
     char *result, *get, *put;
 
@@ -274,8 +267,7 @@ char *src;
 /* Returns true iff the character is a path leaf separator
  */
 int
-is_path_sep (ch)
-int ch;
+is_path_sep (int ch)
 {
 #if defined(MSDOS) || defined(OS2)
     return ch == '/' || ch == '\\';
@@ -288,8 +280,7 @@ int ch;
  * Return a pointer to the string.
  */
 char *
-trim_path_sep (s)
-char *s;
+trim_path_sep (char *s)
 {
     int n;
 
@@ -304,7 +295,7 @@ char *s;
 /* Output usage message and exit.
  */
 static void
-usage ()
+usage (void)
 {
     fprintf(stderr, "usage: %s [ option ... ] [ file ... ]\n", progname);
     fputs("Options:\n", stderr);
@@ -328,7 +319,9 @@ usage ()
 #endif
     fputs("  -v               Output variable declarations\n", stderr);
     fputs("  -x               Output variables and functions declared \"extern\"\n", stderr);
+#if OPT_LINTLIBRARY
     fputs("  -X level         Limit externs to given include-level\n", stderr);
+#endif
     fputs("  -m               Put macro around prototype parameters\n", stderr);
     fputs("  -M name          Set name of prototype macro\n", stderr);
     fputs("  -d               Omit prototype macro definition\n", stderr);
@@ -349,13 +342,8 @@ static	char	*cpp_defines;
 static	char	*cpp_include;
 static	char	*cpp_undefns;
 
-static	void	add2list ARGS((char *dst, char *src));
-static	void	add_option ARGS((char *keyword, char *src));
-
 static void
-add2list(dst, src)
-char *dst;
-char *src;
+add2list(char *dst, char *src)
 {
     if (*dst)
 	strcat(dst, ",");
@@ -363,9 +351,7 @@ char *src;
 }
 
 static void
-add_option(keyword, src)
-char *keyword;
-char *src;
+add_option(char *keyword, char *src)
 {
     if (*src)
 	sprintf(cpp_opt + strlen(cpp_opt), " /%s=(%s)", keyword, src);
@@ -381,8 +367,7 @@ char *src;
 #define QUOTECHARS "\"\'\t\n "
 
 static int
-quote_length (s)
-char *s;
+quote_length (char *s)
 {
     int len = strlen(s);
 
@@ -399,8 +384,7 @@ char *s;
  * /bin/sh.
  */
 static char *
-quote_string (s) 
-char *s;
+quote_string (char *s)
 {
     if (strpbrk(s, QUOTECHARS))  {
 	char *src = s;
@@ -474,9 +458,7 @@ x\
 /* Process the command line options.
  */
 static void
-process_options (pargc, pargv)
-int *pargc;
-char ***pargv;
+process_options (int *pargc, char ***pargv)
 {
     int argc, eargc, nargc;
     char **argv, *eargv[MAX_OPTIONS], **nargv;
@@ -692,13 +674,13 @@ char ***pargv;
 	    (void)strcat(cpp_opt, " -C");	/* pass-through comments */
 # endif
 	    break;
-#endif
 	case 'X':
 	    extern_in = atoi(optarg);
 	    do_tracking = TRUE;
 	    if (extern_in < 0 || extern_in > MAX_INC_DEPTH)
 		usage();
 	    break;
+#endif	/* OPT_LINTLIBRARY */
 	case 'x':
 	    extern_in = MAX_INC_DEPTH;
 	    break;
@@ -718,9 +700,7 @@ char ***pargv;
 }
 
 int
-main (argc, argv)
-int argc;
-char *argv[];
+main (int argc, char *argv[])
 {
     int i;
     FILE *inf;
@@ -924,8 +904,7 @@ char *argv[];
  */
 #if HAVE_LIBDBMALLOC
 #undef exit
-void ExitProgram(code)
-int code;
+void ExitProgram(int code)
 {
     extern int malloc_errfd;	/* FIXME: should be in dbmalloc.h */
     malloc_dump(malloc_errfd);

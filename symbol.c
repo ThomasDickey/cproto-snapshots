@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 4.3 1998/01/19 00:49:30 cthuang Exp $
+/* $Id: symbol.c,v 4.4 2004/03/24 20:58:35 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -6,14 +6,11 @@
 #include "cproto.h"
 #include "symbol.h"
 
-static unsigned hash ARGS((char *name));
-static Symbol *search_symbol_list ARGS((Symbol *list, char *name));
-
 /* Create a symbol table.
  * Return a pointer to the symbol table or NULL if an error occurs.
  */
 SymbolTable *
-new_symbol_table ()
+new_symbol_table (void)
 {
     SymbolTable *symtab;
     int i;
@@ -29,8 +26,7 @@ new_symbol_table ()
 /* Free the memory allocated to the symbol table.
  */
 void
-free_symbol_table (symtab)
-SymbolTable *symtab;
+free_symbol_table (SymbolTable *symtab)
 {
     int i;
     Symbol *sym, *next;
@@ -52,8 +48,7 @@ SymbolTable *symtab;
 /* This is a simple hash function mapping a symbol name to a hash bucket. */
 
 static unsigned
-hash (name)
-char *name;
+hash (char *name)
 {
     char *s;
     unsigned h;
@@ -70,9 +65,7 @@ char *name;
  * Return a pointer to the symbol or NULL if not found.
  */
 static Symbol *
-search_symbol_list (list, name)
-Symbol *list;
-char *name;
+search_symbol_list (Symbol *list, char *name)
 {
     Symbol *sym;
 
@@ -88,9 +81,7 @@ char *name;
  * Return a pointer to the symbol or NULL if not found.
  */
 Symbol *
-find_symbol (symtab, name)
-SymbolTable *symtab;
-char *name;
+find_symbol (SymbolTable *symtab, char *name)
 {
     return search_symbol_list(symtab->bucket[hash(name)], name);
 }
@@ -101,11 +92,11 @@ char *name;
  * Return a pointer to the symbol.
  */
 Symbol *
-new_symbol (symtab, name, value, flags)
-SymbolTable *symtab;	/* symbol table */
-char *name;		/* symbol name */
-char *value;		/* symbol value */
-int flags;		/* symbol attributes */
+new_symbol (
+SymbolTable *symtab,	/* symbol table */
+char *name,		/* symbol name */
+char *value,		/* symbol value */
+int flags)		/* symbol attributes */
 {
     Symbol *sym;
     int i;

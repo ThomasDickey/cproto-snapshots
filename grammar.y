@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.8.1.3 2004/03/09 01:31:56 pronovic Exp $
+/* $Id: grammar.y,v 4.8.1.4 2004/03/24 21:29:23 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -74,7 +74,7 @@
 
 #define YYMAXDEPTH 150
 
-extern	int	yylex ARGS((void));
+extern	int	yylex (void);
 
 /* declaration specifier attributes for the typedef statement currently being
  * scanned
@@ -122,7 +122,7 @@ static IncludeStack *cur_file;	/* current input file */
 
 #include "yyerror.c"
 
-static int haveAnsiParam ARGS((void));
+static int haveAnsiParam (void);
 
 
 /* Flags to enable us to find if a procedure returns a value.
@@ -131,10 +131,10 @@ static int return_val,	/* nonzero on BRACES iff return-expression found */
 	   returned_at;	/* marker for token-number to set 'return_val' */
 
 #if OPT_LINTLIBRARY
-static char *dft_decl_spec ARGS((void));
+static char *dft_decl_spec (void);
 
 static char *
-dft_decl_spec ()
+dft_decl_spec (void)
 {
     return (lintLibrary() && !return_val) ? "void" : "int";
 }
@@ -144,7 +144,7 @@ dft_decl_spec ()
 #endif
 
 static int
-haveAnsiParam ()
+haveAnsiParam (void)
 {
     Parameter *p;
     if (func_params != 0) {
@@ -792,7 +792,7 @@ direct_abs_declarator
 	| '(' parameter_type_list ')'
 	{
 	    Declarator *d;
-	    
+
 	    d = new_declarator("", "", $1.begin);
 	    $$ = new_declarator("%s()", "", $1.begin);
 	    $$->params = $2;
@@ -803,7 +803,7 @@ direct_abs_declarator
 	| '(' ')'
 	{
 	    Declarator *d;
-	    
+
 	    d = new_declarator("", "", $1.begin);
 	    $$ = new_declarator("%s()", "", $1.begin);
 	    $$->func_stack = d;
@@ -825,8 +825,7 @@ direct_abs_declarator
 #endif
 
 static void
-yaccError (msg)
-char *msg;
+yaccError (char *msg)
 {
     func_params = NULL;
     put_error();		/* tell what line we're on, and what file */
@@ -837,7 +836,7 @@ char *msg;
  * analyzer.
  */
 void
-init_parser ()
+init_parser (void)
 {
     static char *keywords[] = {
 	"const",
@@ -904,7 +903,7 @@ init_parser ()
 	"__volatile__",
 #endif
     };
-    int i;
+    unsigned i;
 
     /* Initialize type qualifier table. */
     type_qualifiers = new_symbol_table();
@@ -918,9 +917,7 @@ init_parser ()
  * code to a temporary file.
  */
 void
-process_file (infile, name)
-FILE *infile;
-char *name;
+process_file (FILE *infile, char *name)
 {
     char *s;
 
@@ -965,7 +962,7 @@ char *name;
 
 #ifdef NO_LEAKS
 void
-free_parser()
+free_parser(void)
 {
     free_symbol_table (type_qualifiers);
 #ifdef FLEX_SCANNER
