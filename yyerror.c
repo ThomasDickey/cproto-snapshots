@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 3.1 1994/08/05 22:39:36 tom Exp $
+/* $Id: yyerror.c,v 3.4 1994/08/06 11:02:08 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -6,15 +6,17 @@
  * expected.
  */
 
-/* This has to be a macro, since it relies on subverting the internal state of
- * 'yyparse()'
+/* 'yyerror()' has to be a macro, since it must be expanded inline to subvert
+ * the internal state of 'yyparse()'.
  */
-#if YYBISON
+#if YYBISON		/* bison 1.22 */
+#if YYDEBUG
+/* this is better than defining YYERROR_VERBOSE */
 #define	yyerror(text)	\
 	{ register int	n, c1, count = 0;\
 		YaccError(text);\
 		if (yypact[yystate] != YYFLAG)\
-			for (c1 = 2; c1 < YYLAST; c1++) {\
+			for (c1 = 0; c1 < YYLAST; c1++) {\
 				n = yypact[yystate] + c1;\
 				if (n >= 0 && n < YYLAST\
 				&& yycheck[n] == c1 && yytname[c1] != 0)\
@@ -23,13 +25,18 @@
 		YaccExpected("", -1);\
 	}
 #endif
+#endif	/* YYBISON */
 
-#if YACC_HAS_YYTOKS
+#if YACC_HAS_YYTOKS		/* Solaris, Gould */
+#if YYDEBUG
+#ifndef YaccState
+#define YaccState yystate	/* sometimes 'yy_state' */
+#endif
 #define	yyerror(text)	{\
 	register int	n, x, c1, y, count = 0;\
 	YaccError(text);\
-	if ((n = yypact[yy_state]) > YYFLAG && n < YYLAST) {\
-	    for (x = n > 0 ? n : 0; x < YYLAST; ++x) {\
+	if (((n = yypact[YaccState]) > YYFLAG) && (n < YYLAST)) {\
+	    for (x = ((n > 0) ? n : 0); x < YYLAST; ++x) {\
 		c1 = x - n;\
 		if ((yychk[yyact[x]] == c1) && (c1 != YYERRCODE)) {\
 		    if (isascii(c1)) {\
@@ -47,8 +54,30 @@
 		}\
 	    }\
 	}\
-	YaccExpected("", -1);
+	YaccExpected("", -1);\
+    }
+#endif
 #endif	/* YACC_HAS_YYTOKS */
+
+#if YACC_HAS_YYNAME	/* Linux's yacc */
+#if YYDEBUG
+#define	yyerror(text)	{\
+	register int	n, x, c1, count = 0;\
+	YaccError(text);\
+	if (((n = yysindex[yystate]) != 0) && (n < YYTABLESIZE)) {\
+	    for (x = ((n > 0) ? n : 0); x < YYTABLESIZE; ++x) {\
+		c1 = x - n;\
+		if ((yycheck[x] == c1) && (c1 != YYERRCODE)) {\
+		    YaccExpected(yyname[c1] ? yyname[c1] : "illegal symbol",\
+			count++);\
+		}\
+	    }\
+	}\
+	YaccExpected("", -1);\
+    } 
+#endif
+#endif	/* YACC_HAS_YYNAME */
+
 
 /*
  * Any way we define it, 'yyerror()' is a real function (that we provide,
@@ -76,10 +105,10 @@ void	YaccExpected(s, count)
 	static	struct	{
 		char	*actual, *name;
 		} tbl[] = {
-		"...",	"T_ELLIPSIS",
-		"[]",	"T_BRACKETS",
-		"{",	"T_LBRACE",
-		"}",	"T_MATCHRBRACE",
+		{"...",	"T_ELLIPSIS"},
+		{"[]",	"T_BRACKETS"},
+		{"{",	"T_LBRACE"},
+		{"}",	"T_MATCHRBRACE"},
 		};
 	register int	j, k, x;
 	auto	char	*t = (char *)s;

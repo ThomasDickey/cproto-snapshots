@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.5 1994/07/31 21:07:22 tom Exp $
+/* $Id: lintlibs.c,v 3.6 1994/08/06 00:20:57 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -150,14 +150,13 @@ static	char	*strip_name(s)
 			if (!strncmp(inc_dir[n], s, len)
 			 && is_path_sep(s[len])) {
 				standard = TRUE;
+				s += len + 1;
+				quote_l = '<';
+				quote_r = '>';
 				break;
 			}
 		}
-		if (standard) {
-			s += len + 1;
-			quote_l = '<';
-			quote_r = '>';
-		} else {
+		if (!standard) {
 			quote_l =
 			quote_r = '"';
 			if (*s == '.' && is_path_sep(s[1]))

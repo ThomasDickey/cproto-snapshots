@@ -1,6 +1,9 @@
 /* case17.c */
+int dots_0(int p1);
 int dots_1(int p1, ...);
 int dots_3(int P1, char P2, ...);
+_FIRST *func1(void);
+_FIRST *func2(_FIRST *P1 , int P2 [], float p);
 int *(func_func)(int p1, int p2, int p3);
 int main(register argc, char **argv);
 int veryfunny(char *a, long b, long c);
@@ -147,18 +150,22 @@ char P2;	{ return(1); }
 int	dots_4();
 char *dots_5();
 
-extern	_FIRST *xdots_0(p1);
+extern	_FIRST *xdots_0();
 
-extern	char *xdots_1(int p1, ...);
+extern	char *xdots_1();
 
 #ifdef	ERR_CHECK
 extern	xdots_2(p1, ...);
 #endif	ERR_CHECK
 
-extern	xdots_3(int P1,char P2, ...);
+extern	xdots_3();
 
 _FIRST	*func1() { }
-_FIRST	*func2(_FIRST *P1,int P2[],float p) { }
+_FIRST *
+func2 (, , p)
+_FIRST *P1 ;
+int P2 [];
+float p; { }
 
 int	*(func_func)(
 #ifdef	ERR_CHECK
@@ -167,7 +174,7 @@ p1,p2,p3
 )	{ return(0); }
 
 extern	float	efunc0();
-extern	_FIRST	efunc1(int p1, float p2,long P3);
+extern	_FIRST	efunc1();
 #ifdef	ERR_CHECK
 extern	_FIRST	efunc1(int p1, float p2,p3);
 #endif	ERR_CHECK

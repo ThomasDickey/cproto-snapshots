@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.24 1994/08/05 00:10:10 tom Exp $
+/* $Id: semantic.c,v 3.25 1994/08/06 11:07:09 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -956,7 +956,7 @@ Declarator *declarator;
 {
     Parameter *p;
     ParameterList *params;
-    char *comment;
+    char *comment = 0;
     int n;
     unsigned comment_len;
     long diff;
@@ -1028,6 +1028,7 @@ Declarator *declarator;
 	    cur_func = xmalloc(func_len);
 	    fread(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
+	    cur_func = 0;
 	    func_len = 0;
 	}
 
@@ -1036,7 +1037,7 @@ Declarator *declarator;
 
 	/* Output new style function definition head. */
 	if (func_declarator->func_def == FUNC_ANSI) {
-	    if (func_len != 0)
+	    if (cur_func != 0)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
@@ -1051,7 +1052,7 @@ Declarator *declarator;
 	/* Output old style function definition head. */
 	if (func_declarator->func_def == FUNC_TRADITIONAL
 	 || func_declarator->func_def == FUNC_BOTH) {
-	    if (func_len != 0)
+	    if (cur_func != 0)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
@@ -1069,7 +1070,7 @@ Declarator *declarator;
 	    fputc('\n', cur_tmp_file());
 	func_style = FUNC_BOTH;
 
-	if (func_len != 0)
+	if (cur_func != 0)
 	    free(cur_func);
 
     } else {
@@ -1085,8 +1086,10 @@ Declarator *declarator;
     }
 
     /* Output text between function head and body. */
-    fwrite(comment, sizeof(char), comment_len, cur_tmp_file());
-    free(comment);
+    if (comment != 0) {
+	fwrite(comment, sizeof(char), comment_len, cur_tmp_file());
+	free(comment);
+    }
 
     cur_file_changed();
 }
