@@ -24,7 +24,7 @@ enum x16;
 x4t;
 
 x4t	x17;
-const	x18;
+const	x18 = {0};
 volatile x19;
 
 typedef	struct	_first	{
@@ -310,5 +310,5 @@ int	GenFunc(p1, p2)
 		{ return(*(int *)0); }
 
 void	*(*__glob_opendir_hook)();
-const char *(*__glob_readdir_hook)();
+const char *(*__glob_readdir_hook)() = {0};
 void	(*__glob_closedir_hook)();

@@ -22,7 +22,7 @@ enum x16;
 x4t;
 
 x4t	x17;
-const	x18;
+const	x18 = {0};
 volatile x19;
 
 typedef	struct	_first	{
