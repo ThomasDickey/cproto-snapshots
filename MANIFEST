@@ -1,6 +1,7 @@
-MANIFEST for cproto, version t19900315
+MANIFEST for cproto, version t19900330
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 testing                         subdirectory
 testing/case12.com              test cases from 1993 merge of my changes to cproto
 testing/case13.com              test cases from 1993 merge of my changes to cproto
+testing/run_test.sh             UNIX test-script for CPROTO
