@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 3.1 1994/02/08 17:28:58 tom Exp $
+/* $Id: trace.c,v 3.2 1994/08/13 12:20:34 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  */
@@ -6,7 +6,9 @@
 #include "cproto.h"
 #define P(params) params
 
+#if UNIX
 #include <sys/time.h>
+#endif
 void	show_alloc();
 
 #define	BEFORE	0
