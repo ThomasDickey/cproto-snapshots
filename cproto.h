@@ -1,8 +1,8 @@
-/* $Id: cproto.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: cproto.h,v 4.2 1994/10/22 21:42:10 cthuang Exp $
  *
  * Declarations for C function prototype generator
  */
-#ifdef	HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
