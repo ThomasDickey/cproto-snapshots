@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.5.1.2 2004/03/24 20:36:51 tom Exp $
+/* $Id: lintlibs.c,v 4.5.1.3 2004/03/26 00:18:25 pronovic Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -256,6 +256,17 @@ c_suffix(char *path)
 }
 
 /*
+ * Keep track of "include files" that we always want to filter out (ignore) 
+ */
+static int
+ignored (char *path)
+{
+	if (strcmp(path, "<built-in>") == 0)
+		return TRUE;
+	return FALSE;
+}
+
+/*
  * For lint-library, we want to keep track of what file we are in so that we
  * can generate appropriate comments and include-statements.
  *
@@ -268,9 +279,9 @@ void
 track_in(void)
 {
 	static	char	old_file[MAX_TEXT_SIZE];	/* from last call */
-	auto	boolean	show = lintLibrary() || do_tracking;
+	auto	boolean	show = lintLibrary();
 
-	if (!show && !debug_trace)
+	if (!show && !do_tracking && !debug_trace)
 		return;
 
 #ifdef	DEBUG
@@ -293,7 +304,7 @@ track_in(void)
 			make_inc_stack(in_include, old_file);
 			if (in_include++ == 0) {
 				char	*s = CUR_FILE;
-				if (show && !already_included(s)) {
+				if (show && !already_included(s) && !ignored(s)) {
 					fmt_library(4);
 					put_string (stdout, "#include ");
 					put_char   (stdout, quote_l);
