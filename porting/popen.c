@@ -1,4 +1,4 @@
-/* $Id: popen.c,v 3.1 1994/07/26 22:40:41 tom Exp $
+/* $Id: popen.c,v 4.2 1998/01/08 00:03:28 cthuang Exp $
  *
  * Imitate a UNIX pipe in MS-DOS.
  */
