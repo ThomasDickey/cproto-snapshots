@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.6 1998/01/21 00:55:59 cthuang Exp $
+/* $Id: system.h,v 4.7 1998/01/24 01:42:09 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -56,14 +56,18 @@
 #define CPP "cpp -P-"
 #endif
 
-/* EMX C preprecssor */
+/* EMX C preprocessor */
 #ifdef __EMX__
+#ifndef CPP
 #define CPP "cpp"
+#endif
 #endif
 
 /* Watcom C preprocessor */
 #ifdef __WATCOMC__
+#ifndef CPP
 #define CPP "wcl386 /p"
+#endif
 #define HAVE_POPEN_PROTOTYPE 1
 #define popen _popen
 #define pclose _pclose
@@ -72,13 +76,17 @@
 
 /* Microsoft C preprocessor */
 #ifdef M_I86
+#ifndef CPP
 #define CPP "cl /E /nologo"
+#endif
 #define HAVE_TMPFILE 1
 #endif
 
 /* Vax C */
 #ifdef vms
+#ifndef CPP
 #define CPP "cc /preprocess_only=%s"
+#endif
 #define unlink remove
 #define HAVE_TMPFILE 1
 #define HAVE_GETOPT_H 1

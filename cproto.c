@@ -1,4 +1,4 @@
-/* $Id: cproto.c,v 4.7 1998/01/20 00:19:09 cthuang Exp $
+/* $Id: cproto.c,v 4.8 1998/01/24 01:42:07 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
@@ -761,6 +761,7 @@ char *argv[];
 	     */
 	    char temp[BUFSIZ];
 	    char *s = strcpy(temp, argv[i]);
+#  if HAVE_LINK
 	    int len = strlen(temp);
 	    s += len - 1;
 	    if ((len > 2)
@@ -773,6 +774,7 @@ char *argv[];
 	    	if (link(argv[i], temp) < 0)
 		    (void)strcpy(temp, argv[i]);
 	    }
+#  endif
 #  define FileName temp
 # else
 #  define FileName argv[i]
