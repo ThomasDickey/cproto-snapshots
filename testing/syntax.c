@@ -223,10 +223,10 @@ static	void_junk	*foo_void2() { }
 
 extern void (*sigdisp(int sig, void (*func)(int sig)))(int sig);
 
-void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)
+void (*Sigdisp(int sig, void (*func)(int sig)))(int sig1)
 { /* nothing */ }
 
-void (*sigdisp2(sig, func))(int sig)
+void (*sigdisp2(sig, func))(int sig2)
 	int sig;		/* the signal value */
 	void (*func)(int sig);	/* the function pointer */
 { /* nothing again! */ }
