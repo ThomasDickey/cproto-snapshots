@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.12 1994/07/30 19:10:18 tom Exp $
+/* $Id: cproto.c,v 3.13 1994/08/02 00:24:35 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.12 1994/07/30 19:10:18 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.13 1994/08/02 00:24:35 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -13,7 +13,7 @@ static char rcsid[] = "$Id: cproto.c,v 3.12 1994/07/30 19:10:18 tom Exp $";
 #if HAVE_GETOPT_H
 #include <getopt.h>
 #else
-extern int getopt (int argc, char *const *argv, const char *shortopts);
+extern int getopt ARGS((int argc, char *const *argv, const char *shortopts));
 extern char *optarg;
 extern int optind;
 #endif

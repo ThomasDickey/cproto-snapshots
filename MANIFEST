@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940801
+MANIFEST for cproto, version t19940802
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -18,6 +18,7 @@ grammar.y                       yacc grammar for CPROTO
 lex.l                           lex rules for CPROTO
 lintlibs.c                      functions used for lint-library formatting
 makefile.in                     template makefile for CPROTO
+mkdirs.sh                       mkinstalldirs (renamed for MSDOS compatibility)
 patchlev.h                      current patch level of CPROTO
 popen.c                         v3_7 base
 semantic.c                      functions to support yacc grammar (formatting and translation)

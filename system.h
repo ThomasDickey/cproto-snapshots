@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.6 1994/07/30 19:36:45 tom Exp $
+/* $Id: system.h,v 3.7 1994/08/02 00:24:24 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -68,7 +68,7 @@
 #endif
 
 #ifndef HAVE_GETOPT_H
-#define HAVE_GETOPT_H 1
+#define HAVE_GETOPT_H 0
 #endif 
 
 /* Default C preprocessor on UNIX systems */
