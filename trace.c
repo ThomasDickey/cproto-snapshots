@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 3.2 1994/08/13 12:20:34 tom Exp $
+/* $Id: trace.c,v 3.3 1994/09/15 23:30:07 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  */
@@ -48,7 +48,7 @@ va_dcl
 	va_list ap;
 
 	if (!fp)
-		fp = fopen("Trace.out", "a");
+		fp = fopen("Trace.out", "w");
 	if (!fp)
 		abort();
 
@@ -137,8 +137,8 @@ void	fail_alloc(msg, ptr)
 	char	*msg;
 	char	*ptr;
 {
-	Trace("%s: %#x\n", msg, ptr);
-	Trace("allocs %d, frees %d\n", count_alloc, count_freed);
+	Trace("%s: %p\n", msg, ptr);
+	Trace("allocs %ld, frees %ld\n", count_alloc, count_freed);
 	WalkBack();
 #if NO_LEAKS
 	show_alloc();

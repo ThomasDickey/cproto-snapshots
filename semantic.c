@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.31 1994/09/14 00:25:00 tom Exp $
+/* $Id: semantic.c,v 3.32 1994/09/15 00:47:02 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -440,7 +440,9 @@ int	commented;	/* comment-delimiters already from higher level */
 	if (*s == '\0') {
 	    int len = (int)(s - p->declarator->text);
 	    char *t = supply_parm(count);
-	    p->declarator->text = concat_string(p->declarator->text, t);
+	    char *u = p->declarator->text;
+	    p->declarator->text = concat_string(u, t);
+	    free(u);
 	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
 	} else if (strstr(s, "%s") != 0
 	 && p->declarator->name[0] == '\0') {

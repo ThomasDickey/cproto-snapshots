@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.9 1994/08/14 20:02:05 tom Exp $
+/* $Id: lintlibs.c,v 3.10 1994/09/15 00:16:26 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -516,6 +516,8 @@ void
 free_lintlibs()
 {
     register int n;
+    if (implied_buf != 0)
+    	free(implied_buf);
     for (n = 0; n < MAX_INC_DEPTH; n++)
     	free_inc_stack(n);
     if (include_list != 0)
