@@ -82,17 +82,27 @@ int	i[] = {1,
 		11L};
 float	f[] = {5,
 #ifdef	ERR_CHECK
-		.5,
 		.5e,
 		.5e+,
 		5e-,
 		5e,
+		.34P1,
+		0x1.2.34,	/* error */
 #endif
+		.5,
 		5.5,
 		5e5,
 		5e0,
 		5e-1,
 		5e+5
+#ifdef	__STDC_VERSION__ /* ( C9X supports hexadecimal floating point ;-) */
+		0x12.34+1,
+		0x12.34P1,
+		.34e1,
+		0.34e1,
+		0x.34P1,
+#endif
+		.0e-1
 		};
 
 int	array[][10][20];
