@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.3.1.1 1995/12/02 13:14:23 tom Exp $
+/* $Id: semantic.c,v 4.3.1.2 1995/12/03 20:38:53 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -150,7 +150,7 @@ long offset;
 {
     Declarator *d;
 
-    d = ALLOC(Declarator);
+    d = sALLOC(Declarator);
     d->text = xstrdup(text);
     d->name = xstrdup(name);
     d->begin = offset;
@@ -225,7 +225,7 @@ DeclSpec *decl_spec;
 Declarator *declarator;
 {
     Parameter *param;
-    param = ALLOC(Parameter);
+    param = sALLOC(Parameter);
 
     if (decl_spec == NULL) {
 	new_decl_spec(&param->decl_spec, "", 0L, DS_NONE);
@@ -1101,7 +1101,7 @@ Declarator *declarator;
      */
     if ((diff = (ftell(cur_tmp_file()) - cur_begin_comment())) > 0) {
 	comment_len = (unsigned)diff;
-	comment = xmalloc(comment_len);
+	*(comment = xmalloc(comment_len)) = '\0';
 	fseek(cur_tmp_file(), cur_begin_comment(), 0);
 	fread(comment, sizeof(char), comment_len, cur_tmp_file());
     } else {
@@ -1117,7 +1117,7 @@ Declarator *declarator;
 	params = &func_declarator->params;
 	n = (int)(params->end_comment - params->begin_comment);
 	if (n > 0) {
-	    params->comment = xmalloc((unsigned)(n+1));
+	    *(params->comment = xmalloc((unsigned)(n+1))) = '\0';
 	    fseek(cur_tmp_file(), params->begin_comment, 0);
 	    fread(params->comment, sizeof(char), (size_t)n, cur_tmp_file());
 	    params->comment[n] = '\0';
@@ -1128,7 +1128,7 @@ Declarator *declarator;
 	for (p = func_declarator->params.first; p != NULL; p = p->next) {
 	    n = (int)(p->declarator->end_comment - p->declarator->begin_comment);
 	    if (n > 0) {
-	        p->comment = xmalloc((unsigned)n+1);
+	        *(p->comment = xmalloc((unsigned)n+1)) = '\0';
 	        fseek(cur_tmp_file(), p->declarator->begin_comment, 0);
 	        fread(p->comment, sizeof(char), (size_t)n, cur_tmp_file());
 	        p->comment[n] = '\0';

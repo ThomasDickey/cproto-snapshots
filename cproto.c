@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.4.1.1 1995/12/02 18:28:38 tom Exp $
+/* $Id: cproto.c,v 4.4.1.2 1995/12/03 20:42:35 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.4.1.1 1995/12/02 18:28:38 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.4.1.2 1995/12/03 20:42:35 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -126,6 +126,7 @@ static	void	parse_options   ARGS((char *src, int maxargc, int *pargc, char **arg
 /* Try to allocate some memory.
  * If unsuccessful, output an error message and exit.
  */
+#if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
 char *xMalloc(n,f,l) unsigned n; char *f; int l;
 #else
@@ -147,10 +148,12 @@ char *xmalloc (n) unsigned n;
     *p = '\0';
     return p;
 }
+#endif /* if !HAVE_LIBDMALLOC */
 
 /* Copy the string into allocated memory.
  * If unsuccessful, output an error message and exit.
  */
+#if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
 char *xStrdup(src, f, l) char *src; char *f; int l;
 #else
@@ -163,6 +166,7 @@ char *xstrdup (src) char *src;
     return strcpy(xmalloc(strlen(src)+1), src);
 #endif
 }
+#endif /* if !HAVE_LIBDMALLOC */
 
 /* Output the current source file name and line number.
  */
@@ -473,13 +477,14 @@ char ***pargv;
 	n += quote_length(argv[i]) + 1;  /* add more for possible quoting */
     }
 #ifdef	vms
-    cpp_include = xmalloc(n+argc);
-    cpp_defines = xmalloc(n+argc);
-    cpp_undefns = xmalloc(n+argc);
+    *(cpp_include = xmalloc(n+argc)) = '\0';
+    *(cpp_defines = xmalloc(n+argc)) = '\0';
+    *(cpp_undefns = xmalloc(n+argc)) = '\0';
     n += 30;	/* for keywords */
 #endif
-    cpp_opt = xmalloc(n);
-    cpp_cmd = xmalloc(n);
+    *(cpp_opt = xmalloc(n)) = '\0';
+    n += (2 + strlen(CPP) + BUFSIZ);
+    *(cpp_cmd = xmalloc(n)) = '\0';
 #endif
 
     while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqSstU:Vvo:O:Tlx")) != EOF) {
@@ -671,11 +676,12 @@ char **argv;
 {
     int i;
     FILE *inf;
+    char *argv0;
 
     /* Get the program name from the 0th argument, stripping the pathname
      * for readability.
      */
-    progname = xstrdup(argv[0]);
+    progname = argv0 = xstrdup(argv[0]);
 #ifdef vms
     for (i = strlen(progname)-1; i >= 0; i--) {
     	if (progname[i] == SQUARE_R
@@ -852,6 +858,7 @@ char **argv;
 # ifdef DOALLOC
     show_alloc();
 # endif
+    free(argv0);
 #endif
 
 #if HAVE_LIBDBMALLOC

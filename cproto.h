@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.4.1.1 1995/12/01 00:12:22 tom Exp $
+/* $Id: cproto.h,v 4.4.1.2 1995/12/03 20:21:55 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -8,15 +8,15 @@
 
 #include "system.h"
 
-#if HAVE_LIBDBMALLOC || defined(DOALLOC)
+#if HAVE_LIBDMALLOC || HAVE_LIBDBMALLOC || defined(DOALLOC)
 #undef  NO_LEAKS
 #define NO_LEAKS 1
 #endif
 
 #ifdef	lint
-#define	ALLOC(cast)	(cast *)0
+#define	sALLOC(cast)	(cast *)0
 #else
-#define	ALLOC(cast)	(cast *)xmalloc(sizeof(cast))
+#define	sALLOC(cast)	(cast *)xmalloc(sizeof(cast))
 #endif
 
 /* Useful constants (mainly to avoid problems balancing parentheses...) */
@@ -192,6 +192,7 @@ extern int debug_trace;
 extern char base_file[];
 
 /* cproto.c */
+#if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
 extern char *xMalloc        ARGS((unsigned n, char *f, int l));
 extern char *xStrdup        ARGS((char *s,    char *f, int l));
@@ -201,6 +202,7 @@ extern char *xStrdup        ARGS((char *s,    char *f, int l));
 extern char *xmalloc        ARGS((unsigned n));
 extern char *xstrdup        ARGS((char *src));
 #endif
+#endif /* !HAVE_LIBDMALLOC */
 extern void put_error       ARGS((void));
 extern int is_path_sep      ARGS((int ch));
 extern char *trim_path_sep  ARGS((char *s));
