@@ -1,4 +1,4 @@
-/* case05.c */
+/* case20.c */
 int dots_0(int p1);
 int dots_1(int p1, ...);
 int dots_3(int p1, char p2, ...);

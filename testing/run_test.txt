@@ -1,4 +1,4 @@
-$Id: run_test.txt,v 3.1 1994/07/30 21:40:30 tom Exp $
+$Id: run_test.txt,v 3.2 1994/07/31 00:28:58 tom Exp $
 
 CASE 01 = unix, vms, dos =
 
@@ -13,6 +13,8 @@ CASE 05 = unix, vms, dos = -c -f3
 CASE 06 = unix, vms, dos = -c -f3 -v
 
 CASE 07 = unix, vms, dos = -c -f3 -v -e
+
+CASE 08 = unix, vms, dos = -c -f3 -v -e -m
 
 CASE 09 = unix, vms, dos = -c -f3 -v -P"int func(\n\ta,\n\tb\n\t)"
 
@@ -29,3 +31,14 @@ CASE 14 = unix, vms, dos = -l -x
 CASE 15 = apollo = -D__STDC__ -D__attribute='#attributes' -l apollo.c
 
 CASE 16 = unix	= -a
+
+CASE 17 = unix	= -t
+
+CASE 18 = unix, vms, dos = -f1
+
+CASE 19 = unix, vms, dos = -f2
+
+CASE 20 = unix, vms, dos = -f3
+
+CASE 21 = unix, vms, dos = -f3 -v -P"int func(\n\ta,\n\tb\n\t)"
+

@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.15 1994/07/30 18:58:38 tom Exp $
+/* $Id: lex.l,v 3.17 1994/07/31 18:12:26 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -452,9 +452,30 @@ static
 void put_quoted (c)
 int	c;
 {
-#ifndef	YYLMAX
-#define	YYLMAX	256	/* FIXME */
-#endif
+	/*
+	 * Modifying 'yytext[]' doesn't work well with FLEX, which simply
+	 * maintains 'yytext' as a pointer into its input buffer.  LEX copies
+	 * characters into the 'yytext[]' array.
+	 */
+#if defined(FLEX_SCANNER) || !defined(YYLMAX)
+	if (c != 0) {
+		static	char	temp[2];
+		temp[0] = c;
+		/* save_text */
+# if OPT_LINTLIBRARY
+		if (!in_cpp)
+			copy_typedef(temp);
+# endif	
+		if (cur_file->convert) {
+			fputs(temp, cur_file->tmp_file);
+		}
+		/* update_line_num */
+		if (c == '\n')
+			cur_file->line_num++;
+	}
+
+#else	/* this works fine on LEX (e.g., on SunOS 4.x) */
+
 	if ((c == 0) || (yyleng+1 >= YYLMAX)) {
 		save_text();
 		update_line_num();
@@ -464,10 +485,14 @@ int	c;
 		yytext[yyleng++] = c;
 		yytext[yyleng] = 0;
 	}
+#endif	/* LEX/FLEX */
 }
 
-/* Scan past quoted string. Note that some strings may overflow 'yytext[]',
- * so we don't try to eat them in the lexical rules.
+/*
+ * Scan past the characters in a backslash sequence
+ */
+/* Scan past quoted string.  Note that some strings may overflow 'yytext[]', so
+ * we don't try to eat them in the lexical rules.
  */
 static void
 get_quoted ()
@@ -475,6 +500,9 @@ get_quoted ()
 	int	delim = *yytext;
 	int	c;
 
+#if defined(FLEX_SCANNER) || !defined(YYLMAX)
+	put_quoted(delim);
+#endif
 	while ((c = input()) != 0) {
 		if (c == '\\') {
 			put_quoted(c);
@@ -649,7 +677,7 @@ cur_text ()
     return yytext;
 }
 
-#ifdef NEED_tmpfile
+#if !HAVE_TMPFILE
 /*
  * tmpfile() - return a FILE* for a temporary file that will be
  * removed automatically when the program exits.
@@ -685,7 +713,7 @@ tmpfile ()
 
     return f;
 }
-#endif /* NEED_tmpfile */
+#endif /* !HAVE_TMPFILE */
 
 /* Push a file onto the include stack.	The stream yyin must already
  * point to the file.

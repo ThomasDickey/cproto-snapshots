@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.15 1994/07/30 20:57:47 tom Exp $
+/* $Id: semantic.c,v 3.19 1994/07/31 23:28:52 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -429,13 +429,13 @@ int	commented;	/* comment-delimiters already from higher level */
 
 #if OPT_LINTLIBRARY
     if (LintLibrary()) {
-    	s = p->declarator->text;
+	s = p->declarator->text;
 	while (*s == '*')
 	    s++;
 	if (*s == '\0') {
 	    int len = (int)(s - p->declarator->text);
 	    char *t = supply_parm(count);
-    	    p->declarator->text = concat_string(p->declarator->text, t);
+	    p->declarator->text = concat_string(p->declarator->text, t);
 	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
 	}
     }
@@ -486,14 +486,14 @@ int commented;
 	    put_string(outf, declarator->params.comment);
 	else if (do_cmt && !commented)
 	    put_string(outf, COMMENT_BEGIN);
-		
+
 	put_string(outf, fmt[f].first_param_prefix);
 	(void)PutParameter(outf, p, LintLibrary(), ++count, commented);
 
 	while (p->next != NULL) {
 #if OPT_LINTLIBRARY
 	    if (lint_ellipsis(p->next))
-	    	break;
+		break;
 #endif
 	    put_char(outf, ',');
 	    if (where == FUNC_DEF && p->comment != NULL)
@@ -551,7 +551,7 @@ int commented;
 		put_string(outf, COMMENT_END);
 	    }
 	} else if (proto_style != PROTO_NONE) {
-	    put_param_list(outf, declarator, FALSE);
+	    put_param_list(outf, declarator, commented);
 	}
     }
 }
@@ -580,11 +580,13 @@ int commented;
 	if (declarator->name[0] == '\0') {
 	    put_string(outf, decl_text);
 	} else {
+	    int star;
 
 	    /* Output the declarator text before the declarator name. */
 	    if ((t = strstr(decl_text, declarator->name)) == NULL)
 		return;
 	    *t = '\0';
+	    star = ((t != decl_text) && (t[-1] == '*'));
 	    put_string(outf, decl_text);
 	    *t = declarator->name[0];
 
@@ -597,6 +599,7 @@ int commented;
 	    if (where == FUNC_PROTO && proto_style == PROTO_ABSTRACT &&
 	     declarator != func_declarator) {
 		if (proto_comments) {
+		    if (star) put_string(outf, " ");
 		    put_string(outf, COMMENT_BEGIN);
 		    put_string(outf, declarator->name);
 		    put_string(outf, COMMENT_END);
@@ -629,7 +632,7 @@ int commented;
 
     /* Substitute place holder with function parameters. */
     put_char(outf, *t++ = '(');
-    put_parameters(outf, declarator, FALSE);
+    put_parameters(outf, declarator, commented);
     put_string(outf, t);
 
     if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
@@ -715,8 +718,10 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	strcut(decl_spec->text, "static");
 	strcut(decl_spec->text, "extern");
 	fmt_library((decl_list == 0) ? 1 : 2);
-	put_string(stdout, decl_spec->text);
-	put_string(stdout, ";\n");
+	if (decl_spec->text[0] != '\0') {
+	    put_string(stdout, decl_spec->text);
+	    put_string(stdout, ";\n");
+	}
 	return;
     }
 #endif
@@ -743,10 +748,13 @@ DeclaratorList *decl_list;	/* list of declared variables */
 #endif
 	   ) {
 #if OPT_LINTLIBRARY
+	    if (already_declared(d->name))
+		continue;
+
 	    if (LintLibrary() && d->func_def != FUNC_NONE)
 		ellipsis_varargs(d);
 	    else if (types_out)
-	    	fmt_library(2);
+		fmt_library(2);
 #endif
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
@@ -832,7 +840,7 @@ Declarator *declarator;
     if (LintLibrary())
 	ellipsis_varargs(declarator);
     else if (types_out)
-    	fmt_library(0);
+	fmt_library(0);
 #endif
 
     func_declarator = declarator->head;
@@ -926,10 +934,10 @@ Declarator *declarator;
      * end of the file.
      */
     if ((diff = (ftell(cur_tmp_file()) - cur_begin_comment())) > 0) {
-    	comment_len = diff;
-    	comment = xmalloc(comment_len);
-    	fseek(cur_tmp_file(), cur_begin_comment(), 0);
-    	fread(comment, sizeof(char), comment_len, cur_tmp_file());
+	comment_len = diff;
+	comment = xmalloc(comment_len);
+	fseek(cur_tmp_file(), cur_begin_comment(), 0);
+	fread(comment, sizeof(char), comment_len, cur_tmp_file());
     } else {
 	comment_len = 0;
     }
@@ -1008,7 +1016,7 @@ Declarator *declarator;
 	    fputs(decl_spec->text, cur_tmp_file());
 	    fputc(' ', cur_tmp_file());
 
- 	    format = FMT_FUNC;
+	    format = FMT_FUNC;
 	    func_style = FUNC_TRADITIONAL;
 	    put_func_declarator(cur_tmp_file(), declarator, FALSE);
 	    put_param_decl(func_declarator, FALSE);

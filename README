@@ -1,16 +1,24 @@
+This is a modification of CPROTO 3.7 which was written by Chin Huang.  I added
+changes to generate text files in the form of lint libraries (e.g., llib-lc),
+and ported to VAX/VMS and HP/Apollo.  I've not been able to get in touch with
+him for some time, so I'm posting this as CPROTO 3.9
+
+Thomas Dickey
+dickey@clark.net
+
+--------------------------------------------------------------------------------
 Cproto is a program that generates function prototypes and variable
-declarations from C source code.  It can also convert function
-definitions between the old style and the ANSI C style.  This conversion
-overwrites the original files, so make a backup copy of your files in
-case something goes wrong.
+declarations from C source code.  It can also convert function definitions
+between the old style and the ANSI C style.  This conversion overwrites the
+original files, so make a backup copy of your files in case something goes
+wrong.
 
-The program isn't confused by complex function definitions as much as
-other prototype generators because it uses a yacc generated parser.  By
-ignoring all the input between braces, I avoided implementing the entire
-C language grammar.
+The program isn't confused by complex function definitions as much as other
+prototype generators because it uses a yacc generated parser.  By ignoring all
+the input between braces, I avoided implementing the entire C language grammar.
 
-Cproto is in the public domain.  If you have any comments or find any
-bugs, please let me know.
+Cproto is in the public domain.  If you have any comments or find any bugs,
+please let me know.
 
 Chin Huang
 cthuang@zerosan.UUCP

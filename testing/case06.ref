@@ -40,3 +40,5 @@ extern_junk *foo(void);
 void_junk *foo2a(void);
 void_junk *foo2(void);
 void_junk *foo_void(void_junk void_int);
+void (*Sigdisp(int sig, void (*func)(int sig)))(int sig);
+void (*sigdisp2(int sig, void (*func)(int sig)))(int sig);

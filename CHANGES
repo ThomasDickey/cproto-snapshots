@@ -9,9 +9,19 @@ Patchlevel 9 (dickey, July 1994)
 - added ifdef OPT_LINTLIBRARY to allow compiling without the lint library
   code (saves about 4kb).
 
+- corrected some logic that made incorrect commenting for options -c -f1
+  (e.g., "void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)").
+
+- modified logic for options -c -f2 so that cproto inserts a space before
+  the beginning of a comment when it immediately follows an '*'.
+
 - tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22
 
 - tested on MS-DOS with flex 2.37 / bison 1.22 (built with turboc.mak).
+
+- moved non-UNIX files into 'porting' subdirectory.
+
+- added 'testing' subdirectory, for simple regression tests.
 
 Patchlevel 8 (internal: dickey/cthuang, June 1993)
 

@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940730
+MANIFEST for cproto, version t19940731
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -29,6 +29,7 @@ symbol.h                        interface definitions for symbol.c
 system.h                        system-dependent definitions, coordinated with config.h
 trace.c                         debugging support for CPROTO
 porting                         subdirectory
+porting/README                  description of files in CPROTO/PORTING
 porting/borland.mak             makefile for Borland C
 porting/getopt.c                free version of getopt
 porting/getopt.h                header file for getopt
@@ -69,6 +70,11 @@ testing/case15.com              test cases from 1993 merge of my changes to cpro
 testing/case15.ref              test case reference: apollo lint library (sr10.3.5)
 testing/case16.com              test cases from 1993 merge of my changes to cproto
 testing/case16.ref              test case reference: -a
+testing/case17.ref              test case reference: -t
+testing/case18.ref              test case reference: -f1
+testing/case19.ref              test case reference: -f2
+testing/case20.ref              test case reference: -f3
+testing/case21.ref              test case reference: -f3 -v + template
 testing/descrip.mms             VAX MMS-script for CPROTO/TESTING directory
 testing/make_dcl.sh             script to generate UNIX/VMS ".dcl" files
 testing/makefile                UNIX makefile for CPROTO/TESTING directory

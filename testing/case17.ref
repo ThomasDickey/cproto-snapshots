@@ -1,4 +1,4 @@
-/* case16.c */
+/* case17.c */
 int dots_1(int p1, ...);
 int dots_3(int P1, char P2, ...);
 int *(func_func)(int p1, int p2, int p3);
@@ -15,7 +15,7 @@ void_junk *foo2(void);
 void_junk *foo_void(void_junk void_int);
 void (*Sigdisp(int sig, void (*func)(int sig)))(int sig);
 void (*sigdisp2(int sig, void (*func)(int sig)))(int sig);
-... edited case16.c ...
+... edited case17.c ...
 /*
  * Define:
  *	ERR_YACC	to force yacc error reporting
@@ -130,16 +130,21 @@ int	array[][10][20];
 
 	dots_0(p1)		{ return(1); }
 
-	dots_1(int p1, ...)	{ return(1); }
+	int 
+dots_1 (p1)
+int p1;	{ return(1); }
 
 #ifdef	ERR_CHECK
 	dots_2(p1, ...)		{ return(1); }
 #endif	ERR_CHECK
 
-	dots_3(int P1,char P2, ...)	{ return(1); }
+	int 
+dots_3 (, )
+int P1;
+char P2;	{ return(1); }
 
-int	dots_4(int,char, char *);
-char *	dots_5(int,char, char *, ...);
+int	dots_4();
+char *dots_5();
 
 extern	_FIRST *xdots_0(p1);
 
@@ -154,10 +159,13 @@ extern	xdots_3(int P1,char P2, ...);
 _FIRST	*func1() { }
 _FIRST	*func2(_FIRST *P1,int P2[],float p) { }
 
-int *(
-func_func) (int p1, int p2, int p3)	{ return(0); }
+int	*(func_func)(
+#ifdef	ERR_CHECK
+p1,p2,p3
+#endif	ERR_CHECK
+)	{ return(0); }
 
-extern	float	efunc0(p1,p2,p3);
+extern	float	efunc0();
 extern	_FIRST	efunc1(int p1, float p2,long P3);
 #ifdef	ERR_CHECK
 extern	_FIRST	efunc1(int p1, float p2,p3);
@@ -201,60 +209,52 @@ bbb";
 
 extern	int	junk;
 
-int 
-main (register argc, extern char **argv)
+main(argc, argv)
+register argc;
+#ifdef	ERR_CHECK
+extern
+#endif	ERR_CHECK
+char	**argv;
 {
 }
 
 /*VARARGS*/
 /*VARARGS3*/
-int 
-program (
-    string argv[],	/* first argument */
-    struct alpha y,	/* second argument */
-    int zz,
-    int z1,
-    int z2,
-    int z3
-)
+program(argv, y, zz, z1, z2, z3)
+string	argv[];	/* first argument */
+struct	alpha { int x,z; } y;	/* second argument */
 {
 	return(0);
 }
 
-int 
-junk0 (void) { if(junk != 6) return; else junk++; }
-int 
-junk1 (void) { return (0); }
-int 
-junk2 (void) { }
-int 
-junk3 (void) { return 1; }
+junk0() { if(junk != 6) return; else junk++; }
+junk1() { return (0); }
+junk2() { }
+junk3() { return 1; }
 
-BONG *
-junk4 (void) { }
+BONG	*junk4() { }
 
 typedef	int	extern_junk;
-extern_junk *
-foo (void) { }
+extern_junk	*foo() { }
 
 typedef	int	void_junk;
-extern void_junk *
-foo2a (void) { }
+extern void_junk	*foo2a() { }
 extern void_junk	*foo2a();
+void_junk	*foo2() { }
 void_junk *
-foo2 (void) { }
-void_junk	*foo_void(void_junk void_int) { }
-static void_junk *
-foo_void2 (void) { }
+foo_void (void_int)
+void_junk void_int; { }
+static	void_junk	*foo_void2() { }
 
-extern void (*sigdisp(int sig, void (*func)(int sig)))(int sig);
-
-void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)
-{ /* nothing */ }
+extern void (*sigdisp())();
 
 void (*
-sigdisp2 (
-    int sig,		/* the signal value */
-    void (*func)(int sig)	/* the function pointer */
-))(int sig)
+Sigdisp (sig, func))()
+int sig;
+void (*func)();
+{ /* nothing */ }
+
+void (*sigdisp2(sig, func))()
+	int sig;		/* the signal value */
+	void (*func)();		/* the function pointer */
 { /* nothing again! */ }
