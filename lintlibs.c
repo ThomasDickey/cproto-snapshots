@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.16 1994/09/21 00:13:16 tom Exp $
+/* $Id: lintlibs.c,v 3.17 1994/09/23 00:38:59 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -11,11 +11,6 @@
 #include "symbol.h"
 
 #if OPT_LINTLIBRARY
-
-#define PAREN_LEFT  '('
-#define PAREN_RIGHT ')'
-#define CURL_L      '{'
-#define CURL_R      '}'
 
 	int	in_include;
 
@@ -488,6 +483,24 @@ char *	supply_parm(count)
 }
 
 /*
+ * (Attempt to) distinguish between declarators for functions and for
+ * function pointers.
+ */
+int	is_actual_func (d)
+	Declarator *d;
+{
+	if (LintLibrary() && (d->func_def != FUNC_NONE)) {
+		if (d->func_stack->text[0] == PAREN_L) {
+			if (strstr(d->func_stack->text, "()") != 0)
+		 		return TRUE;
+		} else {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/*
  * Output the body (or terminating semicolon) of a procedure
  */
 void	put_body(outf, decl_spec, declarator)
@@ -497,7 +510,7 @@ void	put_body(outf, decl_spec, declarator)
 {
     register char	*spec_text;
 
-    if ((declarator->func_def != FUNC_NONE) && LintLibrary()) {
+    if (is_actual_func(declarator)) {
 	strcut(decl_spec->text, "static");
 	strcut(decl_spec->text, "extern");
 	indent(outf);
