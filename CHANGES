@@ -7,6 +7,13 @@ Patchlevel 5
 
 - corrected a missing 'void' in parameter list
 
+- modified to allow compile/test with 'dmalloc' library in addition to
+  'dbmalloc'.
+
+- corrected memory leak in yyerror.c, and allocation-size for cpp command.
+
+- added keywords to work with gcc 2.7.0
+
 Patchlevel 4
 
 - Added -S option to only output static declarations.
