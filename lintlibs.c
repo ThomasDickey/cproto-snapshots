@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.1 1993/06/09 18:06:44 tom Exp $
+/* $Id: lintlibs.c,v 3.2 1994/07/26 00:03:52 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -11,6 +11,10 @@
 #include "symbol.h"
 
 	int	in_include;
+
+static	char	*strip_name      ARGS((char *s));
+static	int	already_included ARGS((char *path));
+static	void	add2implied_buf  ARGS((char *s, int append));
 
 static	int	in_typedef;
 static	int	blank_lines;	/* used to filter blank lines from typedefs */
@@ -137,7 +141,7 @@ static	char	*strip_name(s)
 	char	*s;
 	{
 		register int	n;
-		register SIZE_T	len;
+		register size_t	len;
 		int standard = FALSE;
 
 		for (n = 1; n < num_inc_dir; n++) {

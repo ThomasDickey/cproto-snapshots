@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.10 1994/02/08 19:52:56 tom Exp $
+/* $Id: semantic.c,v 3.12 1994/07/26 00:29:44 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -10,25 +10,19 @@
 #define	COMMENT_BEGIN "/*"
 #define COMMENT_END   "*/"
 
-#ifdef	__STDC__
-#define P_(params) params
-#else
-#define P_
-#endif
-
-static	char *		concat_string		P_((char *a, char *b));
-static	boolean		is_void_parameter	P_((Parameter *p));
-static	Parameter *	search_parameter_list	P_((ParameterList *params, char *name));
-static	int		put_parameter		P_((FILE *outf, Parameter *p, int name_only, int count, int commented));
-static	void		put_param_list		P_((FILE *outf, Declarator *declarator, int commented));
-static	void		put_parameters		P_((FILE *outf, Declarator *declarator, int commented));
-static	void		put_func_declarator	P_((FILE *outf, Declarator *declarator, int commented));
-static	void		put_declarator		P_((FILE *outf, Declarator *declarator, int commented));
-static	void		put_decl_spec		P_((FILE *outf, DeclSpec *decl_spec));
-static	int		uses_varargs		P_((Declarator *declarator));
-static	void		check_void_param	P_((Declarator *declarator));
-static	void		set_param_decl_spec	P_((Declarator *declarator));
-static	void		put_param_decl		P_((Declarator *declarator, int commented));
+static	char *		concat_string		ARGS((char *a, char *b));
+static	boolean		is_void_parameter	ARGS((Parameter *p));
+static	Parameter *	search_parameter_list	ARGS((ParameterList *params, char *name));
+static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
+static	void		put_param_list		ARGS((FILE *outf, Declarator *declarator, int commented));
+static	void		put_parameters		ARGS((FILE *outf, Declarator *declarator, int commented));
+static	void		put_func_declarator	ARGS((FILE *outf, Declarator *declarator, int commented));
+static	void		put_declarator		ARGS((FILE *outf, Declarator *declarator, int commented));
+static	void		put_decl_spec		ARGS((FILE *outf, DeclSpec *decl_spec));
+static	int		uses_varargs		ARGS((Declarator *declarator));
+static	void		check_void_param	ARGS((Declarator *declarator));
+static	void		set_param_decl_spec	ARGS((Declarator *declarator));
+static	void		put_param_decl		ARGS((Declarator *declarator, int commented));
 
 /* Head function declarator in a prototype or function definition */
 static Declarator *func_declarator;
@@ -884,7 +878,7 @@ Declarator *declarator;
      * Read the temporary file from after the last ) or ; to the
      * end of the file.
      */
-    comment_len = (int)(ftell(cur_tmp_file()) - cur_begin_comment());
+    comment_len = (size_t)(ftell(cur_tmp_file()) - cur_begin_comment());
     comment = xmalloc(comment_len);
     fseek(cur_tmp_file(), cur_begin_comment(), 0);
     fread(comment, sizeof(char), comment_len, cur_tmp_file());
@@ -895,9 +889,9 @@ Declarator *declarator;
 	params = &func_declarator->params;
 	n = (int)(params->end_comment - params->begin_comment);
 	if (n > 0) {
-	    params->comment = xmalloc(n+1);
+	    params->comment = xmalloc((unsigned)(n+1));
 	    fseek(cur_tmp_file(), params->begin_comment, 0);
-	    fread(params->comment, sizeof(char), n, cur_tmp_file());
+	    fread(params->comment, sizeof(char), (size_t)n, cur_tmp_file());
 	    params->comment[n] = '\0';
 	    format = FMT_FUNC_COMMENT;
 	}
@@ -906,9 +900,9 @@ Declarator *declarator;
 	for (p = func_declarator->params.first; p != NULL; p = p->next) {
 	    n = (int)(p->declarator->end_comment - p->declarator->begin_comment);
 	    if (n > 0) {
-	        p->comment = xmalloc(n+1);
+	        p->comment = xmalloc((unsigned)n+1);
 	        fseek(cur_tmp_file(), p->declarator->begin_comment, 0);
-	        fread(p->comment, sizeof(char), n, cur_tmp_file());
+	        fread(p->comment, sizeof(char), (size_t)n, cur_tmp_file());
 	        p->comment[n] = '\0';
 	        format = FMT_FUNC_COMMENT;
 	    }

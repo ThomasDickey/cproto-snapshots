@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940725
+MANIFEST for cproto, version t19940726
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -32,6 +32,7 @@ porting                         subdirectory
 porting/borland.mak             makefile for Borland C
 porting/getopt.h                header file for getopt
 porting/micrsoft.mak            makefile for Microsoft C
+porting/popen.c                 fake popen/pclose
 testing                         subdirectory
 testing/apollo.c                template for apollo lint-library
 testing/case01.com              test cases from 1993 merge of my changes to cproto
