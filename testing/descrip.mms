@@ -1,4 +1,4 @@
-# $Id: descrip.mms,v 3.2 1994/08/18 22:45:26 tom Exp $
+# $Id: descrip.mms,v 4.1 1998/01/20 00:59:43 cthuang Exp $
 # VMS make-file for CPROTO test directory
 #
 

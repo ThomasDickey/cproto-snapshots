@@ -1,13 +1,12 @@
-/* $Id: cproto.c,v 4.5.1.6 1997/08/23 21:26:50 tom Exp $
+/* $Id: cproto.c,v 4.7 1998/01/20 00:19:09 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.5.1.6 1997/08/23 21:26:50 tom Exp $";
+#define VERSION "4.6"
 
 #include <stdio.h>
 #include <ctype.h>
 #include "cproto.h"
-#include "patchlev.h"
 
 /* getopt declarations */
 #if HAVE_GETOPT_H
@@ -266,8 +265,7 @@ char *src;
     return result;
 }
 
-/*
- * Returns true iff the character is a pathleaf separator
+/* Returns true iff the character is a path leaf separator
  */
 int
 is_path_sep (ch)
@@ -348,22 +346,21 @@ static	void	add_option ARGS((char *keyword, char *src));
 
 static void
 add2list(dst, src)
-	char	*dst;
-	char	*src;
+char *dst;
+char *src;
 {
-	if (*dst)
-		strcat(dst, ",");
-	strcat(dst, src);
+    if (*dst)
+	strcat(dst, ",");
+    strcat(dst, src);
 }
 
 static void
 add_option(keyword, src)
-	char	*keyword;
-	char	*src;
+char *keyword;
+char *src;
 {
-	if (*src)
-		(void)sprintf(cpp_opt + strlen(cpp_opt),
-			" /%s=(%s)", keyword, src);
+    if (*src)
+	sprintf(cpp_opt + strlen(cpp_opt), " /%s=(%s)", keyword, src);
 }
 #endif	/* vms */
 
@@ -621,7 +618,7 @@ char ***pargv;
 	    func_style = FUNC_TRADITIONAL;
 	    break;
 	case 'V':
-	    fprintf(stderr, "%s patchlevel %s\n", rcsid, PATCHLEVEL);
+	    fprintf(stderr, "%s\n", VERSION);
 	    exit(EXIT_FAILURE);
 	    break;
 	case 'v':
@@ -679,6 +676,11 @@ char *argv[];
     int i;
     FILE *inf;
     char *argv0;
+
+#ifdef __EMX__
+    /* Expand file wild cards. */
+    _wildcard(&argc, &argv);
+#endif
 
     /* Get the program name from the 0th argument, stripping the pathname
      * for readability.
@@ -863,12 +865,10 @@ char *argv[];
     free(argv0);
 #endif
 
-    exit(EXIT_SUCCESS);
-    return EXIT_SUCCESS;	/* some compilers _require_ this */
+    return EXIT_SUCCESS;
 }
 
-/*
- * Intercept 'exit()' for debugging.  (The Linux libc uses malloc/free in
+/* Intercept 'exit()' for debugging.  (The Linux libc uses malloc/free in
  * 'exit()', so we cannot get a trace unless we resort to this hack ;-)
  */
 #if HAVE_LIBDBMALLOC

@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19980119
+MANIFEST for cproto, version t19980120
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -37,6 +37,16 @@ system.h                        system-dependent definitions, coordinated with c
 trace.c                         debugging support for CPROTO
 trace.h                         header for trace.c, dump.c
 yyerror.c                       enhanced error reporting support for yacc/bison
+emx                             subdirectory
+emx/README                      description of files in emx directory
+msdos                           subdirectory
+msdos/README                    description of files in msdos directory
+msdos/borland.mak               makefile for Borland C
+msdos/micrsoft.lnk              linker-file for Microsoft C
+msdos/micrsoft.mak              makefile for Microsoft C
+msdos/turboc.mak                makefile for TurboC
+os2                             subdirectory
+os2/README                      description of files in os2 directory
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
 porting/borland.mak             makefile for Borland C
@@ -102,3 +112,8 @@ testing/syntax.c                odds & ends of syntax to use for testing
 testing/test_dos.bat            dos test script
 testing/testunix.sh             runs UNIX test scripts
 testing/turboc.c                test-case for TurboC include-files
+vms                             subdirectory
+vms/README                      description of files in vms directory
+vms/descrip.mms                 makefile for vms
+win32                           subdirectory
+win32/README                    description of files in win32 directory
