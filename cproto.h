@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.13 1994/08/01 00:28:23 tom Exp $
+/* $Id: cproto.h,v 3.14 1994/08/09 00:21:09 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -16,15 +16,6 @@
 
 /* Boolean type */
 typedef char boolean;
-#if	!defined(TRUE) || (TRUE != 1)
-#undef  TRUE
-#define	TRUE	(1)
-#endif
-
-#if	!defined(FALSE) || (FALSE != 0)
-#undef  FALSE
-#define	FALSE	(0)
-#endif
 
 /* Source file text */
 typedef struct text {

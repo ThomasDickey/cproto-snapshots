@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940806
+MANIFEST for cproto, version t19940809
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -6,6 +6,7 @@ Makefile.bc                     v3_7 base
 Makefile.msc                    v3_7 base
 Makefile.uni                    v3_7 base
 README                          overview of the CPROTO program
+aclocal.m4                      autoconf macros
 config.h                        v3_7 base
 config_h.in                     template for config.h
 configure.in                    script for generating 'configure' via autoconf

@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 3.4 1994/08/06 11:02:08 tom Exp $
+/* $Id: yyerror.c,v 3.5 1994/08/09 01:07:32 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -9,7 +9,7 @@
 /* 'yyerror()' has to be a macro, since it must be expanded inline to subvert
  * the internal state of 'yyparse()'.
  */
-#if YYBISON		/* bison 1.22 */
+#if BISON_HAS_YYTNAME	/* bison 1.22 */
 #if YYDEBUG
 /* this is better than defining YYERROR_VERBOSE */
 #define	yyerror(text)	\
@@ -25,7 +25,13 @@
 		YaccExpected("", -1);\
 	}
 #endif
-#endif	/* YYBISON */
+#endif	/* BISON_HAS_YYTNAME */
+
+#if YACC_HAS_YYTOKS_2
+#undef  YACC_HAS_YYTOKS
+#define YACC_HAS_YYTOKS 1
+#define YaccState yy_state
+#endif
 
 #if YACC_HAS_YYTOKS		/* Solaris, Gould */
 #if YYDEBUG
