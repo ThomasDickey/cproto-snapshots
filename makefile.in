@@ -1,8 +1,9 @@
-# $Id: makefile.in,v 3.16 1994/08/14 20:44:25 tom Exp $
+# $Id: makefile.in,v 3.17 1994/08/19 23:55:23 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
+RELEASE = 3
 
 #### Start of system configuration section. ####
 
@@ -104,6 +105,7 @@ $(THIS).man : $(THIS).1
 
 clean :
 	rm -f *.o *.bak *.log *.man *.out $(JUNK) tags default.h
+	rm -f .version .fname MANIFEST
 
 clobber : clean
 	rm -f $(THIS)
@@ -125,6 +127,33 @@ config.status : configure
 
 configure : configure.in aclocal.m4
 	autoconf
+
+# I keep my sources in RCS, and assign a symbolic release to the current patch
+# level.  The 'manifest' script knows how to build a list of files for a given
+# revision.
+MANIFEST: CHANGES
+	rm -f .version
+	rlog -h CHANGES | \
+		sed	-e '1,/symbolic names:/d' \
+			-e 's/[ 	]//g' \
+			-e 's/:.*//' |\
+		head -1 >.version
+	manifest -r`cat .version`
+	rm -f .version
+
+dist:
+	make MANIFEST
+	rm -f .fname .files
+	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	cat MANIFEST | grep ' ' | sed -e 's/\ .*//' | uniq >.files
+	rm -rf `cat .fname`
+	TOP=`cat .fname`; mkdir $$TOP `cat .files | grep / | sed -e 's@/.*@@' | sed -e s@\^@$$TOP/@ | uniq`
+	for file in `cat .files`; do \
+	  ln $(srcdir)/$$file `cat .fname`/$$file \
+	    || { echo copying $$file instead; cp -p $$file `cat .fname`/$$file; }; \
+	done
+	tar -cf - `cat .fname` | gzip >`cat .fname`.tgz
+	rm -rf `cat .fname` .fname .files
 
 shar: $(SOURCES)
 	shar -opart -l50 $(SOURCES)
