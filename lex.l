@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.5.1.2 1999/12/19 23:49:32 tom Exp $
+/* $Id: lex.l,v 4.6 2000/10/29 00:47:16 cthuang Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
