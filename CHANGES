@@ -1,10 +1,18 @@
 Version 4
 
-Patchlevel 4 (january 1995)
+Patchlevel 4 (february 1995)
 
 - update test-cases for the -f2 fix in patch 3.
 
 - remove dependency on GNU-make from makefile.in
+
+- corrected configuration script that tests whether yyerror can be extended
+  (had cached wrong flag, preventing some configurations from being
+  recognized).
+
+- added calls for 'flush_varargs()' to correct situation in lint-library output
+  where VARARGS comments were not reset properly when a function
+  was skipped.
 
 Patchlevel 3
 

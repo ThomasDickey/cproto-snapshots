@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: lintlibs.c,v 4.1.1.1 1995/02/24 11:19:46 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -269,7 +269,7 @@ void	track_in()
 		return;
 
 #ifdef	DEBUG
-	printf("track_in: in_include=%d line_num=%d base_file=%s\n",
+	printf("/* track_in: in_include=%d line_num=%d base_file=%s */\n",
 		in_include, cur_line_num(), base_file);
 	dump_stack("-before");
 #endif	/* DEBUG */
@@ -282,6 +282,7 @@ void	track_in()
 			base_level = (strcmp(cur_file_name(), base_file) != 0);
 			make_inc_stack(0, base_file);
 		} else if (!strcmp(cur_file_name(), base_file)) {
+			flush_varargs();
 			in_include = 0;	/* reset level */
 		} else {
 			make_inc_stack(in_include, old_file);
@@ -302,9 +303,11 @@ void	track_in()
 		}
 	} else if (!strcmp(cur_file_name(), base_file)) {
 		in_include = 0;	/* kludgy bison! */
+		flush_varargs();
 	} else {		/* continue or unnest ? */
 		while (strcmp(old_file, cur_file_name())) {
 			in_include--;
+			flush_varargs();
 			if (in_include < 0) {
 				/* yacc did it again! */
 				in_include = 0;
@@ -443,6 +446,18 @@ int	lint_ellipsis(p)
 		&& (!strcmp(p->declarator->name, ellipsis)));
 }
 
+/*
+ * Reset the data used for "VARARGS" comment.
+ */
+void	flush_varargs()
+{
+	varargs_num = 0;
+	if (varargs_str != 0) {
+		free(varargs_str);
+		varargs_str = 0;
+	}
+}
+
 /* If either we received a "VARARGS" comment in the lexical scanner, or if the
  * parameter list contains an ellipsis, generate a corresponding "VARARGS"
  * comment for lint-library output.
@@ -466,12 +481,10 @@ void	ellipsis_varargs(d)
 			if (varargs_str != 0) {
 				put_char(stdout, ' ');
 				put_string(stdout, varargs_str);
-				free(varargs_str);
-				varargs_str = 0;
 			}
 		}
+		flush_varargs();
 		put_string(stdout, " */\n");
-		varargs_num = 0;
 	}
 }
 
