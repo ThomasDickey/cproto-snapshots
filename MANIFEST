@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t20030405
+MANIFEST for cproto, version t20031129
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -22,6 +22,7 @@ dump.h                          interface of dump.c
 getopt.c                        GNU getopt.c
 getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO
+install-sh                      install-script
 install.sh                      install-script from X-Window distribution
 lex.l                           lex rules for CPROTO
 lex_yy.c                        v4_6
