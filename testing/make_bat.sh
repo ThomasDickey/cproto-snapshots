@@ -1,11 +1,18 @@
 #!/bin/sh
-# $Id: make_bat.sh,v 3.9 1994/08/15 12:34:28 tom Exp $
+# $Id: make_bat.sh,v 3.10 1994/08/16 23:52:52 tom Exp $
 #
 # This makes a special ".bat" file for testing CPROTO on MSDOS.
 # It won't work properly if /bin/echo tries to expand the backslash sequences.
+# (This is the case on SunOS 4.1.x).
 #
 # The MSDOS 'fc' program doesn't return an exit code for differing files.
 # We have to examine the output log...
+if [ -f /bin/echo ]
+then
+	ECHO=/bin/echo
+else
+	ECHO=echo
+fi
 for i in $*
 do
 	i="`echo $i | sed -e 's/[A-Za-z_.]//g'`"
@@ -22,9 +29,9 @@ if exist $I.dif erase $I.dif
 copy syntax.c $I.c
 EOF
 		CASE="`grep \"CASE[ 	]$i\" run_test.txt`"
-		OPTS=`/bin/echo "$CASE"|sed -e 's/^.*=/..\\CPROTO/'`
-		/bin/echo "$OPTS -o$I.out -O$I.err $I.c" >>$I.bat
-		TEST=`/bin/echo $OPTS | sed -e 's/-[at]//'`
+		OPTS=`$ECHO "$CASE"|sed -e 's/^.*=/CPROTO/'`
+		$ECHO "..\\$OPTS -o$I.out -O$I.err $I.c" >>$I.bat
+		TEST=`$ECHO $OPTS | sed -e 's/-[at]//'`
 		if [ ".$OPTS" !=  ".$TEST" ]
 		then
 		cat >>$I.bat <<EOF

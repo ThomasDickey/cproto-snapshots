@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.28 1994/08/14 20:28:57 tom Exp $
+/* $Id: semantic.c,v 3.30 1994/08/16 23:43:34 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -442,6 +442,27 @@ int	commented;	/* comment-delimiters already from higher level */
 	    char *t = supply_parm(count);
 	    p->declarator->text = concat_string(p->declarator->text, t);
 	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
+	} else if (strstr(s, "%s") != 0
+	 && p->declarator->name[0] == '\0') {
+	    Declarator *q;
+
+	    free(p->declarator->name);
+	    p->declarator->name = supply_parm(count);
+
+	    for (q = p->declarator; q != 0; q = q->func_stack) {
+		if (q->func_def == FUNC_NONE) {
+		    if (!strcmp(q->text, "(*)")) {
+			char temp[20];
+			sprintf(temp, "(*%s)", p->declarator->name);
+			free(q->text);
+			q->text = xstrdup(temp);
+		    } else {
+			free(q->text);
+			q->text = concat_string("/*BUG*/", p->declarator->name);
+		    }
+		    break;
+		}
+	    }
 	}
     }
 #endif
@@ -760,7 +781,9 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	if (in_include >= extern_in)	/* -x option not set? */
 #endif
 	    return;
+#if OPT_LINTLIBRARY
 	strcut(decl_spec->text, "extern");
+#endif
     }
     if (!static_out && (decl_spec->flags & DS_STATIC))
 	return;
