@@ -16,6 +16,7 @@ extern unsigned x13;
 extern x4t x17;
 extern const x18 = {0};
 extern volatile x19;
+extern void badFunc P_((int *badStyle));
 extern _FIRST first;
 extern _FIRST last;
 extern _FIRST first_last[];

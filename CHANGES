@@ -1,3 +1,9 @@
+1999/12/14
+- change vec[] array in yaccExpected() to be dynamically allocated.  It was a
+  fixed-size (10 entries) array before.  Also fix problem reported by Wolfgang
+  Wander <wwc@rentec.com>, which is that if the array were empty, it was passed
+  to qsort() with a zero-size, causing a core dump.
+- add to syntax.c & corresponding test-cases the typedef/identifier example.
 1999/10/21
 - allow identifiers to be the same as typedef names, handle this case:
   typedef int badStyle; 
