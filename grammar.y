@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.21 1994/08/14 20:10:36 tom Exp $
+/* $Id: grammar.y,v 3.22 1994/08/29 11:16:30 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -765,7 +765,7 @@ direct_abs_declarator
 
 %%
 
-#if defined(MSDOS) || defined(OS2)
+#if defined(MSDOS) || defined(OS2) || defined(VMS)
 # ifdef USE_flex
 #  include "lexyy.c"
 # else

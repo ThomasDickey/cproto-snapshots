@@ -1,4 +1,4 @@
-# $Id: descrip.mms,v 3.3 1994/08/12 23:47:49 tom Exp $
+# $Id: descrip.mms,v 3.4 1994/08/29 11:31:36 tom Exp $
 # VAX/VMS "mms" script for CPROTO
 
 THIS = cproto
@@ -6,9 +6,10 @@ THIS = cproto
 #### Start of system configuration section. ####
 
 LEX	= flex
-YACC	= bison /fixed_outfiles
+#YACC	= bison /fixed_outfiles
+YACC	= bison 
 
-DEFINES	=
+DEFINES	= /Define=(STDC_HEADERS)
 CFLAGS	= /Include=([]) $(DEFINES)
 
 #### End of system configuration section. ####
@@ -33,13 +34,14 @@ C_FILES = \
 	strkey.c \
 	strstr.c \
 	symbol.c \
+	getopt.c
 
 AUX_FILES = \
 	mkdirs.sh \
 	lex.l \
 	grammar.y
 
-LEX_YY	= yylex
+LEX_YY	= lexyy
 Y_TAB	= y_tab
 
 JUNK =	\
@@ -47,13 +49,14 @@ JUNK =	\
 	$(Y_TAB).c
 
 OBJECTS = \
-	$(THIS).obj \
-	lintlibs.obj \
-	semantic.obj \
-	strkey.obj \
-	strstr.obj \
-	symbol.obj \
-	$(Y_TAB).obj
+	$(THIS).obj, \
+	lintlibs.obj, \
+	semantic.obj, \
+	strkey.obj, \
+	strstr.obj, \
+	symbol.obj, \
+	$(Y_TAB).obj, \
+	getopt.obj
 
 SOURCES = $(DOC_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
@@ -61,10 +64,10 @@ all : $(THIS).exe
 	@ write sys$output "** produced $?"
 
 $(THIS).exe : $(OBJECTS)
-	$(LINK)/exec=$(THIS) $(OBJECTS),sys$library:vaxcrtl/lib
+	$(LINK)/exec=$(THIS) $(OBJECTS),sys$library:vaxcrtl/lib,tools$$library:alloca.obj
 
 $(Y_TAB).c : grammar.y
-	$(YACC) grammar.y
+	$(YACC) grammar.y/fixed_outfiles
 
 $(LEX_YY).c : lex.l
 	$(LEX) lex.l
@@ -85,4 +88,5 @@ lintlibs.obj : cproto.h system.h semantic.h symbol.h
 semantic.obj : cproto.h system.h semantic.h
 strkey.obj   : cproto.h system.h
 symbol.obj   : cproto.h system.h symbol.h
-$(Y_TAB).obj : cproto.h system.h symbol.h semantic.h $(LEX_YY).c yyerror.c
+$(Y_TAB).obj : cproto.h system.h symbol.h semantic.h $(LEX_YY).c yyerror.c $(Y_TAB).c
+	$(CC) $(CFLAGS) $(Y_TAB).c

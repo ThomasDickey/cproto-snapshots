@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.22 1994/08/14 20:16:17 tom Exp $
+/* $Id: lex.l,v 3.23 1994/08/29 11:21:02 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -724,7 +724,7 @@ tmpfile ()
 static void
 include_file (name, convert)
 char *name;		/* file name */
-boolean convert;	/* if TRUE, convert function definitions */
+int convert;		/* if TRUE, convert function definitions */
 {
     ++inc_depth;
     cur_file = inc_stack + inc_depth;

@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.21 1994/08/15 00:31:35 tom Exp $
+/* $Id: cproto.c,v 3.22 1994/08/29 12:13:44 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.21 1994/08/15 00:31:35 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.22 1994/08/29 12:13:44 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -371,6 +371,7 @@ char ***pargv;
 
     argc = *pargc;
     argv = *pargv;
+#ifndef vms	/* this conflicts with use of foreign commands... */
     if ((s = getenv("CPROTO")) != NULL) {
 	parse_options(s, MAX_OPTIONS, &eargc, eargv);
 	nargv = (char **)xmalloc((eargc+argc+1)*sizeof(char *));
@@ -384,6 +385,7 @@ char ***pargv;
 	argc = nargc;
 	argv = nargv;
     }
+#endif
 
 #ifdef CPP
     /* Allocate buffer for C preprocessor command line. */
@@ -615,6 +617,8 @@ char **argv;
 	process_file(stdin, "stdin");
 	pop_file();
     } else {
+	if (!optind)
+	    optind++;
 	for (i = optind; i < argc; ++i) {
 #ifdef CPP
 # if CPP_DOES_ONLY_C_FILES
@@ -656,7 +660,7 @@ char **argv;
 		 * the file that we're writing to.
 		 */
 		sprintf(cpp_cmd, cpp,
-			mktemp(strcpy(temp, "sys$scratch:XXXXXX")));
+			mktemp(strcpy(temp, "sys$scratch:XXXXXX.i")));
 		sprintf(cpp_cmd + strlen(cpp_cmd), "%s %s", cpp_opt, FileName);
 		system(cpp_cmd);
 		inf = fopen(temp, "r");
@@ -685,7 +689,11 @@ char **argv;
 	    process_file(inf, argv[i]);
 #ifdef CPP
 	    if (func_style == FUNC_NONE && cpp != NULL) {
+#ifdef vms
+		fclose(inf);
+#else
 		pclose(inf);
+#endif
 #if CPP_DOES_ONLY_C_FILES || defined(vms)
 		if (strcmp(argv[i], temp)) {
 			(void)unlink(temp);
