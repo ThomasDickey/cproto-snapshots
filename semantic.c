@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.2.1.1 1995/02/24 11:19:46 tom Exp $
+/* $Id: semantic.c,v 4.3 1995/08/24 01:03:48 cthuang Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -629,7 +629,7 @@ int commented;
 		put_param_list(outf, declarator, TRUE);
 		put_string(outf, COMMENT_END);
 	    }
-	} else if (proto_style != PROTO_NONE) {
+	} else if (func_style != FUNC_NONE || proto_style != PROTO_NONE) {
 #if OPT_LINTLIBRARY
 	    if (!lintLibrary() || nestedParams <= 1)
 #endif
@@ -849,7 +849,9 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	strcut(decl_spec->text, "extern");
 #endif
     }
-    if (!static_out && (decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
+	return;
+    if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
 	return;
 
     check_untagged(decl_spec);
@@ -963,7 +965,9 @@ Declarator *declarator;
 
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
-    if (!static_out && (decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
+	return;
+    if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
 	return;
 
     /*

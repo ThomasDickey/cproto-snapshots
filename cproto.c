@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.3 1995/01/01 19:34:59 cthuang Exp $
+/* $Id: cproto.c,v 4.4 1995/08/24 01:03:48 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.3 1995/01/01 19:34:59 cthuang Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.4 1995/08/24 01:03:48 cthuang Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -32,8 +32,8 @@ int exitlike_func = FALSE;
 /* If TRUE, output "extern" before global declarations */
 boolean extern_out = FALSE;
 
-/* If TRUE, generate static declarations */
-boolean static_out = FALSE;
+/* By default, generate global declarations only */
+Scope scope_out = SCOPE_EXTERN;
 
 /* If TRUE, export typedef declarations (needed for lint-libs) */
 #if OPT_LINTLIBRARY
@@ -122,7 +122,6 @@ static	char *	escape_string   ARGS((char *src));
 static	void	usage           ARGS((void));
 static	void	process_options ARGS((int *pargc, char ***pargv));
 static	void	parse_options   ARGS((char *src, int maxargc, int *pargc, char **argv));
-	int	main            ARGS((int argc, char **argv));
 
 /* Try to allocate some memory.
  * If unsuccessful, output an error message and exit.
@@ -313,7 +312,8 @@ usage ()
     fputs("  -O file          Redirect errors to file\n", stderr);
     fputs("  -p               Disable formal parameter promotion\n", stderr);
     fputs("  -q               Disable include file read failure messages\n", stderr);
-    fputs("  -s               Output static declarations\n", stderr);
+    fputs("  -s               Output static declarations also\n", stderr);
+    fputs("  -S               Output static declarations only\n", stderr);
 #if OPT_LINTLIBRARY
     fputs("  -T               Output type definitions\n", stderr);
 #endif
@@ -363,6 +363,71 @@ add_option(keyword, src)
 }
 #endif	/* vms */
 
+#ifdef QUOTE_POPEN_ARGS
+
+/* Calculate length of string including shell quoting characters that
+ * must be inserted to preserve the string when it is passed to /bin/sh.
+ * On UNIX systems, popen() runs /bin/sh.
+ */
+#define QUOTECHARS "\"\'\t\n "
+
+static int
+quote_length (s)
+char *s;
+{
+    int len = strlen(s);
+
+    if (strpbrk(s, QUOTECHARS))  {
+	len += 2;
+	while (*s)
+	    if (*s++ == '\'')
+		len += 4; /* replace ' with '"'"' (ick!) */
+    }
+    return len;
+}
+
+/* Insert quoting characters to preserve the string when it is passed to
+ * /bin/sh.
+ */
+static char *
+quote_string (s) 
+char *s;
+{
+    if (strpbrk(s, QUOTECHARS))  {
+	char *src = s;
+	char *dup, *dup_orig;
+	
+	dup = dup_orig = xstrdup(s);
+
+	while (isspace(*src))
+	    *src++ = *dup++;
+
+	*src++ = '\'';
+	while (*dup) {
+	    if (*dup == '\'') {
+		*src++ = '\'';
+		*src++ = '"';
+		*src++ = '\'';
+		*src++ = '"';
+		*src++ = '\'';
+		dup++;
+	    } else {
+	        *src++ = *dup++;
+	    }
+	}
+
+	*src++ = '\'';
+	*src = '\0';
+	free(dup_orig);
+    }
+
+    return s;
+}
+#else
+#define	quote_length(s) strlen(s)
+#define quote_string(s)	(s)
+#endif /*QUOTE_POPEN_ARGS*/
+
 #define MAX_OPTIONS 40
 
 /* Process the command line options.
@@ -405,7 +470,7 @@ char ***pargv;
     /* Allocate buffer for C preprocessor command line. */
     n = strlen(cpp) + 1;
     for (i = 0; i < argc; ++i) {
-	n += strlen(argv[i]) + 1;
+	n += quote_length(argv[i]) + 1;  /* add more for possible quoting */
     }
 #ifdef	vms
     cpp_include = xmalloc(n+argc);
@@ -417,7 +482,7 @@ char ***pargv;
     cpp_cmd = xmalloc(n);
 #endif
 
-    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vvo:O:Tlx")) != EOF) {
+    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqSstU:Vvo:O:Tlx")) != EOF) {
 	switch (c) {
 	case 'I':
 #ifdef	vms
@@ -445,7 +510,7 @@ char ***pargv;
 #else	/* UNIX, etc. */
 #ifdef CPP
 	    sprintf(tmp, " -%c%s", c, optarg);
-	    strcat(cpp_opt, tmp);
+	    strcat(cpp_opt, quote_string(tmp));
 #endif
 #endif
 	    break;
@@ -539,8 +604,11 @@ char ***pargv;
 	case 'q':
 	    quiet = TRUE;
 	    break;
+	case 'S':
+	    scope_out = SCOPE_STATIC;
+	    break;
 	case 's':
-	    static_out = TRUE;
+	    scope_out = SCOPE_ALL;
 	    break;
 	case 't':
 	    func_style = FUNC_TRADITIONAL;

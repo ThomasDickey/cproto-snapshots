@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.3 1994/10/22 21:42:10 cthuang Exp $
+/* $Id: lex.l,v 4.4 1995/08/24 01:03:48 cthuang Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -203,13 +203,12 @@ QUOTE		[\"\']
 			    return ')';
 			}
 <INITIAL>"*"		{ save_text_offset(); return '*'; }
-<INITIAL>","		{ save_text(); return ','; }
-<INITIAL>";"		{
+<INITIAL>[,;]		{
 			    save_text();
 			    if (cur_file->convert)
 				cur_file->begin_comment =
 				 ftell(cur_file->tmp_file);
-			    return ';';
+			    return yytext[0];
 			}
 <INITIAL>"..."		{ save_text(); return T_ELLIPSIS; }
 <INITIAL>\"		{
