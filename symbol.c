@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 3.6 1994/07/26 00:08:21 tom Exp $
+/* $Id: symbol.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -6,8 +6,8 @@
 #include "cproto.h"
 #include "symbol.h"
 
-static	unsigned hash ARGS((char *name));
-static	Symbol * search_symbol_list ARGS((Symbol *list, char *name));
+static unsigned hash ARGS((char *name));
+static Symbol *search_symbol_list ARGS((Symbol *list, char *name));
 
 /* Create a symbol table.
  * Return a pointer to the symbol table or NULL if an error occurs.

@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.16 1994/08/31 22:52:14 tom Exp $
+/* $Id: system.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -6,32 +6,15 @@
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
  
-#if	!defined(TRUE) || (TRUE != 1)
+#if !defined(TRUE) || (TRUE != 1)
 #undef  TRUE
 #define	TRUE	(1)
 #endif
 
-#if	!defined(FALSE) || (FALSE != 0)
+#if !defined(FALSE) || (FALSE != 0)
 #undef  FALSE
 #define	FALSE	(0)
 #endif
-
-/* don't use continuation-lines -- breaks on VAXC */
-#if defined(__STDC__) || defined(__TURBOC__) || defined(vms) || defined(__cplusplus)
-#define ARGS(p) p
-#else
-#define ARGS(p) ()
-#endif
-
-/* Declare argument for 'exit()' and '_exit()': */
-#ifdef	vms
-#include	<stsdef.h>
-#define	SUCCESS	(STS$M_INHIB_MSG | STS$K_SUCCESS)
-#define	FAIL	(STS$M_INHIB_MSG | STS$K_ERROR)
-#else	/* unix */
-#define	SUCCESS	(0)		/* if no error */
-#define	FAIL	(1)		/* if any error */
-#endif	/* vms/unix */
 
 /* Borland C++ for MS-DOS predefines __MSDOS__ */
 #ifdef __MSDOS__
@@ -45,6 +28,13 @@
 #ifndef OS2
 #define OS2
 #endif
+#endif
+
+/* don't use continuation-lines -- breaks on VAXC */
+#if defined(__STDC__) || defined(__cplusplus) || defined(MSDOS) || defined(OS2) || defined(vms)
+#define ARGS(p) p
+#else
+#define ARGS(p) ()
 #endif
 
 /* Turbo C preprocessor */
@@ -122,14 +112,24 @@
 #endif
 
 #if HAVE_STDLIB_H
-#include	<stdlib.h>
+#include <stdlib.h>
 #else
 extern char *malloc  ARGS((size_t n));
 extern char *realloc ARGS((char *p, size_t n));
 #endif
 
+/* Declare argument for exit() function */
+#ifdef vms
+#include <stsdef.h>
+#define	EXIT_SUCCESS	(STS$M_INHIB_MSG | STS$K_SUCCESS)
+#define	EXIT_FAIL	(STS$M_INHIB_MSG | STS$K_ERROR)
+#elif !defined(HAVE_STDLIB_H)
+#define	EXIT_SUCCESS	(0)		/* if no error */
+#define	EXIT_FAIL	(1)		/* if any error */
+#endif /* vms */
+
 #if HAVE_UNISTD_H
-#include	<unistd.h>
+#include <unistd.h>
 #endif
 
 #if STDC_HEADERS || HAVE_STRING_H
@@ -159,7 +159,7 @@ extern void dofree(char *);
 #define malloc(n)    doalloc(0,n)
 #define realloc(p,n) doalloc(p,n)
 #define free(n) dofree(n)
-#endif	/* DOALLOC */
+#endif /* DOALLOC */
 
 /*
  * Lint libraries are useful only on systems that are likely to have lint.
@@ -180,4 +180,4 @@ extern void dofree(char *);
 #include <dbmalloc.h>
 #endif
 
-#endif	/* SYSTEM_H */
+#endif /* SYSTEM_H */

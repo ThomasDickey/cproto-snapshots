@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 3.5 1994/09/24 21:34:07 tom Exp $
+dnl $Id: aclocal.m4,v 3.6 1994/10/12 13:00:00 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -15,7 +15,7 @@ cat >yacctest.y <<EOF
 #include "system.h"
 #include <stdio.h>
 #include "yyerror.c"
-static void YaccError(s) char *s; { exit(0); }
+static void yaccError(s) char *s; { exit(0); }
 int yylex ARGS((void))
 { return 1; }
 %}

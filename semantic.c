@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.43 1994/09/24 15:06:32 tom Exp $
+/* $Id: semantic.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -9,10 +9,10 @@
 
 #if OPT_LINTLIBRARY
 static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
-#define	PutParameter(fp,p,f,n,c)		put_parameter(fp, p, f, n, c)
+#define	putParameter(fp,p,f,n,c)		put_parameter(fp, p, f, n, c)
 #else
 static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int commented));
-#define	PutParameter(fp,p,f,n,c)		put_parameter(fp, p, c)
+#define	putParameter(fp,p,f,n,c)		put_parameter(fp, p, c)
 #endif
 
 static	char *		concat_string		ARGS((char *a, char *b));
@@ -49,7 +49,7 @@ static int format;
 /* Function-parameter level, used to simplify logic that comments/suppresses
  * function parameters in the output.
  */
-static NestedParams;
+static int nestedParams;
 
 /* Initialize a new declaration specifier part.
  */
@@ -61,7 +61,7 @@ long offset;
 int flags;
 {
 #if OPT_LINTLIBRARY
-    if (LintLibrary()) {
+    if (lintLibrary()) {
 	if (!strcmp(text, "register"))
 	    text = "";
     }
@@ -423,7 +423,7 @@ int	commented;	/* comment-delimiters already from higher level */
 #if OPT_LINTLIBRARY
     if (name_only) {
 	s = p->declarator->name;
-	if (LintLibrary()) {
+	if (lintLibrary()) {
 	    while (*s == '*')
 		s++;
 	    if (*s == '\0' && !is_void_parameter(p))
@@ -436,7 +436,7 @@ int	commented;	/* comment-delimiters already from higher level */
 
     s = p->decl_spec.text;
 #if OPT_LINTLIBRARY
-    if (LintLibrary()) {
+    if (lintLibrary()) {
 	if (is_void_parameter(p))
 	    return (FALSE);
 	indent(outf);
@@ -450,7 +450,7 @@ int	commented;	/* comment-delimiters already from higher level */
     put_string(outf, s);
 
 #if OPT_LINTLIBRARY
-    if (LintLibrary()) {
+    if (lintLibrary()) {
 	char *t, *u;
 	s = p->declarator->text;
 	while (*s == '*')
@@ -533,7 +533,7 @@ int commented;
     } else if (is_void_parameter(p)) {
 	if (p != NULL
 #if OPT_LINTLIBRARY
-	 && !LintLibrary()
+	 && !lintLibrary()
 #endif
 	 )
 	    put_string(outf, "void");
@@ -542,7 +542,7 @@ int commented;
 
 #if OPT_LINTLIBRARY
 	if (where == FUNC_PROTO
-	 && LintLibrary()
+	 && lintLibrary()
 	 && (func_declarator != declarator)) {
 	    do_cmt = TRUE;	/* patch: shouldn't have gotten here at all */
 	}
@@ -553,7 +553,7 @@ int commented;
 	    put_string(outf, COMMENT_BEGIN);
 
 	put_string(outf, fmt[f].first_param_prefix);
-	(void)PutParameter(outf, p, LintLibrary(), ++count, commented);
+	(void)putParameter(outf, p, lintLibrary(), ++count, commented);
 
 	while (p->next != NULL) {
 #if OPT_LINTLIBRARY
@@ -566,7 +566,7 @@ int commented;
 
 	    p = p->next;
 	    put_string(outf, fmt[f].middle_param_prefix);
-	    (void)PutParameter(outf, p, LintLibrary(), ++count, commented);
+	    (void)putParameter(outf, p, lintLibrary(), ++count, commented);
 	}
 	if (where == FUNC_DEF && p->comment != NULL)
 	    put_string(outf, p->comment);
@@ -587,7 +587,7 @@ int commented;
 {
     Parameter *p;
 
-    NestedParams++;
+    nestedParams++;
     if (where == FUNC_DEF && func_style == FUNC_TRADITIONAL) {
 
 	/* Output parameter name list for traditional function definition. */
@@ -618,12 +618,12 @@ int commented;
 	    }
 	} else if (proto_style != PROTO_NONE) {
 #if OPT_LINTLIBRARY
-	    if (!LintLibrary() || NestedParams <= 1)
+	    if (!lintLibrary() || nestedParams <= 1)
 #endif
 	    	put_param_list(outf, declarator, commented);
 	}
     }
-    NestedParams--;
+    nestedParams--;
 }
 
 /* Output a function declarator.
@@ -636,7 +636,7 @@ int commented;
 {
     char *s, *t, *decl_text;
     int f;
-    int saveNest = NestedParams;
+    int saveNest = nestedParams;
 
     /* Output declarator text before function declarator place holder. */
     if ((s = strstr(declarator->text, "%s")) == NULL)
@@ -687,7 +687,7 @@ int commented;
 	}
     } else {
 	put_func_declarator(outf, declarator->func_stack, commented);
-	NestedParams = 2; /* e.g., "void (*signal(p1, p2))()" */
+	nestedParams = 2; /* e.g., "void (*signal(p1, p2))()" */
     }
     *s = '%';
     s += 2;
@@ -716,7 +716,7 @@ int commented;
      && proto_macro) {
 	put_char(outf, PAREN_R);
     }
-    NestedParams = saveNest;
+    nestedParams = saveNest;
 }
 
 /* Output a declarator.
@@ -783,7 +783,7 @@ int commented;
 	Parameter *p;
 	int	count = 0;
 
-	NestedParams++;
+	nestedParams++;
 	p = (declarator->func_stack->func_def != FUNC_NONE)
 		? declarator->func_stack->params.first
 		: declarator->params.first;
@@ -791,11 +791,11 @@ int commented;
 	while (p != 0) {
 		if (lint_ellipsis(p))
 			break;
-		if (PutParameter(stdout, p, FALSE, ++count, commented))
+		if (putParameter(stdout, p, FALSE, ++count, commented))
 			putchar(';');
 		p = p->next;
 	}
-	NestedParams--;
+	nestedParams--;
 }
 #endif
 
@@ -808,7 +808,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
     int	commented = FALSE;
-    int	saveNest = NestedParams;
+    int	saveNest = nestedParams;
 
 #if OPT_LINTLIBRARY
     boolean	defines = (strchr(decl_spec->text, CURL_L) != 0);
@@ -843,7 +843,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
     func_declarator = NULL;
     where = FUNC_OTHER;
     format = FMT_OTHER;
-    NestedParams = 0;
+    nestedParams = 0;
 
     for (d = decl_list->first; d != NULL; d = d->next) {
 	if (d->func_def == FUNC_NONE
@@ -866,11 +866,11 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    if (is_func) {
 		ellipsis_varargs(d);
 	    } else {
-		NestedParams = 2;	/* disable params altogether */
+		nestedParams = 2;	/* disable params altogether */
 		if (types_out)
 		    fmt_library(2);
 	    }
-    	    if (lint_shadowed && LintLibrary())
+    	    if (lint_shadowed && lintLibrary())
 		printf("#undef %s\n", d->name);
 #endif
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
@@ -881,7 +881,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 		put_llib_params(d, commented);
 #endif
 	    put_body(stdout, decl_spec, d);
-	    NestedParams = saveNest;
+	    nestedParams = saveNest;
 	}
     }
     exitlike_func = FALSE;
@@ -961,7 +961,7 @@ Declarator *declarator;
     }
 
 #if OPT_LINTLIBRARY
-    if (LintLibrary())
+    if (lintLibrary())
 	ellipsis_varargs(declarator);
     else if (types_out)
 	fmt_library(0);
@@ -981,17 +981,17 @@ Declarator *declarator;
 
     where = FUNC_PROTO;
     format = FMT_PROTO;
-    NestedParams = 0;
+    nestedParams = 0;
 
 #if OPT_LINTLIBRARY
-    if (lint_shadowed && LintLibrary())
+    if (lint_shadowed && lintLibrary())
 	printf("#undef %s\n", declarator->name);
 #endif
     put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);
 #if OPT_LINTLIBRARY
-    if (LintLibrary())
+    if (lintLibrary())
 	put_llib_params(declarator, commented);
 #endif
     put_body(stdout, decl_spec, declarator);
@@ -1011,7 +1011,7 @@ Declarator *declarator;
 
     where = FUNC_DEF;
     format = FMT_FUNC;
-    NestedParams = 0;
+    nestedParams = 0;
 
     put_func_declarator(cur_tmp_file(), declarator, FALSE);
     cur_file_changed();
@@ -1032,14 +1032,14 @@ int commented;
     p = declarator->params.first;
     if (!is_void_parameter(p)) {
 	fputc('\n', cur_tmp_file());
-	(void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
+	(void)putParameter(cur_tmp_file(), p, lintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
 	if (p->comment != 0)
 	    fputs(p->comment, cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
 	    fputc('\n', cur_tmp_file());
-	    (void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
+	    (void)putParameter(cur_tmp_file(), p, lintLibrary(), ++count, commented);
 	    fputc(';', cur_tmp_file());
 	    if (p->comment != 0)
 		fputs(p->comment, cur_tmp_file());
@@ -1084,7 +1084,7 @@ Declarator *declarator;
     }
 
     format = FMT_FUNC;
-    NestedParams = 0;
+    nestedParams = 0;
 
     if (func_declarator->func_def == FUNC_TRADITIONAL
      || func_declarator->func_def == FUNC_BOTH) {

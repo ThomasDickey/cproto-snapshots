@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.20 1994/09/24 14:28:40 tom Exp $
+/* $Id: cproto.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -119,7 +119,7 @@ typedef union {
 #define PROTO_ANSI		3	/* ANSI C prototype */
 typedef int PrototypeStyle;
 
-#define LintLibrary() (proto_style == PROTO_LINTLIBRARY)
+#define lintLibrary() (proto_style == PROTO_LINTLIBRARY)
 
 /* The role of a function declarator */
 #define FUNC_OTHER	0	/* miscellaneous declaration */

@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.29 1994/09/24 14:59:09 tom Exp $
+/* $Id: lex.l,v 4.1 1994/10/12 14:14:56 cthuang Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -83,8 +83,8 @@ static IncludeStack inc_stack[MAX_INC_DEPTH];	/* stack of included files */
 static SymbolTable *included_files;		/* files already included */
 
 static int  type_of_name      ARGS((char *name));
-static void StartCpp          ARGS((int level));
-static void FinishCpp         ARGS((void));
+static void startCpp          ARGS((int level));
+static void finishCpp         ARGS((void));
 #if defined(apollo) || !OPT_LINTLIBRARY
 static void absorb_special    ARGS((void));
 #endif
@@ -135,12 +135,12 @@ QUOTE		[\"\']
 <LEXYACC>.		save_text();
 <INITIAL>^"%}"		{ save_text(); BEGIN LEXYACC; }
 
-<INITIAL>#{WS}* 	{ save_text(); StartCpp(0); }
-<INITIAL>"??="{WS}* 	{ save_text(); StartCpp(0); }
+<INITIAL>#{WS}* 	{ save_text(); startCpp(0); }
+<INITIAL>"??="{WS}* 	{ save_text(); startCpp(0); }
 
 <CPP1>attribute		{ BEGIN CPP_INLINE; /* apollo */}
 <CPP1>options		{ BEGIN CPP_INLINE; /* apollo */}
-<CPP_INLINE>[^;]*	FinishCpp();
+<CPP_INLINE>[^;]*	finishCpp();
 
 <CPP1>define{WS}+{ID}	{
 			    char name[MAX_TEXT_SIZE], value[MAX_TEXT_SIZE];
@@ -173,7 +173,7 @@ QUOTE		[\"\']
 			     &cur_file->line_num, cur_file->file_name);
 			    cur_file->line_num--;
 			    track_in();
-			    FinishCpp();
+			    finishCpp();
 			}
 <CPP1>[0-9]+{WS}+\".*$  {
 			    save_text();
@@ -181,14 +181,14 @@ QUOTE		[\"\']
 			     cur_file->file_name);
 			    cur_file->line_num--;
 			    track_in();
-			    FinishCpp();
+			    finishCpp();
 			}
 <CPP1>[0-9]+.*$ 	{
 			    save_text();
 			    sscanf(yytext, "%d ", &cur_file->line_num);
 			    cur_file->line_num--;
 			    track_in();
-			    FinishCpp();
+			    finishCpp();
 			}
 
 <CPP1>. 		{ save_text(); get_cpp_directive(NULL, 0); }
@@ -310,8 +310,8 @@ QUOTE		[\"\']
 <CURLY>{QUOTE}		get_quoted();
 <CURLY>"return"		{ save_text(); returned_at = TRUE; }
 <CURLY>";"		{ save_text(); returned_at = FALSE; }
-<CURLY>#{WS}* 		{ save_text(); StartCpp(1); }
-<CURLY>"??="{WS}* 	{ save_text(); StartCpp(1); }
+<CURLY>#{WS}* 		{ save_text(); startCpp(1); }
+<CURLY>"??="{WS}* 	{ save_text(); startCpp(1); }
 <CURLY>.		{ save_text(); return_val |= returned_at; }
 
 [ \r\t\f]+		save_text();
@@ -323,8 +323,8 @@ QUOTE		[\"\']
 %%
 
 static void
-StartCpp(level)
-int	level;
+startCpp (level)
+int level;
 {
     save_cpp = level;
     in_cpp = TRUE;
@@ -332,7 +332,7 @@ int	level;
 }
 
 static void
-FinishCpp()
+finishCpp()
 {
     in_cpp = FALSE;
     if (save_cpp)
@@ -345,19 +345,19 @@ FinishCpp()
  * Skip over embedded __attribute/__attribute_ syntax.
  */
 #if defined(apollo) || !OPT_LINTLIBRARY
-static
-void absorb_special()
+static void
+absorb_special ()
 {
-	int	c;
-	int	nest	= 0;
-	while ((c = input()) > 0) {
-		if (c == '(')
-			nest++;
-		else if (c == ')') {
-			if (--nest <= 0)
-				break;
-		}
+    int	c;
+    int	nest	= 0;
+    while ((c = input()) > 0) {
+	if (c == '(')
+	    nest++;
+	else if (c == ')') {
+	    if (--nest <= 0)
+		break;
 	}
+    }
 }
 #endif
 
@@ -371,41 +371,41 @@ void absorb_special()
  * (It's a distinct piece of code from the 'absorb_special()' function to
  * avoid spurious matches with non-gcc compilers).
  */
-static
-void gcc_attribute()
+static void
+gcc_attribute ()
 {
-	int	c, num1, num2;
-	int	nest	= 0;
-	int	len	= 0;
-	char	bfr[BUFSIZ];
+    int	c, num1, num2;
+    int	nest = 0;
+    int	len = 0;
+    char bfr[BUFSIZ];
 
-	while ((c = input()) > 0) {
-		if (len < sizeof(bfr)-1 && !isspace(c))
-			bfr[len++] = c;
-		if (c == '(')
-			nest++;
-		else if (c == ')') {
-			if (--nest <= 0)
-				break;
-		}
+    while ((c = input()) > 0) {
+	if (len < sizeof(bfr)-1 && !isspace(c))
+	    bfr[len++] = c;
+	if (c == '(')
+	    nest++;
+	else if (c == ')') {
+	    if (--nest <= 0)
+		break;
 	}
-	bfr[len] = '\0';
-	if (!strcmp(bfr, "((noreturn))")) {
-		exitlike_func = TRUE;
-	} else if (sscanf(bfr, "((format(printf,%d,%d)))", &num1, &num2) == 2) {
-		(void)sprintf(bfr, "PRINTFLIKE%d", varargs_num = num1);
-		varargs_str = xstrdup(bfr);
-	} else if (sscanf(bfr, "((format(scanf,%d,%d)))", &num1, &num2) == 2) {
-		(void)sprintf(bfr, "SCANFLIKE%d", varargs_num = num1);
-		varargs_str = xstrdup(bfr);
-	}
+    }
+    bfr[len] = '\0';
+    if (!strcmp(bfr, "((noreturn))")) {
+	exitlike_func = TRUE;
+    } else if (sscanf(bfr, "((format(printf,%d,%d)))", &num1, &num2) == 2) {
+	(void)sprintf(bfr, "PRINTFLIKE%d", varargs_num = num1);
+	varargs_str = xstrdup(bfr);
+    } else if (sscanf(bfr, "((format(scanf,%d,%d)))", &num1, &num2) == 2) {
+	(void)sprintf(bfr, "SCANFLIKE%d", varargs_num = num1);
+	varargs_str = xstrdup(bfr);
+    }
 }
 #endif
 
 /* Decode the current token according to the type-of-name
  */
 static int
-type_of_name(name)
+type_of_name (name)
 char *name;
 {
     if (find_symbol(type_qualifiers, name) != NULL)
@@ -418,8 +418,9 @@ char *name;
 	return T_IDENTIFIER;
 }
 
-boolean	is_typedef_name (name)
-	char	*name;
+boolean
+is_typedef_name (name)
+char *name;
 {
     return (find_symbol(typedef_names, name) != NULL);
 }
@@ -471,93 +472,92 @@ save_text_offset ()
 #if OPT_LINTLIBRARY
 /* Decipher comments that are useful for lint (and making lint-libraries)
  */
-static	struct	{
-	int	VarText;
-	int	Varargs;
-	int	Externs;
-	int	Preproz;
-	} CmtVal;
+static struct {
+    int	varText;
+    int	varargs;
+    int	externs;
+    int	preproz;
+} cmtVal;
 
 static int
 decipher_comment (keyword, len)
-char	*keyword;
-int	len;
+char *keyword;
+int len;
 {
-	if (len != 0) {
-		int	value;
-		keyword[len] = '\0';
+    if (len != 0) {
+	int value;
+	keyword[len] = '\0';
 
-		/* these are recognized by some lint-programs */
-		if (!strcmp(keyword, "VARARGS")) {
-			CmtVal.Varargs = -1;
-		} else if (sscanf(keyword, "VARARGS%d", &value) == 1) {
-			CmtVal.Varargs = value;
-		} else if (!strcmp(keyword, "PRINTFLIKE")) {
-			CmtVal.Varargs = 1;
-			CmtVal.VarText = TRUE;
-		} else if (sscanf(keyword, "PRINTFLIKE%d", &value) == 1) {
-			CmtVal.Varargs = value;
-			CmtVal.VarText = TRUE;
-		} else if (!strcmp(keyword, "SCANFLIKE")) {
-			CmtVal.Varargs = 2;
-			CmtVal.VarText = TRUE;
-		} else if (sscanf(keyword, "SCANFLIKE%d", &value) == 1) {
-			CmtVal.Varargs = value;
-			CmtVal.VarText = TRUE;
-		/* these are extensions added to simplify library-generation */
-		} else if (!strcmp(keyword, "LINT_EXTERN")) {
-			CmtVal.Externs = MAX_INC_DEPTH;
-		} else if (sscanf(keyword, "LINT_EXTERN%d", &value) == 1) {
-			CmtVal.Externs = value;
-		} else if (!strcmp(keyword, "LINT_PREPRO")) {
-			CmtVal.Preproz = -1;	/* the whole comment */
-		} else if (sscanf(keyword, "LINT_PREPRO%d", &value) == 1) {
-			CmtVal.Preproz = value;
-		} else if (!strcmp(keyword, "LINT_SHADOWED")) {
-			lint_shadowed = TRUE;
-		}
+	/* these are recognized by some lint-programs */
+	if (!strcmp(keyword, "VARARGS")) {
+	    cmtVal.varargs = -1;
+	} else if (sscanf(keyword, "VARARGS%d", &value) == 1) {
+	    cmtVal.varargs = value;
+	} else if (!strcmp(keyword, "PRINTFLIKE")) {
+	    cmtVal.varargs = 1;
+	    cmtVal.varText = TRUE;
+	} else if (sscanf(keyword, "PRINTFLIKE%d", &value) == 1) {
+	    cmtVal.varargs = value;
+	    cmtVal.varText = TRUE;
+	} else if (!strcmp(keyword, "SCANFLIKE")) {
+	    cmtVal.varargs = 2;
+	    cmtVal.varText = TRUE;
+	} else if (sscanf(keyword, "SCANFLIKE%d", &value) == 1) {
+	    cmtVal.varargs = value;
+	    cmtVal.varText = TRUE;
+	/* these are extensions added to simplify library-generation */
+	} else if (!strcmp(keyword, "LINT_EXTERN")) {
+	    cmtVal.externs = MAX_INC_DEPTH;
+	} else if (sscanf(keyword, "LINT_EXTERN%d", &value) == 1) {
+	    cmtVal.externs = value;
+	} else if (!strcmp(keyword, "LINT_PREPRO")) {
+	    cmtVal.preproz = -1;	/* the whole comment */
+	} else if (sscanf(keyword, "LINT_PREPRO%d", &value) == 1) {
+	    cmtVal.preproz = value;
+	} else if (!strcmp(keyword, "LINT_SHADOWED")) {
+	    lint_shadowed = TRUE;
 	}
-	return 0;
+    }
+    return 0;
 }
 #endif
 
-static
-void put_quoted (c)
-int	c;
+static void
+put_quoted (c)
+int c;
 {
-	/*
-	 * Modifying 'yytext[]' doesn't work well with FLEX, which simply
-	 * maintains 'yytext' as a pointer into its input buffer.  LEX copies
-	 * characters into the 'yytext[]' array.
-	 */
+    /* Modifying 'yytext[]' doesn't work well with FLEX, which simply
+     * maintains 'yytext' as a pointer into its input buffer.  LEX copies
+     * characters into the 'yytext[]' array.
+     */
 #if defined(FLEX_SCANNER) || !defined(YYLMAX)
-	if (c != 0) {
-		static	char	temp[2];
-		temp[0] = c;
-		/* save_text */
+    if (c != 0) {
+	static char	temp[2];
+	temp[0] = c;
+	/* save_text */
 # if OPT_LINTLIBRARY
-		if (!in_cpp)
-			copy_typedef(temp);
+	if (!in_cpp)
+	    copy_typedef(temp);
 # endif	
-		if (cur_file->convert) {
-			fputs(temp, cur_file->tmp_file);
-		}
-		/* update_line_num */
-		if (c == '\n')
-			cur_file->line_num++;
+	if (cur_file->convert) {
+	    fputs(temp, cur_file->tmp_file);
 	}
+	/* update_line_num */
+	if (c == '\n')
+	    cur_file->line_num++;
+    }
 
 #else	/* this works fine on LEX (e.g., on SunOS 4.x) */
 
-	if ((c == 0) || (yyleng+1 >= YYLMAX)) {
-		save_text();
-		update_line_num();
-		yyleng = 0;
-	}
-	if (c != 0) {
-		yytext[yyleng++] = c;
-		yytext[yyleng] = 0;
-	}
+    if ((c == 0) || (yyleng+1 >= YYLMAX)) {
+	save_text();
+	update_line_num();
+	yyleng = 0;
+    }
+    if (c != 0) {
+	yytext[yyleng++] = c;
+	yytext[yyleng] = 0;
+    }
 #endif	/* LEX/FLEX */
 }
 
@@ -570,30 +570,30 @@ int	c;
 static void
 get_quoted ()
 {
-	int	delim = *yytext;
-	int	c;
+    int	delim = *yytext;
+    int	c;
 
 #if defined(FLEX_SCANNER) || !defined(YYLMAX)
-	put_quoted(delim);
+    put_quoted(delim);
 #endif
-	while ((c = input()) != 0) {
-		if (c == '\\') {
-			put_quoted(c);
-			if ((c = input()) == 0)
-				break;
-			put_quoted(c);
-		} else {
-			put_quoted(c);
-			if (c == delim)
-				break;
-			if (c == '\n') {	/* recover from unbalanced */
-				put_error();
-				fprintf(stderr, "unbalanced quote character '%c'\n", delim);
-				break;
-			}
-		}
+    while ((c = input()) != 0) {
+	if (c == '\\') {
+	    put_quoted(c);
+	    if ((c = input()) == 0)
+		break;
+	    put_quoted(c);
+	} else {
+	    put_quoted(c);
+	    if (c == delim)
+		break;
+	    if (c == '\n') {	/* recover from unbalanced */
+		put_error();
+		fprintf(stderr, "unbalanced quote character '%c'\n", delim);
+		break;
+	    }
 	}
-	put_quoted(0);
+    }
+    put_quoted(0);
 }
 
 /* Scan to end of comment.
@@ -608,10 +608,10 @@ get_comment ()
     char keyword[BUFSIZ];
 
     keyword[len] = '\0';
-    CmtVal.VarText = 0;
-    CmtVal.Varargs = 0;
-    CmtVal.Externs = -1;
-    CmtVal.Preproz = 0;
+    cmtVal.varText = 0;
+    cmtVal.varargs = 0;
+    cmtVal.externs = -1;
+    cmtVal.preproz = 0;
 #endif
 
     while ((c = input()) != 0) {
@@ -620,9 +620,9 @@ get_comment ()
 
 #if OPT_LINTLIBRARY
 	if (!(isalnum(c) || c == '_' || c == '$')) {
-	    int flag = CmtVal.Preproz;
+	    int flag = cmtVal.preproz;
 	    len = decipher_comment(keyword, len);
-	    if (flag != CmtVal.Preproz)
+	    if (flag != cmtVal.preproz)
 	    	lastc = '\0';
 	} else if (len+1 < sizeof(keyword)) {
 	    keyword[len++] = c;
@@ -633,10 +633,10 @@ get_comment ()
 	case '\n':
 	    cur_file->line_num++;
 #if OPT_LINTLIBRARY
-	    if (CmtVal.Preproz != 0 && lastc != '\0')
+	    if (cmtVal.preproz != 0 && lastc != '\0')
 		fputc(lastc, stdout); 
-	    if (CmtVal.Preproz > 0)	/* if negative, we pass everything */
-		CmtVal.Preproz -= 1;
+	    if (cmtVal.preproz > 0)	/* if negative, we pass everything */
+		cmtVal.preproz -= 1;
 #endif
 	    break;
 	case '/':
@@ -653,17 +653,17 @@ get_comment ()
 		}
 #if OPT_LINTLIBRARY
 		(void)decipher_comment(keyword, len);
-		if (CmtVal.Varargs != 0) {
-		    if ((varargs_num = CmtVal.Varargs) != 0
-		     && CmtVal.VarText != 0) {
+		if (cmtVal.varargs != 0) {
+		    if ((varargs_num = cmtVal.varargs) != 0
+		     && cmtVal.varText != 0) {
 			if (varargs_str != 0)
 			    free(varargs_str);
 			varargs_str = xstrdup(keyword);
 		    }
 		}
-		if (CmtVal.Externs != -1)
-		    extern_in = CmtVal.Externs;
-		if (CmtVal.Preproz != 0)
+		if (cmtVal.externs != -1)
+		    extern_in = cmtVal.externs;
+		if (cmtVal.preproz != 0)
 		    fputc('\n', stdout); 
 #endif
 		return;
@@ -671,7 +671,7 @@ get_comment ()
 	    /* FALLTHRU */
 	default:
 #if OPT_LINTLIBRARY
-	    if (CmtVal.Preproz != 0 && lastc != '\0')
+	    if (cmtVal.preproz != 0 && lastc != '\0')
 		fputc(lastc, stdout); 
 #endif
 	    break;
@@ -702,7 +702,7 @@ unsigned n;		/* size of buffer to store directive text */
 	case '\n':
 	    cur_file->line_num++;
 	    if (lastc[2] != '\\' && strcmp(lastc, "?\?/") != 0) {
-		FinishCpp();
+		finishCpp();
 		return;
 	    }
 	    break;
