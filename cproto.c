@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.4.1.2 1995/12/03 20:42:35 tom Exp $
+/* $Id: cproto.c,v 4.4.1.3 1995/12/27 15:03:29 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.4.1.2 1995/12/03 20:42:35 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.4.1.3 1995/12/27 15:03:29 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -739,7 +739,7 @@ char **argv;
 	    file_comments = FALSE;
 	}
 	process_file(stdin, "stdin");
-	pop_file();
+	pop_file(FALSE);
     } else {
 	if (!optind)
 	    optind++;
@@ -822,13 +822,13 @@ char **argv;
 		if (strcmp(argv[i], temp)) {
 			(void)unlink(temp);
 		}
-		pop_file();
+		pop_file(TRUE);
 #endif
 	    } else {
-		pop_file();
+		pop_file(FALSE);
 	    }
 #else	/* no CPP defined */
-	    pop_file();
+	    pop_file(FALSE);
 #endif
 	}
     }
