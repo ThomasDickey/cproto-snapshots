@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.13 1994/08/09 00:01:31 tom Exp $
+# $Id: makefile.in,v 3.14 1994/08/10 00:52:07 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -51,6 +51,7 @@ MAK_FILES = \
 	config_h.in
 
 H_FILES = \
+	yyerror.c \
 	system.h \
 	$(THIS).h \
 	patchlev.h \
@@ -64,7 +65,6 @@ C_FILES = \
 	strkey.c \
 	strstr.c \
 	symbol.c \
-	yyerror.c
 
 AUX_FILES = \
 	mkdirs.sh \
@@ -129,8 +129,8 @@ configure : configure.in aclocal.m4
 shar: $(SOURCES)
 	shar -opart -l50 $(SOURCES)
 
-default.h: $(C_FILES)
-	./$(THIS) -e -v -m -M ARGS $(DEFINES) $(C_FILES) grammar.y >$@
+default.h: $(C_FILES) lex.yy.c
+	./$(THIS) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
 
 lint: $(C_FILES)
 	$(LINT) $(CPP_OPTS) -lyacc $(C_FILES) y.tab.c >$@.out

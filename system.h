@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.8 1994/08/09 00:21:06 tom Exp $
+/* $Id: system.h,v 3.9 1994/08/10 00:47:30 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -149,7 +149,5 @@ extern void dofree(char *);
 #  define OPT_LINTLIBRARY 1
 # endif
 #endif
-
-#define YYDEBUG 1
 
 #endif	/* SYSTEM_H */

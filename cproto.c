@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.13 1994/08/02 00:24:35 tom Exp $
+/* $Id: cproto.c,v 3.14 1994/08/10 00:47:05 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.13 1994/08/02 00:24:35 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.14 1994/08/10 00:47:05 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -522,8 +522,34 @@ char **argv;
     } else {
 	for (i = optind; i < argc; ++i) {
 #ifdef CPP
+# if HAVE_LINK
+	    /*
+	     * GCC (and possibly other compilers) don't pass-through the ".l"
+	     * and ".y" files to the C preprocessor stage.  Fix this by
+	     * temporarily linking the input file to a temporary-file with a
+	     * ".c" suffix.
+	     *
+	     * Of course, this solution assumes that the input directory is
+	     * writeable.
+	     */
+	    char temp[BUFSIZ];
+	    char *s = strcpy(temp, argv[i]);
+	    int len = strlen(temp);
+	    s += len - 1;
+	    if (len > 2 && s[-1] == '.' && *s == 'l' || *s == 'y') {
+		while (s != temp && s[-1] != '/')
+		    s--;
+		(void)strcpy(s, "XXXXXX.c");
+	    	mktemp(temp);
+	    	if (link(argv[i], temp) < 0)
+		    (void)strcpy(temp, argv[i]);
+	    }
+#  define FileName temp
+# else
+#  define FileName argv[i]
+# endif
 	    if (func_style == FUNC_NONE && cpp != NULL) {
-		sprintf(cpp_cmd, "%s%s %s", cpp, cpp_opt, argv[i]);
+		sprintf(cpp_cmd, "%s%s %s", cpp, cpp_opt, FileName);
 		if ((inf = popen(cpp_cmd, "r")) == NULL) {
 		    fprintf(stderr, "%s: error running %s\n", progname,
 		     cpp_cmd);
@@ -546,6 +572,11 @@ char **argv;
 #ifdef CPP
 	    if (func_style == FUNC_NONE && cpp != NULL) {
 		pclose(inf);
+#if HAVE_LINK
+		if (strcmp(argv[i], temp)) {
+			(void)unlink(temp);
+		}
+#endif
 	    } else {
 		pop_file();
 	    }
