@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19960405
+MANIFEST for cproto, version t19960413
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -19,6 +19,7 @@ getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO
 install.sh                      install-script from X-Window distribution
 lex.l                           lex rules for CPROTO
+lex_yy.c                        v4_6
 lintlibs.c                      functions used for lint-library formatting
 makefile.in                     template makefile for CPROTO
 mkdirs.sh                       mkinstalldirs (renamed for MSDOS compatibility)

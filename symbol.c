@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 4.1.1.1 1995/12/02 22:35:45 tom Exp $
+/* $Id: symbol.c,v 4.2 1996/04/13 04:29:18 cthuang Exp $
  *
  * Implements a symbol table abstract data type.
  */

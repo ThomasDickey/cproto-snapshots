@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.2.1.1 1995/12/01 00:13:54 tom Exp $
+/* $Id: lintlibs.c,v 4.3 1996/04/13 04:29:18 cthuang Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by

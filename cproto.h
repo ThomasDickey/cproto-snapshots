@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.4.1.3 1995/12/27 15:00:15 tom Exp $
+/* $Id: cproto.h,v 4.5 1996/04/13 04:29:18 cthuang Exp $
  *
  * Declarations for C function prototype generator
  */
