@@ -1,8 +1,7 @@
-/* $Id: system.h,v 4.3.1.2 1996/04/27 21:49:48 tom Exp $
+/* $Id: system.h,v 4.6 1998/01/21 00:55:59 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
-
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
  
@@ -16,22 +15,30 @@
 #define	FALSE	(0)
 #endif
 
+/* Watcom C++ predefines __DOS__ when the target platform is MS-DOS */
 /* Borland C++ for MS-DOS predefines __MSDOS__ */
-#ifdef __MSDOS__
+#if defined(__DOS__) || defined(__MSDOS__)
 #ifndef MSDOS
 #define MSDOS
 #endif
 #endif
 
-/* Borland C++ for OS/2 predefines __OS2__ */
+/* Watcom C++ predefines __OS2__ when the target platform is OS/2 */
 #ifdef __OS2__
 #ifndef OS2
 #define OS2
 #endif
 #endif
 
+/* Watcom C++ predefines __NT__ when the target platform is Windows NT */
+#ifdef __NT__
+#ifndef WIN32
+#define WIN32
+#endif
+#endif
+
 /* don't use continuation-lines -- breaks on VAXC */
-#if defined(__STDC__) || defined(__cplusplus) || defined(MSDOS) || defined(OS2) || defined(vms)
+#if defined(__STDC__) || defined(__GNUC__) || defined(__WATCOMC__) || defined(vms)
 #define ARGS(p) p
 #else
 #define ARGS(p) ()
@@ -47,12 +54,20 @@
 
 #ifdef TURBO_CPP
 #define CPP "cpp -P-"
-#else
-#ifdef OS2
+#endif
+
+/* EMX C preprecssor */
+#ifdef __EMX__
+#define CPP "cpp"
+#endif
+
+/* Watcom C preprocessor */
+#ifdef __WATCOMC__
+#define CPP "wcl386 /p"
 #define HAVE_POPEN_PROTOTYPE 1
 #define popen _popen
 #define pclose _pclose
-#endif
+#define HAVE_TMPFILE 1
 #endif
 
 /* Microsoft C preprocessor */
