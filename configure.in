@@ -1,6 +1,6 @@
 dnl Process this file with 'autoconf' to produce a 'configure' script
-dnl $Id: configure.in,v 4.3.1.2 1996/04/27 21:56:12 tom Exp $
-AC_REVISION($Revision: 4.3.1.2 $)
+dnl $Id: configure.in,v 4.5 1998/01/21 01:05:08 cthuang Exp $
+AC_REVISION($Revision: 4.5 $)
 AC_INIT(cproto.c)
 AC_PROG_CC
 AC_PROG_CPP
@@ -57,7 +57,7 @@ AC_DEFINE_UNQUOTED(CPP,"$CPP")
 
 ###	output makefile and config.h
 changequote({,})dnl
-AC_OUTPUT(makefile config_h,
+AC_OUTPUT(Makefile config_h,
 {
 echo creating config.h
 sed	-e '/^# /d' \

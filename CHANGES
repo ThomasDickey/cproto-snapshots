@@ -1,6 +1,14 @@
-Version 4
+Version 4.6
 
-Patchlevel 6
+- Since cproto is no longer being distributed on USENET in shar file format,
+  the patchlev.h and MANIFEST files have been removed.
+  The patchlevel number has been removed from the version number.
+
+- Moved files out of the porting directory into separate platform specific
+  directories.  The emx directory has files used to compile using EMX.
+  The os2 directory has files used to compile on OS/2 using Watcom C/C++.
+  The win32 directory has files to compile on Windows 95 and Windows NT
+  using Watcom C/C++.
 
 - correct order of include-path to keep standard include (e.g., /usr/include)
   at the end of the search list.
@@ -151,6 +159,8 @@ Patchlevel 0 (dickey, September 1994)
 - added configuration-test to avoid conflict with prototype for 'popen()'
 
 - added several function-pointer regression test-cases
+
+Version 3
 
 Patchlevel 9 (dickey, August 1994)
 

@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19980120
+MANIFEST for cproto, version t19980121
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -36,6 +36,7 @@ symbol.h                        interface definitions for symbol.c
 system.h                        system-dependent definitions, coordinated with config.h
 trace.c                         debugging support for CPROTO
 trace.h                         header for trace.c, dump.c
+y_tab.c                         v4_6
 yyerror.c                       enhanced error reporting support for yacc/bison
 emx                             subdirectory
 emx/README                      description of files in emx directory
