@@ -10,6 +10,7 @@ unsigned x13;
 x4t x17;
 const x18 = {0};
 volatile x19;
+void badFunc(int *badStyle);
 _FIRST first;
 _FIRST last;
 _FIRST first_last[];

@@ -50,6 +50,13 @@ typedef	struct	_first	{
 	struct	_first	*link;
 	}	_FIRST;
 
+typedef int badStyle;
+
+#undef badFunc
+void	badFunc(
+		int	*badStyle)
+		{ /* void */ }
+
 #undef first
 _FIRST	first;
 #undef last

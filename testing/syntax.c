@@ -59,6 +59,9 @@ typedef	struct	_first	{
 	struct	_first	*link;
 	}	_FIRST;
 
+typedef int badStyle; 
+void badFunc(int *badStyle) { } 
+
 _FIRST	first, last={0}, first_last[] = {{0},{1},{2},{3,{4}}};
 
 struct	_second	{

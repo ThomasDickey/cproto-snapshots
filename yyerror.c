@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.3 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: yyerror.c,v 4.3.1.1 1999/12/14 22:33:05 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function. 
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -103,6 +103,8 @@ const void *p2;
     return (strcmp(*(char **)p1, *(char **)p2));
 }
 
+#define MSGLEN 80
+
 static
 void yaccExpected (s, count)
 const char *s;
@@ -119,19 +121,21 @@ int count;
     register int j, k, x;
     char *t = (char *)s;
     char *tag;
-    char tmp[80];
-    static int last;
-    static char	*vec[10];	/* patch: don't know how big */
+    char tmp[MSGLEN];
+    static unsigned have;
+    static unsigned used;
+    static char	**vec;
 
     if (count < 0) {
-	if (last++ >= 0) {
-	    qsort((char *)vec, (size_t)last, sizeof(vec[0]), compar);
+	if (used != 0) {
+	    if (used > 1)
+		qsort((char *)vec, used, sizeof(vec[0]), compar);
 	    /* limit length of error message */
-	    k = 80 - (strlen(vec[last-1]) + 2);
-	    for (j = 0; j < last; j++) {
+	    k = MSGLEN - (strlen(vec[used-1]) + 2);
+	    for (j = 0; j < used; j++) {
 		tag = j ? " " : "Expected: ";
 		s = vec[j];
-		if (j != (last - 1)) {
+		if (j != (used - 1)) {
 		    x = strlen(s) + strlen(tag);
 		    if (k <= 0)
 			continue;
@@ -142,9 +146,10 @@ int count;
 		fprintf(stderr, "%s%s", tag, s);
 	    }
 	    fprintf(stderr, "\n");
-	    while (--last >= 0)
-	    	free(vec[last]);
+	    while (used-- != 0)
+	    	free(vec[used]);
 	}
+	used = 0;
     } else {
 	if (!strncmp(t, "T_", 2)) {
 	    int	found = FALSE;
@@ -165,13 +170,21 @@ int count;
 		}
 	    }
 	}
+	if (count >= have) {
+	    have = (count + 10);
+	    if (vec == 0) {
+		vec = malloc(have * sizeof(*vec));
+	    } else {
+		vec = realloc(vec, have * sizeof(*vec));
+	    }
+	}
 	if (count > (sizeof(vec)/sizeof(vec[0]))-1) {
 	    count = (sizeof(vec)/sizeof(vec[0]))-1;
 	    free(vec[count]);
 	}
 	vec[count] = xstrdup(t);
+	used = count + 1;
     }
-    last = count;
 }
 #else
 #define yyerror(s) yaccError(s)

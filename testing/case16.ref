@@ -1,4 +1,5 @@
 /* case16.c */
+void badFunc(int *badStyle);
 int dots_0(int p1);
 int dots_1(int p1, ...);
 int dots_3(int P1, char P2, ...);
@@ -88,6 +89,9 @@ typedef	struct	_first	{
 #endif	ERR_CHECK
 	struct	_first	*link;
 	}	_FIRST;
+
+typedef int badStyle; 
+void badFunc(int *badStyle) { } 
 
 _FIRST	first, last={0}, first_last[] = {{0},{1},{2},{3,{4}}};
 
