@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940924
+MANIFEST for cproto, version t19941003
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -96,3 +96,4 @@ testing/solaris.c               template for lint-library on Solaris
 testing/syntax.c                odds & ends of syntax to use for testing
 testing/test_dos.bat            dos test script
 testing/testunix.sh             runs UNIX test scripts
+testing/turboc.c                test-case for TurboC include-files
