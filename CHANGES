@@ -12,6 +12,9 @@ Patchlevel 9 (dickey, July 1994)
 - corrected some logic that made incorrect commenting for options -c -f1
   (e.g., "void (*Sigdisp(int sig, void (*func)(int sig)))(int sig)").
 
+- corrected logic that macroizes (e.g., with P_) functions like 'Sigdisp'
+  (it wasn't doing anything about the trailing "(int sig)").
+
 - modified logic for options -c -f2 so that cproto inserts a space before
   the beginning of a comment when it immediately follows an '*'.
 
