@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.17 1994/09/23 00:38:59 tom Exp $
+/* $Id: lintlibs.c,v 3.19 1994/09/24 14:30:43 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -461,8 +461,14 @@ void	ellipsis_varargs(d)
 		}
 	if (varargs_num != 0) {
 		put_string(stdout, "\t/* VARARGS");
-		if (varargs_num > 0)
+		if (varargs_num > 0) {
 			printf("%d", varargs_num);
+			if (varargs_str != 0) {
+				put_char(stdout, ' ');
+				put_string(stdout, varargs_str);
+				free(varargs_str);
+			}
+		}
 		put_string(stdout, " */\n");
 		varargs_num = 0;
 	}
@@ -517,7 +523,9 @@ void	put_body(outf, decl_spec, declarator)
 	put_char(outf, CURL_L);
 	if (!*(spec_text = decl_spec->text))
 		spec_text = "void";
-	if (!strcmp(spec_text, "void")
+	if (exitlike_func) {
+	    put_string(outf, " for(;;); /* no return */ ");
+	} else if (!strcmp(spec_text, "void")
 	 && declarator->text[0] != '*'
 	 && declarator->func_stack->func_def == FUNC_NONE) {
 	    put_string(outf, " /* void */ ");
@@ -542,6 +550,7 @@ void	put_body(outf, decl_spec, declarator)
     } else
 	put_string(outf, ";");
     put_newline(outf);
+    exitlike_func = FALSE;
 }
 
 #ifdef NO_LEAKS

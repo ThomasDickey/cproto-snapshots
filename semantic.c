@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.40 1994/09/23 23:32:01 tom Exp $
+/* $Id: semantic.c,v 3.43 1994/09/24 15:06:32 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -16,7 +16,9 @@ static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int commented));
 #endif
 
 static	char *		concat_string		ARGS((char *a, char *b));
+#if OPT_LINTLIBRARY
 static	char *		glue_strings		ARGS((char *a, char *b));
+#endif
 static	boolean		is_void_parameter	ARGS((Parameter *p));
 static	Parameter *	search_parameter_list	ARGS((ParameterList *params, char *name));
 static	void		put_param_list		ARGS((FILE *outf, Declarator *declarator, int commented));
@@ -95,6 +97,7 @@ char *a, *b;
     return result;
 }
 
+#if OPT_LINTLIBRARY
 static char *
 glue_strings (a, b)	/* concatenate w/o embedded blank */
 char *a, *b;
@@ -106,6 +109,7 @@ char *a, *b;
     strcat(result, b);
     return result;
 }
+#endif
 
 /* Append two declaration specifier parts together.
  */
@@ -632,6 +636,7 @@ int commented;
 {
     char *s, *t, *decl_text;
     int f;
+    int saveNest = NestedParams;
 
     /* Output declarator text before function declarator place holder. */
     if ((s = strstr(declarator->text, "%s")) == NULL)
@@ -682,6 +687,7 @@ int commented;
 	}
     } else {
 	put_func_declarator(outf, declarator->func_stack, commented);
+	NestedParams = 2; /* e.g., "void (*signal(p1, p2))()" */
     }
     *s = '%';
     s += 2;
@@ -710,6 +716,7 @@ int commented;
      && proto_macro) {
 	put_char(outf, PAREN_R);
     }
+    NestedParams = saveNest;
 }
 
 /* Output a declarator.
@@ -877,6 +884,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    NestedParams = saveNest;
 	}
     }
+    exitlike_func = FALSE;
 }
 
 /* Return TRUE if the function uses varargs.
