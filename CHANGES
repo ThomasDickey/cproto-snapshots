@@ -1,5 +1,12 @@
 Version 4
 
+Patchlevel 5
+
+- Modified handling of lint library option to allow generation of lint libraries
+  for ANSI compilers (set -a -l).
+
+- corrected a missing 'void' in parameter list
+
 Patchlevel 4
 
 - Added -S option to only output static declarations.

@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.3 1995/08/24 01:03:48 cthuang Exp $
+/* $Id: semantic.c,v 4.3.1.1 1995/12/02 13:14:23 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -440,7 +440,7 @@ int	commented;	/* comment-delimiters already from higher level */
 	if (is_void_parameter(p))
 	    return (FALSE);
 	indent(outf);
-	if (!*s)
+	if (knrLintLibrary() && !*s)
 	    s = "int";
 	if (strlen(s) < 8)
 	    gap = '\t';
@@ -511,8 +511,8 @@ int	commented;	/* comment-delimiters already from higher level */
 #endif
 
     if (p->declarator->text[0] != '\0') {
-	if (strcmp(p->declarator->text, "...") == 0) {
-	    put_string(outf, "...");
+	if (strcmp(p->declarator->text, ELLIPSIS) == 0) {
+	    put_string(outf, ELLIPSIS);
 	} else {
 	    if (proto_style != PROTO_ABSTRACT || proto_comments
 	     || where != FUNC_PROTO
@@ -544,18 +544,23 @@ int commented;
     if (hide_it && !do_cmt) {
 	;
     } else if (is_void_parameter(p)) {
-	if (p != NULL
+	if (do_cmt) {
+	    if (!commented)
+	    	put_string(outf, COMMENT_BEGIN);
+	    put_string(outf, "void");
+	    if (!commented)
+	    	put_string(outf, COMMENT_END);
+	} else if (!hide_it)
 #if OPT_LINTLIBRARY
-	 && !lintLibrary()
+	if (!knrLintLibrary())
 #endif
-	 )
 	    put_string(outf, "void");
     } else {
 	f = (declarator == func_declarator) ? format : FMT_OTHER;
 
 #if OPT_LINTLIBRARY
 	if (where == FUNC_PROTO
-	 && lintLibrary()
+	 && knrLintLibrary()
 	 && (func_declarator != declarator)) {
 	    do_cmt = TRUE;	/* patch: shouldn't have gotten here at all */
 	}
@@ -566,7 +571,7 @@ int commented;
 	    put_string(outf, COMMENT_BEGIN);
 
 	put_string(outf, fmt[f].first_param_prefix);
-	(void)putParameter(outf, p, lintLibrary(), ++count, commented);
+	(void)putParameter(outf, p, knrLintLibrary(), ++count, commented);
 
 	while (p->next != NULL) {
 #if OPT_LINTLIBRARY
@@ -579,7 +584,7 @@ int commented;
 
 	    p = p->next;
 	    put_string(outf, fmt[f].middle_param_prefix);
-	    (void)putParameter(outf, p, lintLibrary(), ++count, commented);
+	    (void)putParameter(outf, p, knrLintLibrary(), ++count, commented);
 	}
 	if (where == FUNC_DEF && p->comment != NULL)
 	    put_string(outf, p->comment);
@@ -611,7 +616,7 @@ int commented;
 	    put_string(outf, fmt[format].first_param_prefix);
 	    put_string(outf, p->declarator->name);
 	    p = p->next;
-	    while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
+	    while (p != NULL && strcmp(p->declarator->text, ELLIPSIS) != 0) {
 		put_char(outf, ',');
 		put_string(outf, fmt[format].middle_param_prefix);
 		put_string(outf, p->declarator->name);
@@ -631,7 +636,7 @@ int commented;
 	    }
 	} else if (func_style != FUNC_NONE || proto_style != PROTO_NONE) {
 #if OPT_LINTLIBRARY
-	    if (!lintLibrary() || nestedParams <= 1)
+	    if (!knrLintLibrary() || nestedParams <= 1)
 #endif
 	    	put_param_list(outf, declarator, commented);
 	}
@@ -894,7 +899,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    put_decl_spec(stdout, decl_spec);
 	    put_declarator(stdout, d, commented);
 #if OPT_LINTLIBRARY
-	    if (is_func)
+	    if (knrLintLibrary() && is_func)
 		put_llib_params(d, commented);
 #endif
 	    put_body(stdout, decl_spec, d);
@@ -946,7 +951,7 @@ Declarator *declarator;
 
     for (p = declarator->params.first; p != NULL; p = p->next) {
 	if (p->decl_spec.text[0] == '\0' &&
-	 strcmp(p->declarator->text, "...") != 0) {
+	 strcmp(p->declarator->text, ELLIPSIS) != 0) {
 	    free(p->decl_spec.text);
 	    p->decl_spec.text = xstrdup("int");
 	}
@@ -1011,7 +1016,7 @@ Declarator *declarator;
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);
 #if OPT_LINTLIBRARY
-    if (lintLibrary())
+    if (knrLintLibrary())
 	put_llib_params(declarator, commented);
 #endif
     put_body(stdout, decl_spec, declarator);
@@ -1052,14 +1057,14 @@ int commented;
     p = declarator->params.first;
     if (!is_void_parameter(p)) {
 	fputc('\n', cur_tmp_file());
-	(void)putParameter(cur_tmp_file(), p, lintLibrary(), ++count, commented);
+	(void)putParameter(cur_tmp_file(), p, knrLintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
 	if (p->comment != 0)
 	    fputs(p->comment, cur_tmp_file());
 	p = p->next;
-	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
+	while (p != NULL && strcmp(p->declarator->text, ELLIPSIS) != 0) {
 	    fputc('\n', cur_tmp_file());
-	    (void)putParameter(cur_tmp_file(), p, lintLibrary(), ++count, commented);
+	    (void)putParameter(cur_tmp_file(), p, knrLintLibrary(), ++count, commented);
 	    fputc(';', cur_tmp_file());
 	    if (p->comment != 0)
 		fputs(p->comment, cur_tmp_file());

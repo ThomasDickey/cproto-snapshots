@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.4 1995/08/24 01:03:48 cthuang Exp $
+/* $Id: cproto.h,v 4.4.1.1 1995/12/01 00:12:22 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -20,6 +20,7 @@
 #endif
 
 /* Useful constants (mainly to avoid problems balancing parentheses...) */
+#define ELLIPSIS      "..."
 #define PAREN_L       '('
 #define PAREN_R       ')'
 #define SQUARE_L      '['
@@ -64,6 +65,11 @@ typedef struct decl_spec {
 } DeclSpec;
 
 /* Styles of function definitions */
+#if OPT_LINTLIBRARY
+#define FUNC_UNKNOWN		-1	/* unspecified */
+#else
+#define FUNC_UNKNOWN		0	/* unspecified (same as FUNC_NONE) */
+#endif
 #define FUNC_NONE		0	/* not a function definition */
 #define FUNC_TRADITIONAL	1	/* traditional style */
 #define FUNC_ANSI		2	/* ANSI style */
@@ -111,6 +117,7 @@ typedef union {
 
 /* Prototype styles */
 #if OPT_LINTLIBRARY
+#define PROTO_ANSI_LLIB		-2	/* form ANSI lint-library source */
 #define PROTO_LINTLIBRARY	-1	/* form lint-library source */
 #endif
 #define PROTO_NONE		0	/* do not output any prototypes */
@@ -119,7 +126,9 @@ typedef union {
 #define PROTO_ANSI		3	/* ANSI C prototype */
 typedef int PrototypeStyle;
 
-#define lintLibrary() (proto_style == PROTO_LINTLIBRARY)
+#define ansiLintLibrary() (proto_style == PROTO_ANSI_LLIB)
+#define knrLintLibrary()  (proto_style == PROTO_LINTLIBRARY)
+#define lintLibrary()     (knrLintLibrary() || ansiLintLibrary())
 
 /* The role of a function declarator */
 #define FUNC_OTHER	0	/* miscellaneous declaration */

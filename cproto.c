@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.4 1995/08/24 01:03:48 cthuang Exp $
+/* $Id: cproto.c,v 4.4.1.1 1995/12/02 18:28:38 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.4 1995/08/24 01:03:48 cthuang Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.4.1.1 1995/12/02 18:28:38 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -55,7 +55,7 @@ boolean promote_param = TRUE;
 PrototypeStyle proto_style = PROTO_ANSI;
 
 /* Function definition style converted to */
-FuncDefStyle func_style = FUNC_NONE;
+FuncDefStyle func_style = FUNC_UNKNOWN;
 
 /* If TRUE, put guard macro around prototype parameters */
 boolean proto_macro = FALSE;
@@ -637,7 +637,6 @@ char ***pargv;
 	    types_out = TRUE;
 	    break;
 	case 'l':
-	    func_style    = FUNC_NONE;
 	    proto_style   = PROTO_LINTLIBRARY;
 	    extern_out    = FALSE;
 	    types_out     = TRUE;
@@ -704,8 +703,18 @@ char **argv;
     process_options(&argc, &argv);
 
 #if OPT_LINTLIBRARY
-    if (lintLibrary())
+    if (lintLibrary()) {
     	put_string(stdout, "/* LINTLIBRARY */\n");
+	switch (func_style) {
+	case FUNC_ANSI:
+	case FUNC_BOTH:
+	    lint_shadowed = TRUE;	/* e.g., ctype.h */
+	    proto_style = PROTO_ANSI_LLIB;
+	    break;
+	}
+	func_style = FUNC_NONE;
+    } else if (func_style == FUNC_UNKNOWN)
+	func_style = FUNC_NONE;
 #endif
 
     if (proto_macro && define_macro) {

@@ -1,4 +1,4 @@
-$Id: run_test.txt,v 3.6 1995/11/30 23:27:18 tom Exp $
+$Id: run_test.txt,v 3.5.1.1 1995/11/30 23:27:18 tom Exp $
 
 CASE 01 = unix, vms, dos =
 
