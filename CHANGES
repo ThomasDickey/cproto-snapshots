@@ -1,3 +1,13 @@
+Version 4.6d
+
+2000/8/10
+- use newer versions of mkdirs.sh and install.sh
+- regenerate configure script with autoconf 2.13
+- restructure aclocal.m4
+- modify Makefile.in to allow $(bindir) and $(mandir) to be altered
+  independently of $(prefix) and $(exec_prefix) (patch by Carsten Leonhardt
+  <leo@debian.org>).
+
 Version 4.6c
 
 2000/7/8
