@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.19 1994/07/31 23:28:52 tom Exp $
+/* $Id: semantic.c,v 3.20 1994/08/01 00:41:45 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -599,7 +599,7 @@ int commented;
 	    if (where == FUNC_PROTO && proto_style == PROTO_ABSTRACT &&
 	     declarator != func_declarator) {
 		if (proto_comments) {
-		    if (star) put_string(outf, " ");
+		    if (star) put_char(outf, ' ');
 		    put_string(outf, COMMENT_BEGIN);
 		    put_string(outf, declarator->name);
 		    put_string(outf, COMMENT_END);
@@ -626,7 +626,10 @@ int commented;
     *t = '\0';
     put_string(outf, s);
 
-    if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
+    if (where == FUNC_PROTO
+     && (func_declarator == declarator
+      || func_declarator == declarator->head)
+     && proto_macro) {
 	fprintf(outf, " %s(", macro_name);
     }
 
@@ -635,7 +638,10 @@ int commented;
     put_parameters(outf, declarator, commented);
     put_string(outf, t);
 
-    if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
+    if (where == FUNC_PROTO
+     && (func_declarator == declarator
+      || func_declarator == declarator->head)
+     && proto_macro) {
 	put_char(outf, ')');
     }
 

@@ -46,7 +46,7 @@ extern extern_junk *foo P_((void));
 extern void_junk *foo2a P_((void));
 extern void_junk *foo2 P_((void));
 extern void_junk *foo_void P_((void_junk void_int));
-extern void (*Sigdisp P_((int sig, void (*func)(int sig))))(int sig);
-extern void (*sigdisp2 P_((int sig, void (*func)(int sig))))(int sig);
+extern void (*Sigdisp P_((int sig, void (*func)(int sig)))) P_((int sig));
+extern void (*sigdisp2 P_((int sig, void (*func)(int sig)))) P_((int sig));
 
 #undef P_

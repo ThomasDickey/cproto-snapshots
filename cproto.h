@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.12 1994/07/30 19:01:07 tom Exp $
+/* $Id: cproto.h,v 3.13 1994/08/01 00:28:23 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -183,6 +183,7 @@ extern void put_blankline   ARGS((FILE *outf));
 extern void put_padded      ARGS((FILE *outf, char *s));
 extern void fmt_library     ARGS((int code));
 extern void begin_tracking  ARGS((void));
+extern int already_declared ARGS((char *name));
 extern void track_in        ARGS((void));
 extern int want_typedef     ARGS((void));
 extern void begin_typedef   ARGS((void));
