@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.20 1994/08/06 10:36:11 tom Exp $
+/* $Id: lex.l,v 3.21 1994/08/13 11:07:06 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -99,6 +99,7 @@ static int decipher_comment   ARGS((char *keyword, int len));
 #ifdef yywrap
 #undef yywrap
 #endif
+int yywrap ARGS((void));
 %}
 
 WS		[ \t]

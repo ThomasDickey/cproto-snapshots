@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.5 1994/08/04 00:04:56 tom Exp $
+# $Id: makefile,v 3.7 1994/08/13 00:17:34 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -20,6 +20,8 @@ TESTDATA=\
 	$(REF_FILES)
 
 SCRIPTS	=\
+	make_dcl.sh\
+	testunix.sh\
 	run_test.sh	run_test.com
 
 SOURCES	= Makefile descrip.mms $(SCRIPTS) $(TESTDATA)
@@ -28,8 +30,12 @@ SOURCES	= Makefile descrip.mms $(SCRIPTS) $(TESTDATA)
 all:	$(SOURCES) $B/$(THIS)
 	@echo 'Type "make run_test"'
 
+scripts : $(SOURCES)
+	make_bat.sh `fgrep dos run_test.txt |sed -e 's/=.*//'`
+	make_dcl.sh `fgrep unix run_test.txt |sed -e 's/=.*//'`
+
 clean:
-	rm -f *.log *.out *.dcl *.err *.tmp case*.c
+	rm -f *.log *.out *.dcl *.err *.tmp case*.c case*.bat
 
 run_test:	$(SOURCES)
 	date >>$@.out

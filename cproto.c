@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.16 1994/08/12 23:12:14 tom Exp $
+/* $Id: cproto.c,v 3.17 1994/08/13 13:13:44 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.16 1994/08/12 23:12:14 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.17 1994/08/13 13:13:44 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -84,8 +84,13 @@ boolean quiet = FALSE;
 
 /* Include file directories */
 #ifdef MSDOS
+# ifdef __TURBOC__
+int num_inc_dir = 2;
+char *inc_dir[MAX_INC_DIR] = { "" , "/tc/include" };
+# else
 int num_inc_dir = 1;
 char *inc_dir[MAX_INC_DIR] = { "" };
+# endif
 #else
 int num_inc_dir = 2;
 char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
@@ -114,7 +119,8 @@ unsigned n;
     char *p;
 
     if ((p = malloc(n)) == NULL) {
-	fprintf(stderr, "%s: out of memory\n", progname);
+	fprintf(stderr, "%s: out of memory (cannot allocate %d bytes)\n",
+		progname, n);
 	exit(FAIL);
     }
     *p = '\0';

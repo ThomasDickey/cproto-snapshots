@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.10 1994/08/12 23:05:32 tom Exp $
+/* $Id: system.h,v 3.12 1994/08/13 23:44:23 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -48,6 +48,14 @@
 #endif
 
 /* Turbo C preprocessor */
+#ifdef __TURBOC__
+#define YY_READ_BUF_SIZE 256	/* patch */
+#define alloca xmalloc		/* patch */
+#define HAVE_TMPFILE 1
+#define HAVE_GETOPT_H 1	/* use the one from porting-directory */
+#include <io.h>		/* defines 'read()' for flex */
+#endif
+
 #ifdef TURBO_CPP
 #define CPP "cpp -P-"
 #else
@@ -156,6 +164,10 @@ extern void dofree(char *);
 # ifdef unix
 #  define OPT_LINTLIBRARY 1
 # endif
+#endif
+
+#if HAVE_LIBDBMALLOC
+#include <dbmalloc.h>
 #endif
 
 #endif	/* SYSTEM_H */

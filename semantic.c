@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.25 1994/08/06 11:07:09 tom Exp $
+/* $Id: semantic.c,v 3.26 1994/08/13 10:46:52 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -974,7 +974,7 @@ Declarator *declarator;
      * end of the file.
      */
     if ((diff = (ftell(cur_tmp_file()) - cur_begin_comment())) > 0) {
-	comment_len = diff;
+	comment_len = (unsigned)diff;
 	comment = xmalloc(comment_len);
 	fseek(cur_tmp_file(), cur_begin_comment(), 0);
 	fread(comment, sizeof(char), comment_len, cur_tmp_file());
@@ -1024,7 +1024,7 @@ Declarator *declarator;
 
 	/* Save the current function definition head. */
 	if ((diff = (cur_begin_comment() - decl_spec->begin)) > 0) {
-	    func_len = diff;
+	    func_len = (unsigned)diff;
 	    cur_func = xmalloc(func_len);
 	    fread(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
