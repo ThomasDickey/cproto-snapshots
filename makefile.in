@@ -1,9 +1,9 @@
-# $Id: makefile.in,v 3.20 1994/09/01 22:23:35 tom Exp $
+# $Id: makefile.in,v 3.21 1994/09/03 12:15:27 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 3
+RELEASE = 4
 
 #### Start of system configuration section. ####
 
@@ -109,7 +109,7 @@ mostlyclean :
 clean : mostlyclean
 	rm -f $(THIS)
 
-distclean : mostlyclean
+distclean : clean
 	rm -f stamp-h config.status config.h makefile
 	rm -f .version .fname
 
@@ -120,10 +120,10 @@ check:	$(THIS)
 	cd testing; make run_test
 
 # configure might not change config.h
-config.h : stamp-h
-stamp-h : config.status
-	./config.status
-	touch stamp-h
+#config.h : stamp-h
+#stamp-h : config.status
+#	./config.status
+#	touch stamp-h
 
 makefile: makefile.in config.status
 	./config.status
@@ -161,15 +161,8 @@ dist:
 	tar -cf - `cat .fname` | gzip >`cat .fname`.tgz
 	rm -rf `cat .fname` .fname .files
 
-# Some of the output will be uuencoded because the test scripts include
-# <CR><LF> terminated ".bat" files for MS-DOS.
-shar: MANIFEST
-	rm -f .fname .files
-	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
-	cat MANIFEST | grep ' ' | sed -e 's/\ .*//' | uniq >.files
-	for n in testing/case*.dcl testing/case*.bat;do echo $$n >>.files;done
-	shar -M -n`cat .fname` -opart -l50 `cat .files`
-	rm -f .fname .files
+shar:
+	makekit -m
 
 default.h: $(C_FILES) lex.yy.c
 	./$(THIS) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
