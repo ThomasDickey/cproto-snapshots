@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.30 1994/08/16 23:43:34 tom Exp $
+/* $Id: semantic.c,v 3.31 1994/09/14 00:25:00 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -447,7 +447,7 @@ int	commented;	/* comment-delimiters already from higher level */
 	    Declarator *q;
 
 	    free(p->declarator->name);
-	    p->declarator->name = supply_parm(count);
+	    p->declarator->name = xstrdup(supply_parm(count));
 
 	    for (q = p->declarator; q != 0; q = q->func_stack) {
 		if (q->func_def == FUNC_NONE) {
