@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 3.4 1994/09/19 22:57:09 tom Exp $
+/* $Id: trace.c,v 4.1 1994/09/24 20:46:17 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  */
@@ -320,7 +320,7 @@ void	show_alloc()
 		for (j = 0; j < nowPending; j++) {
 			if (area[j].text) {
 				if (count++ < 10)
-					Trace("...%d) %d bytes in alloc #%d:%p\n",
+					Trace("...%d) %ld bytes in alloc #%d:%p\n",
 						j,
 						area[j].size,
 						area[j].note,

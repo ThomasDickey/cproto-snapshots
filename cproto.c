@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.25 1994/09/24 19:44:52 tom Exp $
+/* $Id: cproto.c,v 3.26 1994/09/24 21:31:58 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.25 1994/09/24 19:44:52 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.26 1994/09/24 21:31:58 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -111,7 +111,7 @@ char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
 
 /* Run the C preprocessor */
 #ifdef CPP
-# if OK_POPEN_PROTOTYPE
+# if !HAVE_POPEN_PROTOTYPE
 extern	FILE *	popen  ARGS((const char *c, const char *m));
 # endif
 extern	int	pclose ARGS((FILE *p));

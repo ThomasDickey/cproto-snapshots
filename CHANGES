@@ -29,6 +29,8 @@ Patchlevel 10 (dickey, September 1994)
   define both macros and functions with the same names).
 
 - interpret GCC's __attribute__ noreturn and format for lint-library text
+  (GCC 2.5.8 preprocessor passes these macros through, GCC 2.6 apparently does
+  not).
 
 - treat carriage-return (^M) as whitespace where appropriate.
 
