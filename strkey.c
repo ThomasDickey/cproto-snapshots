@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 3.1 1993/06/09 18:07:18 tom Exp $
+/* $Id: strkey.c,v 3.2 1994/07/25 23:48:17 tom Exp $
  *
  * Some string handling routines
  */
@@ -19,7 +19,7 @@ char *	strkey (src, key)
 {
 	register char	*s  = src,
 			*d;
-	register SIZE_T	len = strlen(key);
+	register size_t	len = strlen(key);
 
 	while (*s) {
 		if (!LETTER(*s))

@@ -1,0 +1,43 @@
+dnl Process this file with 'autoconf' to produce a 'configure' script
+dnl $Id: configure.in,v 3.2 1994/07/25 23:49:04 tom Exp $
+AC_REVISION($Revision: 3.2 $)
+AC_INIT(cproto.c)
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_GCC_TRADITIONAL
+
+###	use option -with-warnings to turn on all gcc warnings
+CC_OPTS="$CFLAGS"
+if test -n "$GCC"
+then
+AC_WITH(warnings,
+[CC_OPTS="$CC_OPTS -Wall -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes"])
+fi
+
+###	extra things that we'll substitute in the makefile
+AC_SUBST(CC_OPTS)
+AC_SUBST(LIBS)
+
+AC_CONST
+AC_SIZE_T
+AC_STDC_HEADERS
+AC_HAVE_HEADERS(stdlib.h unistd.h)
+AC_HAVE_HEADERS(getopt.h string.h malloc.h)
+
+AC_HAVE_FUNCS(strstr)
+
+###	output makefile and config.h
+changequote({,})dnl
+AC_OUTPUT(makefile config_h,
+{
+echo creating config.h
+sed	-e '/^# /d' \
+	-e 's/ -D/\
+#define /g' \
+	-e 's/\(#define [A-Za-z_][A-Za-z0-9_]*\)=/\1	/g' \
+	config_h >config.h
+}
+echo removing config_h
+rm config_h
+)
+changequote([,])dnl

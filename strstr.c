@@ -1,4 +1,4 @@
-/* $Id: strstr.c,v 3.4 1994/02/07 20:11:30 tom Exp $
+/* $Id: strstr.c,v 3.5 1994/07/25 23:32:17 tom Exp $
  *
  * Simple implementation of the ANSI strstr() function
  */
@@ -9,7 +9,7 @@
  * Return a pointer to the first occurence within the string,
  * or NULL if not found.
  */
-#ifndef strstr
+#if !HAVE_STRSTR
 char *
 strstr (src, key)
 char *src, *key;
