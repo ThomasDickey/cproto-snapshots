@@ -1,9 +1,17 @@
-/* $Id: system.h,v 3.1 1994/02/08 17:22:56 tom Exp $
+/* $Id: system.h,v 3.2 1994/07/25 23:45:36 tom Exp $
  *
  * cproto configuration and system dependencies
  */
 
+#ifndef	SYSTEM_H
+#define	SYSTEM_H
  
+#ifdef __STDC__
+#define ARGS(p) p
+#else
+#define ARGS(p) ()
+#endif
+
 /* Declare argument for 'exit()' and '_exit()': */
 #ifdef	vms
 #include	<stsdef.h>
@@ -43,6 +51,15 @@
 #define CPP "cl /E /nologo"
 #endif
 
+/* Set configuration parameters for systems on which we cannot run autoconf */
+#ifndef HAVE_STDLIB_H
+#define HAVE_STDLIB_H 1
+#endif
+
+#ifndef HAVE_STRSTR
+#define HAVE_STRSTR 1
+#endif
+
 /* Default C preprocessor on UNIX systems */
 #ifndef MSDOS
 #ifndef CPP
@@ -65,19 +82,28 @@
 #define MAX_TEXT_SIZE 256
 #endif
 
-#if __STDC__ || defined(MSDOS) || defined(OS2)
-#include <stdlib.h>
-#include <string.h>
+#if HAVE_STDLIB_H
+#include	<stdlib.h>
 #else
-#if defined(BSD) && !defined(apollo)
-#include <strings.h>
-#define strchr index
-#define strrchr rindex
-#else
-#include <string.h>
+extern char *malloc  ARGS((size_t n));
+extern char *realloc ARGS((char *p, size_t n));
 #endif
-extern char *getenv(), *malloc(), *realloc(), *strstr();
-#endif
+
+#if STDC_HEADERS || HAVE_STRING_H
+#  include <string.h>
+/* An ANSI string.h and pre-ANSI memory.h might conflict.  */
+#  if !STDC_HEADERS && HAVE_MEMORY_H
+#    include <memory.h>
+#  endif /* not STDC_HEADERS and HAVE_MEMORY_H */
+#else /* not STDC_HEADERS and not HAVE_STRING_H */
+#  include <strings.h>
+#  define strchr index
+#  define strrchr rindex
+/* memory.h and strings.h conflict on some systems.  */
+#endif /* not STDC_HEADERS and not HAVE_STRING_H */
+
+extern char *getenv  ARGS((const char *v));
+extern char *strstr  ARGS((const char *s, const char *p));
 
 #ifdef DOALLOC
 extern char *doalloc(char *,unsigned);
@@ -87,3 +113,5 @@ extern void dofree(char *);
 #define realloc(p,n) doalloc(p,n)
 #define free(n) dofree(n)
 #endif	/* DOALLOC */
+
+#endif	/* SYSTEM_H */

@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940208
+MANIFEST for cproto, version t19940725
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -7,6 +7,8 @@ Makefile.msc                    v3_7 base
 Makefile.uni                    v3_7 base
 README                          overview of the CPROTO program
 config.h                        v3_7 base
+config_h.in                     template for config.h
+configure.in                    script for generating 'configure' via autoconf
 cproto.1                        man-page for CPROTO
 cproto.c                        main program of CPROTO
 cproto.h                        common datatypes and definitions for CPROTO
@@ -15,6 +17,7 @@ getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO
 lex.l                           lex rules for CPROTO
 lintlibs.c                      functions used for lint-library formatting
+makefile.in                     template makefile for CPROTO
 patchlev.h                      current patch level of CPROTO
 popen.c                         v3_7 base
 semantic.c                      functions to support yacc grammar (formatting and translation)
@@ -26,7 +29,9 @@ symbol.h                        interface definitions for symbol.c
 system.h                        system-dependent definitions, coordinated with config.h
 trace.c                         debugging support for CPROTO
 porting                         subdirectory
+porting/borland.mak             makefile for Borland C
 porting/getopt.h                header file for getopt
+porting/micrsoft.mak            makefile for Microsoft C
 testing                         subdirectory
 testing/apollo.c                template for apollo lint-library
 testing/case01.com              test cases from 1993 merge of my changes to cproto

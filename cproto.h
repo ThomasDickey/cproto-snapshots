@@ -1,8 +1,12 @@
-/* $Id: cproto.h,v 3.8 1993/06/09 18:15:02 tom Exp $
+/* $Id: cproto.h,v 3.10 1994/07/25 23:48:27 tom Exp $
  *
  * Declarations for C function prototype generator
  */
+#ifdef	HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "system.h"
 
 #ifdef	lint
 #define	ALLOC(cast)	(cast *)0
@@ -10,16 +14,17 @@
 #define	ALLOC(cast)	(cast *)xmalloc(sizeof(cast))
 #endif
 
-#if __STDC__ && (defined(apollo) || defined(sun))
-#define	SIZE_T	size_t
-#else
-#define	SIZE_T	int
-#endif
-
 /* Boolean type */
 typedef char boolean;
-#define FALSE	0
-#define TRUE	1
+#if	!defined(TRUE) || (TRUE != 1)
+#undef  TRUE
+#define	TRUE	(1)
+#endif
+
+#if	!defined(FALSE) || (FALSE != 0)
+#undef  FALSE
+#define	FALSE	(0)
+#endif
 
 /* Source file text */
 typedef struct text {

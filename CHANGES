@@ -1,6 +1,10 @@
 Version 3
 
-Patchlevel 8
+Patchlevel 9
+
+- use 'autoconf' to make a UNIX configure-script.
+
+Patchlevel 8 (internal)
 
 - added files 'lintlibs.c' and 'strkey.c'
 

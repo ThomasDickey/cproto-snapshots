@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.10 1994/02/08 16:38:28 tom Exp $
+/* $Id: cproto.c,v 3.11 1994/07/25 23:54:38 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.10 1994/02/08 16:38:28 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.11 1994/07/25 23:54:38 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -10,9 +10,13 @@ static char rcsid[] = "$Id: cproto.c,v 3.10 1994/02/08 16:38:28 tom Exp $";
 #include "patchlev.h"
 
 /* getopt declarations */
-extern int getopt();
+#if HAVE_GETOPT_H
+#include <getopt.h>
+#else
+extern int getopt (int argc, char *const *argv, const char *shortopts);
 extern char *optarg;
 extern int optind;
+#endif
 
 /* Name of the program */
 char progname[] = "cproto";
@@ -87,11 +91,16 @@ char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
 
 /* Run the C preprocessor */
 #ifdef CPP
-extern FILE *popen();
-extern int pclose();
+extern	FILE *	popen  ARGS((const char *c, const char *m));
+extern	int	pclose ARGS((FILE *p));
 static char *cpp = CPP, *cpp_opt, *cpp_cmd;
 #endif
 
+static	char *	escape_string   ARGS((char *src));
+static	void	usage           ARGS((void));
+static	void	process_options ARGS((int *pargc, char ***pargv));
+static	void	parse_options   ARGS((char *src, int maxargc, int *pargc, char **argv));
+	int	main            ARGS((int argc, char **argv));
 
 /* Try to allocate some memory.
  * If unsuccessful, output an error message and exit.
