@@ -1,45 +1,18 @@
 Version 4
 
-Patchlevel 2 (Oct 1994)
+Patchlevel 1
 
-- check for a special case in lint-library generation, i.e., prototype
-  arguments of the form "*()", which need more parentheses for SunOS's lint.
+- Added testing scripts for MS-DOS and VMS.
 
-- fixed date in cproto.1 (the RCS date is all that matters).
+- Added makefile for Borland C++ for OS/2.
 
-- corrected definitions for exit-codes in system.h.
+- Fix: When the -a, -t or -b options were used, '&' characters were stripped
+  from the output files.
 
-- derive the program-name from the argv[0] entry, in case it's installed
-  under a different name.
+- Fix: The system.h file should define EXIT_SUCCESS and EXIT_FAILURE
+  regardless of the presence of <stdlib.h>.
 
-Patchlevel 1 (Oct 1994)
-
-- modified grammar to recognize C++ ref-variables (i.e., '&' as a prefix to
-  identifiers at the top lexical level).  Lint libraries are formatted without
-  this '&', since lint doesn't grok C++.  This corrects an error in cproto 4.0
-  which caused '&' characters to be suppressed altogether, e.g., when filtering
-  with the "-t" option.
-
-- modified rules that generate MANIFEST to put auto-generated scripts there
-  also, if they've been created (e.g., cd testing; make scripts).
-
-- modified makefile.in to have shar target for both GNU shar and Rick Salz's
-  cshar utility.
-
-- use 'const' in yyerror.c, otherwise the error-reporting auto-configuration
-  does not work.
-
-- don't use "#elif" preprocessor control; not all systems support it.
-
-- bumped the other version numbers to 4.x, for consistency.
-
-Patchlevel 0 (cthuang, October 1994)
-
-Merge changes, posted to comp.sources.misc
-
-Version 3
-
-Patchlevel 10 (dickey, September 1994)
+Patchlevel 0 (dickey, September 1994)
 
 - corrected two malloc-defects in lint library generation (one place where
   generated parameter name was copied rather than allocated, and another memory

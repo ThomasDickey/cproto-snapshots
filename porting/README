@@ -1,20 +1,18 @@
-$Id: README,v 3.2.1.1 1994/10/23 00:04:23 tom Exp $
-
 CPROTO/PORTING
 
 The files in this directory are needed on MSDOS or VMS to build CPROTO.
 They all assume that you've already got lex and yacc or flex and bison.
 
-	getopt.c, getopt.h - a free version of getopt function for systems that
-		don't already have it (i.e., MSDOS, VMS).  Some systems that
-		support auto-configuration may need these files; you'll have to
-		edit the makefile in that case.
-
-	popen.c - fakes a pipe open/close by writing to a temporary file.
-
+	getopt.c, getopt.h - public domain getopt function for systems
+		that don't already have it (i.e., MSDOS, VMS).
+ 
+ 	popen.c - fakes a pipe open/close by writing to a temporary file.
+ 
 	turboc.mak - makefile for Turbo C/C++ 3.0 for MS-DOS.
 
-	borland.mak - makefile for Borland C
+	borland.mak - makefile for Borland C for MS-DOS
+
+	borland.os2 - makefile for Borland C+ for OS/2
 
 	micrsoft.mak - makefile for Microsoft C.
 
