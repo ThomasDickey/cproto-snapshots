@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.8 2000/10/29 00:47:16 cthuang Exp $
+# $Id: Makefile.in,v 4.7.1.5 2002/01/25 23:39:44 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_6d
+RELEASE = 4_6e
 
 #### Start of system configuration section. ####
 
@@ -106,14 +106,13 @@ $(THIS).man : $(THIS).1
 
 mostlyclean :
 	- rm -f core .nfs* *.o *.bak *.BAK *.log *.man *.out $(JUNK) default.h
-	- rm -f Part?? part.*
 
 clean : mostlyclean
 	- rm -f $(THIS)
 	cd testing; $(MAKE) $@
 
 distclean : clean
-	- rm -f stamp-h config.log config.cache config.status config.h Makefile
+	- rm -f config.log config.cache config.status config.h Makefile
 	- rm -f .version .fname
 	cd testing; $(MAKE) $@
 
@@ -124,23 +123,9 @@ realclean: distclean
 check:	$(THIS)
 	cd testing; $(MAKE) run_test
 
-# configure might not change config.h
-config.h : stamp-h
-stamp-h : config.status
-	./config.status
-
-Makefile: Makefile.in config.status
-	./config.status
-
-config.status : configure
-	./config.status --recheck
-
-configure : configure.in aclocal.m4
-	autoconf
-
 # I keep my sources in RCS, and assign a symbolic release to the current patch
 # level.  The 'manifest' script knows how to build a list of files for a given
-# revision.
+# revision -TD
 MANIFEST:
 	manifest -rv$(RELEASE) \
 		$(THIS).man testing/case*.dcl testing/case*.bat
@@ -157,21 +142,6 @@ dist: MANIFEST
 	done
 	tar -cf - `cat .fname` | gzip >`cat .fname`.tgz
 	rm -rf `cat .fname` .fname .files
-
-# Some of the output will be uuencoded because the test scripts include
-# <CR><LF> terminated ".bat" files for MS-DOS.
-dist-shar: MANIFEST
-	- rm -f .fname .files
-	echo '$(THIS)-$(RELEASE)' >.fname
-	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
-	shar -M -n`cat .fname` -opart -l50 `cat .files`
-	- rm -f .fname .files
-
-# This uses Rick Salz's cshar to make a set of shar-files.
-# (It'll clobber the version info in MANIFEST, and doesn't restore timestamps,
-# but that's another bag of worms).
-dist-cshar: MANIFEST
-	makekit -m
 
 default.h: $(C_FILES) lex.yy.c
 	./$(THIS) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
