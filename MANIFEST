@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940903
+MANIFEST for cproto, version t19940913
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -16,6 +16,7 @@ cproto.h                        common datatypes and definitions for CPROTO
 getopt.c                        GNU getopt.c
 getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO
+install.sh                      install-script from X-Window distribution
 lex.l                           lex rules for CPROTO
 lintlibs.c                      functions used for lint-library formatting
 makefile.in                     template makefile for CPROTO
