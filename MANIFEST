@@ -1,6 +1,7 @@
-MANIFEST for cproto, version t19910912
+MANIFEST for cproto, version t19920610
 --------------------------------------------------------------------------------
 MANIFEST                        this file
+popen.c                         v3_7 base
 testing                         subdirectory
 testing/case12.com              test cases from 1993 merge of my changes to cproto
 testing/case13.com              test cases from 1993 merge of my changes to cproto
