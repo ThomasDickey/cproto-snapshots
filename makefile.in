@@ -1,5 +1,5 @@
 # @configure_input@
-# $Id: makefile.in,v 4.2.1.1 1994/11/12 15:06:33 tom Exp $
+# $Id: makefile.in,v 4.3 1995/01/01 20:00:24 cthuang Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -43,7 +43,6 @@ LDFLAGS		= @LDFLAGS@
 DOC_FILES = \
 	README \
 	CHANGES \
-	$(THIS).man \
 	$(THIS).1
 
 MAK_FILES = \
@@ -97,10 +96,10 @@ $(THIS) : $(OBJECTS)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
-	$(YACC) $(srcdir)/grammar.y
+	$(YACC) $^
 
 lex.yy.c : lex.l
-	$(LEX) $(srcdir)/lex.l
+	$(LEX) $^
 
 $(THIS).man : $(THIS).1
 	- nroff -man $(srcdir)/$(THIS).1 >$@

@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.1.1.3 1994/11/12 15:53:13 tom Exp $
+dnl $Id: aclocal.m4,v 4.2 1995/01/01 19:34:59 cthuang Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
