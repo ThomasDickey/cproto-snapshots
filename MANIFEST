@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19980121
+MANIFEST for cproto, version t19980122
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -39,6 +39,7 @@ trace.h                         header for trace.c, dump.c
 y_tab.c                         v4_6
 yyerror.c                       enhanced error reporting support for yacc/bison
 emx                             subdirectory
+emx/Makefile                    makefile for gcc (EMX)
 emx/README                      description of files in emx directory
 msdos                           subdirectory
 msdos/README                    description of files in msdos directory
@@ -48,6 +49,8 @@ msdos/micrsoft.mak              makefile for Microsoft C
 msdos/turboc.mak                makefile for TurboC
 os2                             subdirectory
 os2/README                      description of files in os2 directory
+os2/run_test.cmd                run test-cases on OS/2
+os2/watcom.mak                  makefile for watcom (OS/2)
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
 porting/borland.mak             makefile for Borland C
@@ -118,3 +121,4 @@ vms/README                      description of files in vms directory
 vms/descrip.mms                 makefile for vms
 win32                           subdirectory
 win32/README                    description of files in win32 directory
+win32/watcom.mak                makefile for watcom
