@@ -2,7 +2,14 @@ Version 4
 
 Patchlevel 6
 
-- added '__volatile' keyword to grammar to accommodate gcc on Linux.
+- modified lint-library include-stack recovery to work on OSF/1.
+
+- supply default initializer for lint-library const data
+
+- corrected reset of __attribute__((noreturn))
+
+- added '__volatile', '__const__', '__inline' keywords to grammar to
+  accommodate gcc.
 
 - modified configure script to add several development/debugging options (i.e.,
   --with-trace, --with-dbmalloc, --with-dmalloc).

@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.3 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: lintlibs.c,v 4.3.1.1 1996/05/30 23:37:25 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -22,6 +22,7 @@ static	void	free_inc_stack   ARGS((int n));
 static	void	make_inc_stack   ARGS((int n, char *path));
 static	int	already_included ARGS((char *path));
 static	void	add2implied_buf  ARGS((char *s, int append));
+static	int	c_suffix         ARGS((char *path));
 
 static	int	in_typedef;
 static	int	blank_lines;	/* used to filter blank lines from typedefs */
@@ -258,6 +259,18 @@ void	begin_tracking()
 	InitTracking = FALSE;
 }
 
+static	int	c_suffix(path)
+	char	*path;
+{
+	char	*last = path + strlen(path);
+#ifdef	vms
+	char	*vers = strrchr(path, ';');
+	if (vers != 0)
+		last = vers;
+#endif
+	return ((last - path) > 2 && !strcmp(last-2, ".c"));
+}
+
 /*
  * For lint-library, we want to keep track of what file we are in so that we
  * can generate appropriate comments and include-statements.
@@ -308,25 +321,59 @@ void	track_in()
 			}
 			make_inc_stack(in_include, cur_file_name());
 		}
+		(void)strcpy(old_file, cur_file_name());
 	} else if (!strcmp(cur_file_name(), base_file)) {
 		in_include = 0;	/* kludgy bison! */
-	} else {		/* continue or unnest ? */
-		while (strcmp(old_file, cur_file_name())) {
-			in_include--;
-			flush_varargs();
-			if (in_include < 0) {
+		(void)strcpy(old_file, cur_file_name());
+	} else if (strcmp(old_file, cur_file_name())) { /* continue/unnest ? */
+		int n, found;
+		char *s = cur_file_name();
+#ifdef DEBUG
+		char temp[80];
+#endif
+
+		flush_varargs();
+		for (n = in_include, found = FALSE; n >= 0; n--) {
+			if (!strcmp(inc_stack[n], s)) {
+				found = TRUE;
+				in_include--;
+				break;
+			}
+		}
+		if (!found) {
+			/*
+			 * There's two kinds of broken programs that can cause
+			 * us to lose sync at this point:  (1) programs such as
+			 * yacc that don't reference the grammar file, instead
+			 * referencing the generated file, and (2) broken
+			 * preprocessors (such as on OSF/1) that neglect to
+			 * report line #1 on headers that are rejected due to
+			 * prior inclusion.
+			 *
+			 * If the source file's extension is ".h", we'll assume
+			 * the latter case (i.e., just report it).  The former
+			 * case requires that we reset the stack.
+			 */
+#ifdef DEBUG
+			sprintf(temp, "/* lost sync @%d: ", cur_line_num()+1);
+			put_blankline(stdout);
+			put_string(stdout, temp);
+			put_string(stdout, s);
+			put_string(stdout, " */\n");
+#endif
+			if (in_include == 1 && c_suffix(s)) {
 				/* yacc did it again! */
 				in_include = 0;
-				put_blankline(stdout);
+				make_inc_stack(in_include, strcpy(base_file, s));
+#ifdef DEBUG
 				put_string(stdout, "/* processed ");
-				put_string(stdout, strcpy(base_file, cur_file_name()));
+				put_string(stdout, s);
 				put_string(stdout, " */\n");
-				break;
-			} else
-				(void)strcpy(old_file, inc_stack[in_include]);
+#endif
+			}
 		}
+		(void)strcpy(old_file, inc_stack[in_include]);
 	}
-	(void)strcpy(old_file, cur_file_name());
 #ifdef	DEBUG
 	dump_stack("-after");
 #endif	/* DEBUG */
@@ -453,10 +500,14 @@ int	lint_ellipsis(p)
 }
 
 /*
- * Reset the data used for "VARARGS" comment.
+ * Reset the data used for "VARARGS" comment.  Actually, reset almost any
+ * special attribute that's attached to a function, so we don't accidentally
+ * propagate it to the next function (or data) to be output.
  */
 void	flush_varargs()
 {
+	exitlike_func = FALSE;
+
 	varargs_num = 0;
 	if (varargs_str != 0) {
 		free(varargs_str);
@@ -567,8 +618,14 @@ void	put_body(outf, decl_spec, declarator)
 	    put_string(outf, ")0); ");
 	}
 	put_char(outf, CURL_R);
-    } else
+    } else {
+	/* SVR4 lint complains if we declare const data w/o some initializer.
+	 */
+	if (strkey(decl_spec->text, "const") != NULL
+	 || strkey(declarator->text, "const") != NULL)
+	    put_string(outf, " = {0}");
 	put_string(outf, ";");
+    }
     put_newline(outf);
     exitlike_func = FALSE;
 }

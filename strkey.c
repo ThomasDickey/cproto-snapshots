@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: strkey.c,v 4.1.1.1 1996/05/30 15:27:42 tom Exp $
  *
  * Some string handling routines
  */
@@ -18,18 +18,20 @@ char *
 strkey (src, key)
 char *src, *key;
 {
-    register char *s  = src, *d;
-    register size_t len = strlen(key);
+    if (src != 0 && key != 0) {
+	register char *s  = src, *d;
+	register size_t len = strlen(key);
 
-    while (*s) {
-	if (!LETTER(*s)) {
-	    s++;
-	} else {
-	    for (d = s; LETTER(*d); d++)
-		;
-	    if ((d - s) == len && !strncmp(s, key, len))
-		return s;
-	    s = d;
+	while (*s) {
+	    if (!LETTER(*s)) {
+		s++;
+	    } else {
+		for (d = s; LETTER(*d); d++)
+		    ;
+		if ((d - s) == len && !strncmp(s, key, len))
+		    return s;
+		s = d;
+	    }
 	}
     }
     return NULL;

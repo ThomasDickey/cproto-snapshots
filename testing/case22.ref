@@ -32,7 +32,7 @@ x4t;
 #undef x17
 x4t	x17;
 #undef x18
-const	x18;
+const	x18 = {0};
 #undef x19
 volatile x19;
 

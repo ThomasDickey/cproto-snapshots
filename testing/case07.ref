@@ -8,7 +8,7 @@ extern double x11;
 extern signed x12;
 extern unsigned x13;
 extern x4t x17;
-extern const x18;
+extern const x18 = {0};
 extern volatile x19;
 extern _FIRST first;
 extern _FIRST last;
