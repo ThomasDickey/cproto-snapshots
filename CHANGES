@@ -9,8 +9,11 @@ Patchlevel 3
   (also added install.sh - note that "install-sh" is not an MS-DOS-compatible
   filename).
 
-- derive the program-name from the argv[0] entry, in case it's installed
+- derive the program name from the argv[0] entry, in case it's installed
   under a different name.
+
+- Fix: The -f2 option generated incorrect prototypes for functions that
+  take a variable argument list.
 
 - use 'sed' rather than 'flip' to apply trailing CR's to MS-DOS scripts.
 
@@ -82,8 +85,6 @@ Patchlevel 0 (dickey, September 1994)
 - added configuration-test to avoid conflict with prototype for 'popen()'
 
 - added several function-pointer regression test-cases
-
-Version 3
 
 Patchlevel 9 (dickey, August 1994)
 
