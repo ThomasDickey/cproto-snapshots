@@ -1,0 +1,267 @@
+Version 3
+
+Patchlevel 7
+
+- Fix: The processing of string literals is now more robust.
+
+- Removed the -f4 option which generated prototypes like
+
+	int main P_((int argc, char **argv));
+
+  Use the -m option now to put a guard macro around the prototype
+  parameter list.  Use the -m option together with -f3 (which is the
+  default) to produce the same output as the old -f4 option.  The option
+  to set the guard macro name is now -M.
+
+- Comments in prototype parameter lists are now disabled by default.
+  Use the -c option now to output these comments.
+
+- Can now process #include directives in which the file is specified with
+  a #define macro.
+
+- Now does not convert function definitions that take the formal
+  parameter va_alist from <varargs.h>.
+
+- Now recognizes the GNU C modifiers __const and __inline__.
+
+Patchlevel 6
+
+- Fix: A function in lex.l exploited the ANSI C feature of concatenating
+  string literals.  This prevented the module from being compiled with
+  pre-ANSI C compilers.
+
+Patchlevel 5
+
+- Fix: The -v option did not output declarations for function pointers.
+
+- Fix: String literals continued over more than one line messed up the
+  line number count.
+
+- Fix: The program generated incorrect prototypes for functions that
+  take a variable argument list using <varargs.h>.
+
+- Fix: When converting functions from the standard input, cproto
+  generated no output if no functions needed to be converted.
+
+- Fix: Now does not output a warning if an untagged struct is found in a
+  typedef declaration.
+
+- Added the -b option which rewrites function definition heads to
+  include both old style and new style declarations separated by a
+  conditional compilation directive.  For example, the program can
+  generate
+
+	#ifdef ANSI_FUNC
+
+	int
+	main (int argc, char *argv[])
+	#else
+
+	int
+	main (argc, argv)
+	int argc;
+	char *argv[]
+	#endif
+	{
+	}
+
+  Added the -B option to set the preprocessor directive that appears at
+  the beginning of such definitions.
+
+- Added the keyword "interrupt" to the set of type qualifiers when
+  compiled on a UNIX system.
+
+- The MS-DOS version now recognizes the type modifiers introduced by
+  Microsoft C/C++ 7.00.
+
+- Now recognizes ANSI C trigraphs (yuck!).
+
+- Now use "#if __STDC__" instead of "#if defined(__STDC__)".
+
+- GNU bison orders the y.tab.c sections differently than yacc, which
+  resulted in references to variables before they were declared.  The
+  grammar specification was modified to also be compatible with bison.
+
+Patchlevel 4
+
+- Fix: A typedef name defined as a pointer to char, short or float was
+  incorrectly promoted if it was used to specify a formal parameter.
+  For example, for the definition
+
+	typedef char *caddr_t;
+
+	int strlen (s)
+	caddr_t s;
+	{
+	}
+
+  cproto generated the incorrect prototype
+
+	int strlen(int s);
+
+- Added implementation of the ANSI function tmpfile() for systems that
+  don't have it.
+- If compiled with Microsoft C, cproto preprocesses its input by running
+  the command "cl /E".  To eliminate the error messages when the file
+  <malloc.h> is included, the program now recognizes the specifier
+  _based(void).
+
+Patchlevel 3
+
+- Fix: The program didn't generate prototypes for functions defined with
+  the extern specifier.
+- Fix: The -c option didn't output a space before parameter names in
+  generated prototypes.
+- Added the -E option to specify a particular C preprocessor to run or
+  to stop the program from running the C preprocessor.
+- Added the -q option to stop the program from outputting error messages
+  when it cannot read the file specified in an #include directive.
+- Made the yacc specification compatible with UNIX SYSVR4 yacc.
+  
+Patchlevel 2
+
+- Fix: The function definition conversion may produce a mangled function
+  definition if an #include directive appears before the function and
+  no comments appear between the directive and the function.
+- Fix: The size of the buffer allocated for the C preprocessor command
+  string did not include enough space for options set in the environment
+  variable CPROTO.
+- Replaced the -n option with -c which disables all comments in the
+  generated prototypes.
+- Replaced the enum's with #define constants to accommodate C compilers
+  that don't like enumerators in constant expressions.
+
+Patchlevel 1
+
+- Fix: The program was calling ftell() on an invalid FILE pointer.
+
+Patchlevel 0
+
+- Added options to convert function definitions between the old style
+  and ANSI C style.
+- Options can be specified from the environment variable CPROTO.
+- The MS-DOS version recognizes more Microsoft C and Borland C++ type
+  modifiers (such as _cdecl, _far, _near).
+- Fix: Formal parameters specified with typedef names were not promoted.
+  For example, for the definition
+
+	typedef unsigned short ushort;
+
+	void test (x)
+	ushort x;
+	{
+	}
+
+  cproto generated the incorrect prototype
+
+	void test(ushort x);
+
+  while the correct one is
+
+	void test(int x);
+
+- Fix: Incorrect prototypes were generated for functions that returned
+  function pointers.  For example, cproto generated an incorrect
+  prototype for the function definition
+
+	void (*signal(int x, void (*func)(int y)))(int z)
+	{
+	}
+
+- Fix: Changed calls to memory allocation functions to abort the program
+  if they fail.
+
+Version 2
+
+Patchlevel 3
+
+- Made cproto compatible with GNU flex.
+- After compiling with the preprocessor symbol TURBO_CPP defined, on
+  MS-DOS systems, cproto will pipe its input through the Turbo C
+  preprocessor.
+- Fix: Typedef names may now be omitted from typedef declarations.
+  For example, every C compiler I tried accepts
+
+	typedef int;
+
+  and some even give warnings when encountering this statement.
+
+Patchlevel 2
+
+- Cproto is now able to generate prototypes for functions defined in lex
+  and yacc source files named on the command line.  Lex and yacc source
+  files are recognized by the .l or .y extension.
+- Fix: The memory allocated to the typedef symbol table was not being
+  freed after scanning each source file.
+- Fix: Failure to reset a variable during error recovery caused
+  segmentation faults.
+
+Patchlevel 1
+
+- Fix: Cproto incorrectly generated the parameter "int ..." in
+  prototypes of functions taking variable parameters.
+- Fix: Function definitions can now be followed by an optional
+  semicolon.  I found this feature in every C compiler I tried.
+
+Patchlevel 0
+
+- Added formal parameter promotion.
+- Added prototype style that surrounds prototypes with a guard macro.
+- Handles C++ style comment //.
+- Nifty new way to set prototype output format.
+- Got rid of the shell wrapper used to pipe the input through the C
+  preprocessor (cpp).
+- For the port to MS-DOS, I modified cproto to run without cpp, but
+  since I didn't want to reimplement cpp, the program processes only the
+  #include and #define directives and ignores all others.  Macro names
+  defined by the #define directive are treated like typedef names if
+  they appear in declaration specifiers.
+
+Version 1
+
+Patchlevel 3
+
+- Fix: identical typedef names and struct tags should be allowed.
+  For example:
+
+	typedef struct egg_salad egg_salad;
+
+	struct egg_salad {
+	    int mayo;
+	};
+
+	void dine(egg_salad l)
+	{
+	}
+
+Patchlevel 2
+
+- Fix: A typedef statement should allow a list of typedefs to be declared.
+  Example:
+
+	typedef int a, *b;
+
+- Fix: When run with the -v option on this input, cproto did not output
+  a declaration for variable "b":
+
+	char *a="one"; char *b="two";
+
+- The options were renamed.  Added new options that change the output
+  format of the prototypes.
+
+Patchlevel 1
+
+- Fix: Incorrect prototypes were produced for functions that take
+  function pointer parameters or return a function pointer.  For example,
+  cproto produced an erroneous prototype for this function definition:
+
+	void
+	(*signal (sig, func))()
+	int sig;
+	void (*func)();
+	{
+	    /* stuff */
+	}
+
+- The lexical analyser now uses LEX.  It should still be compatible with
+  FLEX.
