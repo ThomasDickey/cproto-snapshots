@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.23 1994/09/19 01:00:29 tom Exp $
+/* $Id: grammar.y,v 4.1 1994/10/12 14:14:56 cthuang Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -118,41 +118,39 @@ static IncludeStack *cur_file;	/* current input file */
 
 #include "yyerror.c"
 
-static int  HaveAnsiParam ARGS((void));
+static int haveAnsiParam ARGS((void));
 
 
 /* Flags to enable us to find if a procedure returns a value.
  */
-static	int	return_val,	/* nonzero on BRACES iff return-expression found */
-		returned_at;	/* marker for token-number to set 'return_val' */
+static int return_val,	/* nonzero on BRACES iff return-expression found */
+	   returned_at;	/* marker for token-number to set 'return_val' */
 
 #if OPT_LINTLIBRARY
-static	char *	dft_decl_spec ARGS((void));
+static char *dft_decl_spec ARGS((void));
 
 static char *
-dft_decl_spec()
+dft_decl_spec ()
 {
-	return	(LintLibrary() && !return_val)
-			? "void"
-			: "int";
+    return (lintLibrary() && !return_val) ? "void" : "int";
 }
 
 #else
 #define dft_decl_spec() "int"
 #endif
 
-static
-int	HaveAnsiParam()
+static int
+haveAnsiParam ()
 {
-	Parameter *p;
-	if (func_params != 0) {
-		for (p = func_params->first; p != 0; p = p->next) {
-			if (p->declarator->func_def == FUNC_ANSI) {
-				return TRUE;
-			}
-		}
+    Parameter *p;
+    if (func_params != 0) {
+	for (p = func_params->first; p != 0; p = p->next) {
+	    if (p->declarator->func_def == FUNC_ANSI) {
+		return TRUE;
+	    }
 	}
-	return FALSE;
+    }
+    return FALSE;
 }
 %}
 %%
@@ -283,14 +281,13 @@ function_definition
 	}
 	  opt_declaration_list T_LBRACE
 	{
-	    /*
-	     * If we're converting to K&R and we've got a nominally K&R
+	    /* If we're converting to K&R and we've got a nominally K&R
 	     * function which has a parameter which is ANSI (i.e., a prototyped
 	     * function pointer), then we must override the deciphered value of
 	     * 'func_def' so that the parameter will be converted.
 	     */
 	    if (func_style == FUNC_TRADITIONAL
-	     && HaveAnsiParam()
+	     && haveAnsiParam()
 	     && $2->head->func_def == func_style) {
 		$2->head->func_def = FUNC_BOTH;
 	    }
@@ -776,12 +773,12 @@ direct_abs_declarator
 #endif
 
 static void
-YaccError (msg)
+yaccError (msg)
 char *msg;
 {
-	func_params = NULL;
-	put_error();		/* tell what line we're on, and what file */
-	fprintf(stderr, "%s at token '%s'\n", msg, yytext);
+    func_params = NULL;
+    put_error();		/* tell what line we're on, and what file */
+    fprintf(stderr, "%s at token '%s'\n", msg, yytext);
 }
 
 /* Initialize the table of type qualifier keywords recognized by the lexical
@@ -854,7 +851,7 @@ char *name;
     include_file(strcpy(base_file, name), func_style != FUNC_NONE);
     if (file_comments) {
 #if OPT_LINTLIBRARY
-    	if (LintLibrary()) {
+    	if (lintLibrary()) {
 	    put_blankline(stdout);
 	    begin_tracking();
 	}

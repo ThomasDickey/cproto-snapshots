@@ -1,4 +1,4 @@
-/* $Id: semantic.h,v 3.5 1994/07/25 23:56:00 tom Exp $
+/* $Id: semantic.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * Declarations of semantic action routines
  */

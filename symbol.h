@@ -1,4 +1,4 @@
-/* $Id: symbol.h,v 3.5 1994/07/26 00:02:55 tom Exp $
+/* $Id: symbol.h,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * A symbol table is a collection of string identifiers stored in a
  * hash table.

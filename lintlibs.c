@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.20 1994/09/24 20:42:29 tom Exp $
+/* $Id: lintlibs.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -100,7 +100,7 @@ FILE	*outf;
 char	*s;
 {
 	put_string(outf, s);
-	put_char(outf, (LintLibrary() && strlen(s) < 8) ? '\t' : ' ');
+	put_char(outf, (lintLibrary() && strlen(s) < 8) ? '\t' : ' ');
 }
 
 /*
@@ -117,10 +117,10 @@ void
 fmt_library(code)
 int	code;
 {
-	if (LintLibrary() || types_out) {
+	if (lintLibrary() || types_out) {
 		static	int	save;
 
-		if (!LintLibrary() && code == 0)
+		if (!lintLibrary() && code == 0)
 			code = 3;
 		if (code <= 1 || code != save)
 			put_blankline(stdout);
@@ -263,7 +263,7 @@ void	begin_tracking()
 void	track_in()
 {
 	static	char	old_file[MAX_TEXT_SIZE];	/* from last call */
-	auto	boolean	show = LintLibrary();
+	auto	boolean	show = lintLibrary();
 
 	if (!show && !debug_trace)
 		return;
@@ -359,7 +359,7 @@ void	add2implied_buf(s,append)
  */
 int	want_typedef()
 {
-	if (LintLibrary()) {
+	if (lintLibrary()) {
 		if (in_include == 0)
 			return (TRUE);
 	} else if (types_out) {
@@ -439,7 +439,7 @@ void	indent(outf)
 int	lint_ellipsis(p)
 	Parameter	*p;
 {
-	return (   LintLibrary()
+	return (   lintLibrary()
 		&& (!strcmp(p->declarator->name, ellipsis)));
 }
 
@@ -496,7 +496,7 @@ char *	supply_parm(count)
 int	is_actual_func (d)
 	Declarator *d;
 {
-	if (LintLibrary() && (d->func_def != FUNC_NONE)) {
+	if (lintLibrary() && (d->func_def != FUNC_NONE)) {
 		if (d->func_stack->text[0] == PAREN_L) {
 			if (strstr(d->func_stack->text, "()") != 0)
 		 		return TRUE;

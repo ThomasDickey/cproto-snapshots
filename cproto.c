@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.26 1994/09/24 21:31:58 tom Exp $
+/* $Id: cproto.c,v 4.1 1994/10/12 14:18:16 cthuang Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.26 1994/09/24 21:31:58 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.1 1994/10/12 14:18:16 cthuang Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -143,7 +143,7 @@ char *xmalloc (n) unsigned n;
     if (p == NULL) {
 	fprintf(stderr, "%s: out of memory (cannot allocate %d bytes)\n",
 		progname, n);
-	exit(FAIL);
+	exit(EXIT_FAILURE);
     }
     *p = '\0';
     return p;
@@ -327,7 +327,7 @@ usage ()
     fputs("  -E command       Run specified C preprocessor command\n", stderr);
     fputs("  -E 0             Do not run any C preprocessor\n", stderr);
     fputs("  -V               Print version information\n", stderr);
-    exit(FAIL);
+    exit(EXIT_FAILURE);
 }
 
 #ifdef	vms
@@ -543,22 +543,21 @@ char ***pargv;
 	    break;
 	case 'V':
 	    fprintf(stderr, "%s patchlevel %d\n", rcsid, PATCHLEVEL);
-	    exit(FAIL);
+	    exit(EXIT_FAILURE);
 	    break;
 	case 'v':
 	    variables_out = TRUE;
 	    break;
-	/* options added by dickey */
 	case 'o':
 	    if (freopen(optarg, "w", stdout) == 0) {
 		perror(optarg);
-		exit(FAIL);
+		exit(EXIT_FAILURE);
   	    }
 	    break;
 	case 'O':
 	    if (freopen(optarg, "w", stderr) == 0) {
 		perror(optarg);
-		exit(FAIL);
+		exit(EXIT_FAILURE);
   	    }
 	    break;
 #if OPT_LINTLIBRARY
@@ -605,7 +604,7 @@ char **argv;
     process_options(&argc, &argv);
 
 #if OPT_LINTLIBRARY
-    if (LintLibrary())
+    if (lintLibrary())
     	put_string(stdout, "/* LINTLIBRARY */\n");
 #endif
 
@@ -749,6 +748,6 @@ char **argv;
 #if HAVE_LIBDBMALLOC
     malloc_dump(fileno(stderr));
 #endif
-    exit(SUCCESS);
-    return SUCCESS;
+    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }

@@ -1,4 +1,4 @@
-/* $Id: solaris.c,v 3.2 1994/09/24 12:41:35 tom Exp $ */
+/* $Id: solaris.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $ */
 /*LINTLIBRARY*/
 /*LINT_EXTERN*/
 /*LINT_SHADOWED*/

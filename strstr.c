@@ -1,4 +1,4 @@
-/* $Id: strstr.c,v 3.6 1994/07/30 14:21:56 tom Exp $
+/* $Id: strstr.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
  *
  * Simple implementation of the ANSI strstr() function
  */
