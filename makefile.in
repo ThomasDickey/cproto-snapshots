@@ -1,6 +1,13 @@
-# $Id: makefile.in,v 3.9 1994/07/31 16:31:56 tom Exp $
+# $Id: makefile.in,v 3.11 1994/08/02 00:46:19 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
+
+THIS = cproto
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+VPATH  = @srcdir@
 
 CC		= @CC@
 CPP		= @CPP@
@@ -13,29 +20,44 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
 DEFINES		=
-CPP_OPTS	= $(DEFINES) -DHAVE_CONFIG_H
+CPP_OPTS	= -I. -I$(srcdir) $(DEFINES) -DHAVE_CONFIG_H
 CFLAGS		= @CC_OPTS@ $(CPP_OPTS)
 LIBS		= @LIBS@ @LEXLIB@
+
+prefix		= /usr/local
+exec_prefix	= $(prefix)
+
+bindir		= $(exec_prefix)/bin
+libdir		= $(exec_prefix)/lib
+mandir		= $(prefix)/man/man1
+manext		= 1
+
+#### End of system configuration section. ####
+
+SHELL		= /bin/sh
+
+LDFLAGS		= 
 
 DOC_FILES = \
 	README \
 	CHANGES \
-	cproto.man \
-	cproto.1
+	$(THIS).man \
+	$(THIS).1
 
 MAK_FILES = \
 	makefile.in \
-	configure.in
+	configure.in \
+	config_h.in
 
 H_FILES = \
 	system.h \
-	cproto.h \
+	$(THIS).h \
 	patchlev.h \
 	semantic.h \
 	symbol.h
 
 C_FILES = \
-	cproto.c \
+	$(THIS).c \
 	lintlibs.c \
 	semantic.c \
 	strkey.c \
@@ -43,6 +65,7 @@ C_FILES = \
 	symbol.c
 
 AUX_FILES = \
+	mkdirs.sh \
 	lex.l \
 	grammar.y
 
@@ -50,11 +73,22 @@ JUNK =	\
 	lex.yy.c \
 	y.tab.c
 
-OBJECTS = cproto.o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
+OBJECTS = $(THIS).o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
+SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
-all : cproto cproto.man
+all : $(THIS) $(THIS).man
 
-cproto : $(OBJECTS)
+install: all installdirs
+	$(INSTALL_PROGRAM) $(THIS) $(bindir)/$(THIS)
+	$(INSTALL_DATA) $(srcdir)/$(THIS).1 $(mandir)/$(THIS).$(manext)
+
+installdirs:
+	$(SHELL) ${srcdir}/mkdirs.sh $(bindir) $(libdir) $(mandir)
+
+uninstall:
+	rm -f $(bindir)/$(THIS) $(mandir)/$(THIS).$(manext)
+
+$(THIS) : $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
@@ -63,14 +97,14 @@ y.tab.c : grammar.y
 lex.yy.c : lex.l
 	$(LEX) lex.l
 
-cproto.man : cproto.1
-	nroff -man cproto.1 >$@
+$(THIS).man : $(THIS).1
+	nroff -man $(THIS).1 >$@
 
 clean :
 	rm -f *.o *.bak *.log *.man *.out $(JUNK) tags
 
 clobber : clean
-	rm -f cproto
+	rm -f $(THIS)
 
 distclean : clobber
 	rm -f stamp-h config.status config.h makefile
@@ -90,17 +124,17 @@ config.status : configure
 configure : configure.in
 	autoconf
 
-shar: $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
-	shar -opart -l50 $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
+shar: $(SOURCES)
+	shar -opart -l50 $(SOURCES)
 
 default.h: $(C_FILES)
-	./cproto -e -v -m -M ARGS $(DEFINES) $(C_FILES) grammar.y >$@
+	./$(THIS) -e -v -m -M ARGS $(DEFINES) $(C_FILES) grammar.y >$@
 
 lint: $(C_FILES)
 	$(LINT) $(CPP_OPTS) -lyacc $(C_FILES) y.tab.c >$@.out
 
 llib: $(C_FILES)
-	./cproto -l $(CPP_OPTS) $(C_FILES) y.tab.c >$@.out
+	./$(THIS) -l $(CPP_OPTS) $(C_FILES) y.tab.c >$@.out
 
 tags: $(H_FILES) $(C_FILES) $(AUX_FILES)
 	ctags -t $(C_FILES) $(AUX_FILES) $(H_FILES)

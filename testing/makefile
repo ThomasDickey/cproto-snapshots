@@ -1,9 +1,8 @@
-# $Id: makefile,v 3.3 1994/07/31 00:30:54 tom Exp $
+# $Id: makefile,v 3.4 1994/08/02 00:23:24 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
-TOP	= ../../../../src
-include $(TOP)/td_lib/support/td_lib.mk
+B	= ..
 
 ####### (Standard Lists) #######################################################
 REF_FILES=\
@@ -25,18 +24,12 @@ SCRIPTS	=\
 
 SOURCES	= Makefile descrip.mms $(SCRIPTS) $(TESTDATA)
 
-ALL	=
-
 ####### (Standard Productions) #################################################
-all:	$(SOURCES) $(ALL) $B/$(THIS) ; @echo 'Type "make run_test"'
-clean:				; rm -f $(CLEAN) *.dcl *.err case*.c
-clobber:	clean		; rm -f $(ALL)
-destroy:			; $(DESTROY)
-sources:	$(SOURCES)
-run_test:	$(SOURCES)	; $(RUN_TESTS)
-lint.out:
-lincnt.out:
+all:	$(SOURCES) $B/$(THIS)
+	@echo 'Type "make run_test"'
 
-####### (Details of Productions) ###############################################
+clean:
+	rm -f *.log *.out *.dcl *.err *.tmp case*.c
 
-$(SOURCES):		; checkout $@
+run_test:	$(SOURCES)
+	sh -c '(run_test.sh 2>&1)' >$@
