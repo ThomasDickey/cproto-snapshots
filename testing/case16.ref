@@ -3,6 +3,7 @@ int dots_1(int p1, ...);
 int dots_3(int P1, char P2, ...);
 int *(func_func)(int p1, int p2, int p3);
 int main(register argc, char **argv);
+int veryfunny(char *a, long b, long c);
 int program(string argv[], struct alpha y, int zz, int z1, int z2, int z3);
 int junk0(void);
 int junk1(void);
@@ -207,6 +208,13 @@ main (register argc, extern char **argv)
 }
 
 /*VARARGS*/
+/* some other comment */
+int 
+veryfunny (char *a, long b, long c)
+{
+	return 0;
+}
+
 /*VARARGS3*/
 int 
 program (

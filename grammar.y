@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.17 1994/08/04 23:56:29 tom Exp $
+/* $Id: grammar.y,v 3.18 1994/08/05 22:43:06 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -70,6 +70,8 @@
 
 #define YYMAXDEPTH 150
 
+extern	int	yylex ARGS((void));
+
 /* declaration specifier attributes for the typedef statement currently being
  * scanned
  */
@@ -114,7 +116,12 @@ typedef struct {
 
 static IncludeStack *cur_file;	/* current input file */
 
+#if 0
 extern void yyerror ARGS((char *));
+#else
+#include "yyerror.c"
+#endif
+
 static int  HaveAnsiParam ARGS((void));
 
 
@@ -768,13 +775,13 @@ direct_abs_declarator
 # include "lex.yy.c"
 #endif
 
-void
-yyerror (msg)
+static void
+YaccError (msg)
 char *msg;
 {
-    func_params = NULL;
-    put_error();
-    fprintf(stderr, "%s\n", msg);
+	func_params = NULL;
+	put_error();		/* tell what line we're on, and what file */
+	fprintf(stderr, "%s at token '%s'\n", msg, yytext);
 }
 
 /* Initialize the table of type qualifier keywords recognized by the lexical

@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.23 1994/08/04 23:54:35 tom Exp $
+/* $Id: semantic.c,v 3.24 1994/08/05 00:10:10 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -736,7 +736,6 @@ DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
     int	commented = FALSE;
-    int save_where = where;
 
 #if OPT_LINTLIBRARY
     boolean	defines = (strchr(decl_spec->text, '{') != 0);
@@ -794,7 +793,6 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    put_body(stdout, decl_spec, d);
 	}
     }
-    where = save_where;
 }
 
 /* Return TRUE if the function uses varargs.
@@ -854,7 +852,6 @@ Declarator *declarator;
 {
     Parameter *p;
     int	commented = FALSE;
-    int save_where = where;
 
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
@@ -900,7 +897,6 @@ Declarator *declarator;
 	put_llib_params(declarator, commented);
 #endif
     put_body(stdout, decl_spec, declarator);
-    where = save_where;
 }
 
 /* Generate a declarator for a function pointer declarator or prototype.
@@ -909,8 +905,6 @@ void
 gen_func_declarator (declarator)
 Declarator *declarator;
 {
-    int save_where = where;
-
     /* Go to the beginning of the function declarator in the temporary
      * file and overwrite it with the converted declarator.
      */
@@ -920,7 +914,6 @@ Declarator *declarator;
     format = FMT_FUNC;
     put_func_declarator(cur_tmp_file(), declarator, FALSE);
     cur_file_changed();
-    where = save_where;
 }
 
 /* Output parameter declarations for old style function definition.

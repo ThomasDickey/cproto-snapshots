@@ -46,6 +46,11 @@ int main(
 	register argc,
 	char **argv
 	);
+int veryfunny(
+	char *a,
+	long b,
+	long c
+	);
 int program(
 	string argv[],
 	struct alpha y,

@@ -196,6 +196,14 @@ char	**argv;
 }
 
 /*VARARGS*/
+/* some other comment */
+veryfunny(a,b,c)
+char *a;
+long b, c;
+{
+	return 0;
+}
+
 /*VARARGS3*/
 program(argv, y, zz, z1, z2, z3)
 string	argv[];	/* first argument */
