@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: make_bat.sh,v 3.11 1994/09/24 21:39:25 tom Exp $
+# $Id: make_bat.sh,v 3.12 1994/11/12 19:09:10 tom Exp $
 #
 # This makes a special ".bat" file for testing CPROTO on MSDOS.
 # It won't work properly if /bin/echo tries to expand the backslash sequences.
@@ -51,6 +51,7 @@ if not exist $I.ref goto saveit
     erase $I.c
 EOF
 		chmod 644 $I.bat
-		flip -m $I.bat
+		sed -e 's/$//' $I.bat >$I.tmp
+		mv $I.tmp $I.bat
 	fi
 done

@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.1 1994/10/22 21:39:59 cthuang Exp $
+dnl $Id: aclocal.m4,v 4.1.1.3 1994/11/12 15:53:13 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -6,7 +6,7 @@ dnl
 dnl	Also, test the preprocessor to see if it will handle non-C files.
 dnl	(gcc 2.5.8 doesn't).
 dnl
-define([TD_YACC_ERROR],
+AC_DEFUN([TD_YACC_ERROR],
 [
 rm -f yacctest.y
 cat >yacctest.y <<EOF
@@ -14,6 +14,7 @@ cat >yacctest.y <<EOF
 #define xstrdup(s) s
 #include "system.h"
 #include <stdio.h>
+#include <ctype.h>
 #include "yyerror.c"
 static void yaccError(s) char *s; { exit(0); }
 int yylex ARGS((void))
@@ -36,13 +37,19 @@ rm -f yacctest.*
 td_incl='#include "y.tab.c"'
 for COND in BISON_HAS_YYTNAME YACC_HAS_YYTOKS YACC_HAS_YYTOKS_2 YACC_HAS_YYNAME
 do
-AC_COMPILE_CHECK(error-reporting with $COND,
-[#define $COND 1
+AC_MSG_CHECKING(for error-reporting with $COND)
+AC_CACHE_VAL(ac_cv_td_yyerror,
+AC_TRY_LINK([
+#define $COND 1
 #define YYDEBUG 1
-$td_incl],,[
-AC_DEFINE($COND)
-break
-])
+$td_incl],,
+ac_cv_td_yyerror=yes,
+ac_cv_td_yyerror=no))
+AC_MSG_RESULT($ac_cv_td_yyerror)
+if test $ac_cv_td_yyerror = yes; then
+	AC_DEFINE_UNQUOTED($COND)
+	break
+fi
 done
 rm -f y.tab.c
 ])dnl
@@ -50,16 +57,39 @@ dnl
 dnl	Check to ensure that our prototype for 'popen()' doesn't conflict
 dnl	with the system's (this is a problem on AIX and CLIX).
 dnl
-define([TD_POPEN_TEST],
-[AC_COMPILE_CHECK(conflicting prototype for popen,
-[#include <stdio.h>
+AC_DEFUN([TD_POPEN_TEST],
+[AC_MSG_CHECKING(for conflicting prototype for popen)
+AC_CACHE_VAL(ac_cv_td_popen,
+AC_TRY_LINK([
+#include <stdio.h>
 #include "system.h"
-extern FILE *popen ARGS((const char *c, const char *m));],,,
-[AC_DEFINE(HAVE_POPEN_PROTOTYPE)])])dnl
+extern int pclose ARGS((FILE *p));
+extern FILE *popen ARGS((const char *c, const char *m));],,
+ac_cv_td_popen=no,
+ac_cv_td_popen=yes))
+AC_MSG_RESULT($ac_cv_td_popen)
+if test $ac_cv_td_popen = yes; then
+	AC_DEFINE(HAVE_POPEN_PROTOTYPE)
+fi
+])dnl
 dnl
-dnl	This should have been in autoconf 1.11
+dnl	This is a more stringent test for size_t than the one distributed with
+dnl	autoconf 2.1: some systems (CLIX, Ultrix) define size_t in <stdio.h>
 dnl
-define([TD_SIZE_T],
-[AC_COMPILE_CHECK(size_t in <sys/types.h> or <stdio.h>,
-[#include <sys/types.h>
-#include <stdio.h>],[size_t f],,[AC_DEFINE(size_t,unsigned)])])dnl
+AC_DEFUN([TD_SIZE_T],
+[AC_REQUIRE([AC_HEADER_STDC])dnl
+AC_MSG_CHECKING(for size_t in <sys/types.h> or <stdio.h>)
+AC_CACHE_VAL(ac_cv_td_size_t,
+AC_TRY_LINK([
+#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
+#include <stdio.h>],[size_t f = 0],
+ac_cv_td_size_t=yes,
+ac_cv_td_size_t=no))
+AC_MSG_RESULT($ac_cv_td_size_t)
+if test $ac_cv_td_size_t = no; then
+	AC_DEFINE(size_t, unsigned)
+fi
+])dnl
