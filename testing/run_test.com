@@ -1,4 +1,4 @@
-$! $Id: run_test.com,v 3.2 1994/08/30 12:21:16 tom Exp $
+$! $Id: run_test.com,v 4.3 1998/01/08 00:03:35 cthuang Exp $
 $! Perform all regression-tests for CPROTO on VAX/VMS
 $
 $	verify	= F$VERIFY(0)

@@ -1,4 +1,4 @@
-/* $Id: linux.c,v 3.3 1994/09/22 21:34:46 tom Exp $ */
+/* $Id: linux.c,v 4.2 1998/01/08 00:03:30 cthuang Exp $ */
 /* LINT_EXTERN */
 /* LINT_SHADOWED */
 #include <sys/types.h>

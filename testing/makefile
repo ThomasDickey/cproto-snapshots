@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.10 1996/04/13 04:24:07 tom Exp $
+# $Id: makefile,v 4.3 1998/01/08 00:03:33 cthuang Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
