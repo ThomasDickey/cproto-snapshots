@@ -1,7 +1,10 @@
-dnl $Id: aclocal.m4,v 3.1 1994/08/09 01:06:16 tom Exp $
+dnl $Id: aclocal.m4,v 3.2 1994/08/11 00:34:41 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
+dnl
+dnl	Also, test the preprocessor to see if it will handle non-C files.
+dnl	(gcc 2.5.8 doesn't).
 dnl
 define([TD_YACC_ERROR],
 [
@@ -23,8 +26,13 @@ dummy
 	;
 %%
 EOF
+$CPP yacctest.y >yacctest.out 2>/dev/null
+if test ! -s yacctest.out
+then
+	AC_DEFINE(CPP_DOES_ONLY_C_FILES)
+fi
 $YACC yacctest.y
-rm -f yacctest.y
+rm -f yacctest.*
 td_incl='#include "y.tab.c"'
 for COND in BISON_HAS_YYTNAME YACC_HAS_YYTOKS YACC_HAS_YYTOKS_2 YACC_HAS_YYNAME
 do
@@ -37,6 +45,9 @@ break
 done
 rm -f y.tab.c
 ])dnl
+dnl
+dnl	This should have been in autoconf 1.11
+dnl
 define([TD_SIZE_T],
 [AC_COMPILE_CHECK(size_t in <sys/types.h> or <stdio.h>,
 [#include <sys/types.h>
