@@ -29,17 +29,26 @@ Patchlevel 9 (dickey, August 1994)
 
 - modified to process lex/yacc files with gcc as C-preprocessor.
 
-- tested on Solaris ? with lex/yacc and flex ? / bison ?
+- Added option "-O" to force redirection of errors without shell operations
+  (useful for VAX/VMS and MS-DOS in particular).
+
+- added "\s" as a synonym for space in the format options (-P, -F, -C)
+
+- tested on Solaris with lex/yacc and flex 2.4.6 / bison 1.22
+  (SunOS explorer 5.3 Generic_101318-42 sun4m sparc; gcc 2.6.0)
 
 - tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22 / byacc 1.9
 
-- tested on MS-DOS with flex 2.37 / bison 1.22 (built with turboc.mak).
+- tested on MS-DOS with flex 2.37 / byacc 1.9 (built with turboc.mak).
+  (Bison uses too much stack space).
 
 - tested on VAX/VMS ? with VAX-C ? and flex ? / bison ?.
 
 - moved non-UNIX files into 'porting' subdirectory.
 
 - added 'testing' subdirectory, for simple regression tests.
+
+- tested for memory leaks with dbmalloc (on Linux).
 
 Patchlevel 8 (internal: dickey/cthuang, June 1993)
 

@@ -1,4 +1,4 @@
-$Id: run_test.txt,v 3.2 1994/07/31 00:28:58 tom Exp $
+$Id: run_test.txt,v 3.4 1994/08/14 23:51:45 tom Exp $
 
 CASE 01 = unix, vms, dos =
 
@@ -16,23 +16,23 @@ CASE 07 = unix, vms, dos = -c -f3 -v -e
 
 CASE 08 = unix, vms, dos = -c -f3 -v -e -m
 
-CASE 09 = unix, vms, dos = -c -f3 -v -P"int func(\n\ta,\n\tb\n\t)"
+CASE 09 = unix, vms, dos = -c -f3 -v -P"int\sfunc(\n\ta,\n\tb\n\t)"
 
-CASE 10 = unix, vms, dos = -"T"
+CASE 10 = unix = -"T"
 
-CASE 11 = unix, vms, dos = -l
+CASE 11 = unix = -l
 
 CASE 12 = unix, vms, dos = -s
 
-CASE 13 = unix, vms, dos = -l -s
+CASE 13 = unix = -l -s
 
-CASE 14 = unix, vms, dos = -l -x
+CASE 14 = unix = -l -x
 
 CASE 15 = apollo = -D__STDC__ -D__attribute='#attributes' -l apollo.c
 
-CASE 16 = unix	= -a
+CASE 16 = unix, vms, dos = -a
 
-CASE 17 = unix	= -t
+CASE 17 = unix, vms, dos = -t
 
 CASE 18 = unix, vms, dos = -f1
 
@@ -40,5 +40,5 @@ CASE 19 = unix, vms, dos = -f2
 
 CASE 20 = unix, vms, dos = -f3
 
-CASE 21 = unix, vms, dos = -f3 -v -P"int func(\n\ta,\n\tb\n\t)"
+CASE 21 = unix, vms, dos = -f3 -v -P"int\sfunc(\n\ta,\n\tb\n\t)"
 

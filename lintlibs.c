@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.6 1994/08/06 00:20:57 tom Exp $
+/* $Id: lintlibs.c,v 3.9 1994/08/14 20:02:05 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -13,7 +13,12 @@
 #if OPT_LINTLIBRARY
 	int	in_include;
 
+static	SymbolTable *include_list;
+static	SymbolTable *declared_list;
+
 static	char	*strip_name      ARGS((char *s));
+static	void	free_inc_stack   ARGS((int n));
+static	void	make_inc_stack   ARGS((int n, char *path));
 static	int	already_included ARGS((char *path));
 static	void	add2implied_buf  ARGS((char *s, int append));
 
@@ -168,7 +173,7 @@ static	char	*strip_name(s)
 #define	CUR_FILE	strip_name(cur_file_name())
 
 static	int	base_level;
-static	char	*stack[MAX_INC_DEPTH];
+static	char	*inc_stack[MAX_INC_DEPTH];
 
 #ifdef	DEBUG
 static
@@ -180,10 +185,29 @@ char	*tag;
 	for (j = 0; j <= in_include; j++)
 		printf("\n\t%d%s:%s", j,
 			j == base_level ? "*" : "",
-			stack[j] ? stack[j] : "?");
+			inc_stack[j] ? inc_stack[j] : "?");
 	printf(" */\n");
 }
 #endif	/* DEBUG */
+
+static
+void	free_inc_stack(n)
+	int	n;
+{
+	if (inc_stack[n] != 0) {
+		free(inc_stack[n]);
+		inc_stack[n] = 0;
+	}
+}
+
+static
+void	make_inc_stack(n, s)
+	int	n;
+	char	*s;
+{
+	free_inc_stack(n);
+	inc_stack[n] = xstrdup(s);
+}
 
 /*
  * Keep track of include-files so that we only include each once.
@@ -192,12 +216,11 @@ static
 int	already_included (path)
 	char	*path;
 {
-	static	SymbolTable *list;
-	if (!list)
-		list = new_symbol_table();
-	if (find_symbol(list, path) != NULL)
+	if (!include_list)
+		include_list = new_symbol_table();
+	if (find_symbol(include_list, path) != NULL)
 		return TRUE;
-	new_symbol(list, path, NULL, DS_NONE);
+	new_symbol(include_list, path, NULL, DS_NONE);
 	return FALSE;
 }
 
@@ -209,11 +232,10 @@ int	already_included (path)
 int	already_declared (name)
 	char	*name;
 {
-	static SymbolTable *my_symtab;
-	if (my_symtab == 0)
-		my_symtab = new_symbol_table ();
-	if (find_symbol (my_symtab, name) == 0) {
-		(void)new_symbol (my_symtab, name, 0, 0);
+	if (declared_list == 0)
+		declared_list = new_symbol_table ();
+	if (find_symbol (declared_list, name) == 0) {
+		(void)new_symbol (declared_list, name, 0, 0);
 		return FALSE;
 	}
 	return TRUE;
@@ -257,11 +279,11 @@ void	track_in()
 			/* yacc may omit first cpp-line! */
 			in_include =
 			base_level = (strcmp(cur_file_name(), base_file) != 0);
-			stack[0] = base_file;
+			make_inc_stack(0, base_file);
 		} else if (!strcmp(cur_file_name(), base_file)) {
 			in_include = 0;	/* reset level */
 		} else {
-			stack[in_include] = xstrdup(old_file);
+			make_inc_stack(in_include, old_file);
 			if (in_include++ == 0) {
 				char	*s = CUR_FILE;
 				if (show && !already_included(s)) {
@@ -275,7 +297,7 @@ void	track_in()
 				if (debug_trace)
 					fprintf(stderr, "++ %s\n", cur_file_name());
 			}
-			stack[in_include] = cur_file_name();
+			make_inc_stack(in_include, cur_file_name());
 		}
 	} else if (!strcmp(cur_file_name(), base_file)) {
 		in_include = 0;	/* kludgy bison! */
@@ -291,7 +313,7 @@ void	track_in()
 				put_string(stdout, " */\n");
 				break;
 			} else
-				(void)strcpy(old_file, stack[in_include]);
+				(void)strcpy(old_file, inc_stack[in_include]);
 		}
 	}
 	(void)strcpy(old_file, cur_file_name());
@@ -469,7 +491,7 @@ void	put_body(outf, decl_spec, declarator)
 {
     char	*s;
 
-    if (declarator->func_def != FUNC_NONE && LintLibrary()) {
+    if ((declarator->func_def != FUNC_NONE) && LintLibrary()) {
 	indent(outf);
 	put_string(outf, "{ ");
 	if (strkey(s = decl_spec->text, "void") == NULL) {
@@ -488,4 +510,19 @@ void	put_body(outf, decl_spec, declarator)
 	put_string(outf, ";");
     put_newline(outf);
 }
+
+#ifdef NO_LEAKS
+void
+free_lintlibs()
+{
+    register int n;
+    for (n = 0; n < MAX_INC_DEPTH; n++)
+    	free_inc_stack(n);
+    if (include_list != 0)
+    	free_symbol_table(include_list);
+    if (declared_list != 0)
+    	free_symbol_table(declared_list);
+}
+#endif
+
 #endif	/* OPT_LINTLIBRARY */

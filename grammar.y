@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.19 1994/08/06 00:20:21 tom Exp $
+/* $Id: grammar.y,v 3.21 1994/08/14 20:10:36 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -138,7 +138,7 @@ dft_decl_spec()
 }
 
 #else
-#define dft_decl_spec() ""
+#define dft_decl_spec() "int"
 #endif
 
 static
@@ -874,5 +874,9 @@ void
 free_parser()
 {
     free_symbol_table (type_qualifiers);
+#ifdef FLEX_SCANNER
+    if (yy_current_buffer != 0)
+	yy_delete_buffer(yy_current_buffer);
+#endif
 }
 #endif

@@ -1,4 +1,4 @@
-# $Id: turboc.mak,v 3.1 1994/07/30 17:31:08 tom Exp $
+# $Id: turboc.mak,v 3.2 1994/08/14 18:21:52 tom Exp $
 #
 # Turbo C/C++ makefile for C prototype generator
 # (adapted from PRJ2MAK output)
@@ -17,8 +17,8 @@ LEX = flex
 LEX_OUT=lexyy
 
 #YACC = yacc
-#YACC = byacc
-YACC = bison -o y_tab.c
+YACC = byacc
+#YACC = bison -o y_tab.c
 
 #		*Translator Definitions*
 CC = tcc +cproto.cfg

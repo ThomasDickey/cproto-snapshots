@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.14 1994/08/09 00:21:09 tom Exp $
+/* $Id: cproto.h,v 3.16 1994/08/14 19:59:16 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -7,6 +7,11 @@
 #endif
 
 #include "system.h"
+
+#if HAVE_LIBDBMALLOC || defined(DOALLOC)
+#undef  NO_LEAKS
+#define NO_LEAKS 1
+#endif
 
 #ifdef	lint
 #define	ALLOC(cast)	(cast *)0
@@ -159,8 +164,15 @@ extern int debug_trace;
 extern char base_file[];
 
 /* cproto.c */
+#ifdef NO_LEAKS
+extern char *xMalloc        ARGS((unsigned n, char *f, int l));
+extern char *xStrdup        ARGS((char *s,    char *f, int l));
+#define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
+#define xstrdup(s)          xStrdup(s, __FILE__, __LINE__)
+#else
 extern char *xmalloc        ARGS((unsigned n));
 extern char *xstrdup        ARGS((char *src));
+#endif
 extern void put_error       ARGS((void));
 extern int is_path_sep      ARGS((int ch));
 extern char *trim_path_sep  ARGS((char *s));
@@ -187,11 +199,14 @@ extern int lint_ellipsis    ARGS((Parameter *p));
 extern void ellipsis_varargs ARGS((Declarator *d));
 extern char *supply_parm    ARGS((int count));
 extern void put_body        ARGS((FILE *outf, DeclSpec *decl_spec, Declarator *declarator));
+# ifdef NO_LEAKS
+extern void free_lintlibs   ARGS((void));
+# endif
 #else
 #define put_string(fp,S)    fputs(S, fp)
 #define put_char(fp,C)      fputc(C, fp)
 #define put_padded(fp,S)    fprintf(fp, "%s ", S)
-#define put_body(fp,s,d)    put_string(fp,";")
+#define put_body(fp,s,d)    put_string(fp,";\n")
 #define track_in()
 #define begin_typedef()
 #define copy_typedef()
@@ -215,3 +230,6 @@ extern char *cur_text       ARGS((void));
 extern void pop_file        ARGS((void));
 extern void init_parser     ARGS((void));
 extern void process_file    ARGS((FILE *infile, char *name));
+#ifdef NO_LEAKS
+extern void free_parser     ARGS((void));
+#endif

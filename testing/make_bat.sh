@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: make_bat.sh,v 3.4 1994/08/13 13:26:23 tom Exp $
+# $Id: make_bat.sh,v 3.7 1994/08/14 23:57:39 tom Exp $
 #
 # This makes a special ".bat" file for testing CPROTO on MSDOS.
 #
@@ -11,24 +11,28 @@ do
 	then
 		echo '** making '$I.bat
 		cat >$I.bat <<EOF
-@echo on
+@echo off
 echo Testing case $i
 if exist $I.out erase $I.out
+if exist $I.dif erase $I.dif
 copy syntax.c $I.c
 EOF
 		grep "CASE[ 	]$i" run_test.txt | \
 			sed -e 's/^.*=/..\\CPROTO /' \
-				-e s/\$/\ -o$I.out\ $I.c/ >>$I.bat
+				-e s/\$/\ -o$I.out\ -O$I.err\ $I.c/ >>$I.bat
 		cat >>$I.bat <<EOF
 if not exist $I.ref goto saveit
-    fc/L/t/n/w $I.out $I.ref
-    if not errorlevel 0 erase $I.out
+    fc/L/n/w $I.out $I.ref >$I.dif
+    if not errorlevel 0 goto end
+    if exist $I.out erase $I.out
+    if exist $I.err erase $I.err
     goto end
 :saveit
     ren $I.out $I.ref
 :end
     erase $I.c
 EOF
+		chmod 644 $I.bat
 		flip -m $I.bat
 	fi
 done
