@@ -1,7 +1,10 @@
-/* $Id: cproto.h,v 4.5 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: cproto.h,v 4.5.1.2 1996/04/27 21:31:52 tom Exp $
  *
  * Declarations for C function prototype generator
  */
+#ifndef CPROTO_H
+#define CPROTO_H 1
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -192,6 +195,11 @@ extern int debug_trace;
 extern char base_file[];
 
 /* cproto.c */
+extern int main             ARGS((int argc, char *argv[]));
+#if HAVE_LIBDBMALLOC
+extern void ExitProgram     ARGS((int code));
+#define exit(code) ExitProgram(code)
+#endif
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
 extern char *xMalloc        ARGS((unsigned n, char *f, int l));
@@ -269,3 +277,4 @@ extern void process_file    ARGS((FILE *infile, char *name));
 #ifdef NO_LEAKS
 extern void free_parser     ARGS((void));
 #endif
+#endif /* CPROTO_H */

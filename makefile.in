@@ -1,10 +1,11 @@
 # @configure_input@
-# $Id: makefile.in,v 4.5 1996/04/13 04:29:18 cthuang Exp $
+# $Id: makefile.in,v 4.5.1.2 1996/04/27 23:39:56 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
 RELEASE = 4
+PATCHLVL = fgrep PATCHLEVEL patchlev.h | sed -e s'/^[^"]*"//' -e s'/".*//'
 
 #### Start of system configuration section. ####
 
@@ -76,7 +77,8 @@ JUNK =	\
 	lex.yy.c \
 	y.tab.c
 
-OBJECTS = $(THIS).o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
+EXTRA_OBJS = @EXTRA_OBJS@
+OBJECTS = $(THIS).o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o $(EXTRA_OBJS)
 SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
 all : $(THIS) # $(THIS).man
@@ -142,12 +144,12 @@ configure : configure.in aclocal.m4
 # level.  The 'manifest' script knows how to build a list of files for a given
 # revision.
 MANIFEST: patchlev.h
-	manifest -rv$(RELEASE)`fgrep PATCHLEVEL patchlev.h | sed -e s'/^[^0-9]*/_/'` \
+	manifest -rv$(RELEASE)_`$(PATCHLVL)` \
 		$(THIS).man testing/case*.dcl testing/case*.bat
 
 dist: MANIFEST
 	- rm -f .fname .files
-	fgrep PATCHLEVEL patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	$(PATCHLVL) | sed -e 's/^/$(THIS)-$(RELEASE)./' >.fname
 	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
 	rm -rf `cat .fname`
 	TOP=`cat .fname`; mkdir $$TOP `cat .files | grep / | sed -e 's@/.*@@' | sed -e s@\^@$$TOP/@ | uniq`
@@ -162,7 +164,7 @@ dist: MANIFEST
 # <CR><LF> terminated ".bat" files for MS-DOS.
 dist-shar: MANIFEST
 	- rm -f .fname .files
-	fgrep PATCHLEVEL patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	$(PATCHLVL) | sed -e 's/^/$(THIS)-$(RELEASE)./' >.fname
 	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
 	shar -M -n`cat .fname` -opart -l50 `cat .files`
 	- rm -f .fname .files

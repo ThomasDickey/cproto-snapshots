@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.5 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: cproto.c,v 4.5.1.4 1996/04/27 23:27:51 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.5 1996/04/13 04:29:18 cthuang Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.5.1.4 1996/04/27 23:27:51 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -619,7 +619,7 @@ char ***pargv;
 	    func_style = FUNC_TRADITIONAL;
 	    break;
 	case 'V':
-	    fprintf(stderr, "%s patchlevel %d\n", rcsid, PATCHLEVEL);
+	    fprintf(stderr, "%s patchlevel %s\n", rcsid, PATCHLEVEL);
 	    exit(EXIT_FAILURE);
 	    break;
 	case 'v':
@@ -646,9 +646,9 @@ char ***pargv;
 	    extern_out    = FALSE;
 	    types_out     = TRUE;
 	    variables_out = TRUE;
-#ifdef unix
+# if !defined(vms) && !defined(MSDOS)
 	    (void)strcat(cpp_opt, " -C");	/* pass-through comments */
-#endif
+# endif
 	    break;
 #endif
 	case 'x':
@@ -672,7 +672,7 @@ char ***pargv;
 int
 main (argc, argv)
 int argc;
-char **argv;
+char *argv[];
 {
     int i;
     FILE *inf;
@@ -861,9 +861,21 @@ char **argv;
     free(argv0);
 #endif
 
-#if HAVE_LIBDBMALLOC
-    malloc_dump(fileno(stderr));
-#endif
     exit(EXIT_SUCCESS);
-    return EXIT_SUCCESS;
+    return EXIT_SUCCESS;	/* some compilers _require_ this */
 }
+
+/*
+ * Intercept 'exit()' for debugging.  (The Linux libc uses malloc/free in
+ * 'exit()', so we cannot get a trace unless we resort to this hack ;-)
+ */
+#if HAVE_LIBDBMALLOC
+#undef exit
+void ExitProgram(code)
+int code;
+{
+    extern int malloc_errfd;	/* FIXME: should be in dbmalloc.h */
+    malloc_dump(malloc_errfd);
+    exit(code);
+}
+#endif
