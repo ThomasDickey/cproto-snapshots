@@ -1,0 +1,6 @@
+MANIFEST for cproto, version t19900315
+--------------------------------------------------------------------------------
+MANIFEST                        this file
+testing                         subdirectory
+testing/case12.com              test cases from 1993 merge of my changes to cproto
+testing/case13.com              test cases from 1993 merge of my changes to cproto
