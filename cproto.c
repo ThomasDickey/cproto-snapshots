@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.17 1994/08/13 13:13:44 tom Exp $
+/* $Id: cproto.c,v 3.20 1994/08/14 22:16:23 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.17 1994/08/13 13:13:44 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.20 1994/08/14 22:16:23 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -92,8 +92,13 @@ int num_inc_dir = 1;
 char *inc_dir[MAX_INC_DIR] = { "" };
 # endif
 #else
+# ifdef vms
+int num_inc_dir = 2;
+char *inc_dir[MAX_INC_DIR] = { "[]", "sys$library:" };
+# else
 int num_inc_dir = 2;
 char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
+# endif
 #endif
 
 /* Run the C preprocessor */
@@ -112,13 +117,20 @@ static	void	parse_options   ARGS((char *src, int maxargc, int *pargc, char **arg
 /* Try to allocate some memory.
  * If unsuccessful, output an error message and exit.
  */
-char *
-xmalloc (n)
-unsigned n;
+#ifdef NO_LEAKS
+char *xMalloc(n,f,l) unsigned n; char *f; int l;
+#else
+char *xmalloc (n) unsigned n;
+#endif
 {
     char *p;
+#if HAVE_LIBDBMALLOC
+    p = debug_malloc(f, l, n);
+#else
+    p = malloc(n);
+#endif
 
-    if ((p = malloc(n)) == NULL) {
+    if (p == NULL) {
 	fprintf(stderr, "%s: out of memory (cannot allocate %d bytes)\n",
 		progname, n);
 	exit(FAIL);
@@ -130,11 +142,17 @@ unsigned n;
 /* Copy the string into allocated memory.
  * If unsuccessful, output an error message and exit.
  */
-char *
-xstrdup (src)
-char *src;
+#ifdef NO_LEAKS
+char *xStrdup(src, f, l) char *src; char *f; int l;
+#else
+char *xstrdup (src) char *src;
+#endif
 {
+#if defined(NO_LEAKS)
+    return strcpy(xMalloc(strlen(src)+1, f, l), src);
+#else
     return strcpy(xmalloc(strlen(src)+1), src);
+#endif
 }
 
 /* Output the current source file name and line number.
@@ -215,6 +233,10 @@ char *src;
 		*put++ = '\n';
 		++get;
 		break;
+	    case 's':
+		*put++ = ' ';
+		++get;
+		break;
 	    case 't':
 		*put++ = '\t';
 		++get;
@@ -274,6 +296,7 @@ usage ()
     fputs("  -l               Generate output in lint-library style\n", stderr);
 #endif
     fputs("  -o file          Redirect output to file\n", stderr);
+    fputs("  -O file          Redirect errors to file\n", stderr);
     fputs("  -p               Disable formal parameter promotion\n", stderr);
     fputs("  -q               Disable include file read failure messages\n", stderr);
     fputs("  -s               Output static declarations\n", stderr);
@@ -520,6 +543,12 @@ char ***pargv;
 		exit(FAIL);
   	    }
 	    break;
+	case 'O':
+	    if (freopen(optarg, "w", stderr) == 0) {
+		perror(optarg);
+		exit(FAIL);
+  	    }
+	    break;
 #if OPT_LINTLIBRARY
 	case 'T':	/* emit typedefs */
 	    types_out = TRUE;
@@ -661,6 +690,7 @@ char **argv;
 		if (strcmp(argv[i], temp)) {
 			(void)unlink(temp);
 		}
+		pop_file();
 #endif
 	    } else {
 		pop_file();
@@ -675,22 +705,32 @@ char **argv;
 	printf("\n#undef %s\n", macro_name);
     }
 
-#ifdef DOALLOC
-#ifdef CPP
+#ifdef NO_LEAKS
+# ifdef CPP
     if (cpp_opt != 0) free(cpp_opt);
     if (cpp_cmd != 0) free(cpp_cmd);
-#ifdef	vms
+#  ifdef vms
     if (cpp_include != 0) free(cpp_include);
     if (cpp_defines != 0) free(cpp_defines);
     if (cpp_undefns != 0) free(cpp_undefns);
-#endif
-#endif
+#  endif
+# endif
     while (num_inc_dir-- > 2) {
 	free(inc_dir[num_inc_dir]);
     }
     free_parser();
+# if OPT_LINTLIBRARY
+    free_lintlibs();
+# endif
+
+# ifdef DOALLOC
     show_alloc();
+# endif
 #endif
 
+#if HAVE_LIBDBMALLOC
+    malloc_dump(fileno(stderr));
+#endif
+    exit(SUCCESS);
     return SUCCESS;
 }

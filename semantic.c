@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.26 1994/08/13 10:46:52 tom Exp $
+/* $Id: semantic.c,v 3.28 1994/08/14 20:28:57 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -7,6 +7,8 @@
 #include "cproto.h"
 #include "semantic.h"
 
+#define CURL_L        '{'
+#define CURL_R        '}'
 #define	COMMENT_BEGIN "/*"
 #define COMMENT_END   "*/"
 
@@ -738,7 +740,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
     int	commented = FALSE;
 
 #if OPT_LINTLIBRARY
-    boolean	defines = (strchr(decl_spec->text, '{') != 0);
+    boolean	defines = (strchr(decl_spec->text, CURL_L) != 0);
 
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
@@ -756,8 +758,8 @@ DeclaratorList *decl_list;	/* list of declared variables */
     if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_JUNK))) {
 #if OPT_LINTLIBRARY
 	if (in_include >= extern_in)	/* -x option not set? */
-	    return;
 #endif
+	    return;
 	strcut(decl_spec->text, "extern");
     }
     if (!static_out && (decl_spec->flags & DS_STATIC))

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: testunix.sh,v 3.4 1994/07/31 00:21:32 tom Exp $
+# $Id: testunix.sh,v 3.5 1994/08/14 20:55:43 tom Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
@@ -35,7 +35,7 @@ do
 
 		if [ -f $I.out ]
 		then
-			diff -b -c $I.ref $I.out >$I.tmp
+			diff -b -c $I.ref $I.out |fgrep -v 'No diff' >$I.tmp
 			if [ -s $I.tmp ]
 			then
 				cat $I.err

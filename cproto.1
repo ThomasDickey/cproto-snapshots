@@ -1,4 +1,4 @@
-.\" $Id: cproto.1,v 3.10 1994/07/25 22:53:04 tom Exp $
+.\" $Id: cproto.1,v 3.11 1994/08/14 23:48:26 tom Exp $
 .\"
 .de EX		\"Begin example
 .ne 5
@@ -169,6 +169,9 @@ Omit the definition of the prototype macro used by the \-m option.
 .BI \-o " file"
 Specify the name of the output file (default: standard output).
 .TP
+.BI \-O " file"
+Specify the name of the error file (default: standard error).
+.TP
 .B \-p
 Disable promotion of formal parameters in old style function definitions.
 By default, parameters of type
@@ -320,13 +323,18 @@ was implemented because include files commonly declare variables this way.
 .LP
 When the program encounters an error, it usually outputs the not very
 descriptive message "syntax error".
+(Your configuration may allow the extended error reporting in yyerror.c).
 .LP
 Options that take string arguments only interpret the following
 character escape sequences:
 .EX
 \\n	newline
+\\s	space
 \\t	tab
 .EE
+.LP
+VARARGS comments don't get passed through on systems whose C preprocessors
+don't support this (e.g., VAX/VMS, MS-DOS).
 .
 .SH AUTHOR
 .nf

@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.12 1994/08/13 23:44:23 tom Exp $
+/* $Id: system.h,v 3.13 1994/08/14 20:33:32 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -146,6 +146,10 @@ extern char *realloc ARGS((char *p, size_t n));
 extern char *getenv  ARGS((const char *v));
 extern char *strstr  ARGS((const char *s, const char *p));
 
+/*
+ * The DOALLOC symbol controls whether we compile in the simple memory tests
+ * in 'trace.c' (use dbmalloc for more rigorous testing).
+ */
 #ifdef DOALLOC
 extern char *doalloc(char *,unsigned);
 extern void dofree(char *);

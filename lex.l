@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.21 1994/08/13 11:07:06 tom Exp $
+/* $Id: lex.l,v 3.22 1994/08/14 20:16:17 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -404,8 +404,9 @@ save_text ()
 static void
 save_text_offset ()
 {
+    (void)strcpy(yylval.text.text, yytext);
 #if OPT_LINTLIBRARY
-    copy_typedef(strcpy(yylval.text.text, yytext));
+    copy_typedef(yytext);
 #endif
     if (cur_file->convert) {
 	yylval.text.begin = ftell(cur_file->tmp_file);
