@@ -1,7 +1,18 @@
-/* $Id: config.h,v 3.6 1993/05/26 01:48:42 cthuang Exp $
+/* $Id: config.h,v 3.7 1993/06/07 17:57:10 tom Exp $
  *
  * cproto configuration and system dependencies
  */
+
+ 
+/* Declare argument for 'exit()' and '_exit()': */
+#ifdef	vms
+#include	<stsdef.h>
+#define	SUCCESS	(STS$M_INHIB_MSG | STS$K_SUCCESS)
+#define	FAIL	(STS$M_INHIB_MSG | STS$K_ERROR)
+#else	/* unix */
+#define	SUCCESS	(0)		/* if no error */
+#define	FAIL	(1)		/* if any error */
+#endif	/* vms/unix */
 
 /* Borland C++ for MS-DOS predefines __MSDOS__ */
 #ifdef __MSDOS__
@@ -58,12 +69,12 @@
 #include <stdlib.h>
 #include <string.h>
 #else
-#ifdef BSD
+#if defined(BSD) && !defined(apollo)
 #include <strings.h>
 #define strchr index
 #define strrchr rindex
 #else
 #include <string.h>
 #endif
-extern char *getenv(), *malloc(), *strstr();
+extern char *getenv(), *malloc(), *realloc(), *strstr();
 #endif
