@@ -19,7 +19,7 @@
    This port is distributed under the terms of the GNU General
    Public License as published by the Free Software Foundation.
 
-   $Header: /users/source/archives/cproto.vcs/porting/RCS/getopt.c,v 3.1 1994/07/30 16:34:04 tom Exp $
+   $Id: getopt.c,v 3.2 1994/09/01 22:39:44 tom Exp $
  */
 
 #if defined(__STDC__) || defined(__TURBOC__)

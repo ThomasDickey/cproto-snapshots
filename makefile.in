@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.19 1994/08/31 22:22:19 tom Exp $
+# $Id: makefile.in,v 3.20 1994/09/01 22:23:35 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -103,17 +103,18 @@ lex.yy.c : lex.l
 $(THIS).man : $(THIS).1
 	- nroff -man $(THIS).1 >$@
 
-clean :
+mostlyclean :
 	rm -f core .nfs* *.o *.bak *.log *.man *.out $(JUNK) default.h
 
-mostlyclean : clean
+clean : mostlyclean
+	rm -f $(THIS)
 
 distclean : mostlyclean
 	rm -f stamp-h config.status config.h makefile
 	rm -f .version .fname
 
 realclean: distclean
-	rm -f MANIFEST tags
+	rm -f tags
 
 check:	$(THIS)
 	cd testing; make run_test
