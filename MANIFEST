@@ -1,10 +1,14 @@
-MANIFEST for cproto, version t19930107
+MANIFEST for cproto, version t19930411
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 README                          overview of the CPROTO program
+getopt.c                        GNU getopt.c
+getopt.h                        GNU getopt.h
 popen.c                         v3_7 base
 semantic.h                      interface definitions of semantic.c
 strstr.c                        look for a substring of a string
+porting                         subdirectory
+porting/getopt.h                header file for getopt
 testing                         subdirectory
 testing/case12.com              test cases from 1993 merge of my changes to cproto
 testing/case13.com              test cases from 1993 merge of my changes to cproto
