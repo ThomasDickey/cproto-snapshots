@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.2 1995/08/23 21:29:04 cthuang Exp $
+/* $Id: lintlibs.c,v 4.2.1.1 1995/12/01 00:13:54 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -28,8 +28,6 @@ static	int	blank_lines;	/* used to filter blank lines from typedefs */
 
 static	int	implied_cnt;	/* state-count associated with implied_buf */
 static	char	*implied_buf;
-
-static	char	*ellipsis = "...";
 
 static	char	quote_l	= '"',
 		quote_r = '"';
@@ -450,8 +448,8 @@ void	indent(outf)
 int	lint_ellipsis(p)
 	Parameter	*p;
 {
-	return (   lintLibrary()
-		&& (!strcmp(p->declarator->name, ellipsis)));
+	return (   knrLintLibrary()
+		&& (!strcmp(p->declarator->name, ELLIPSIS)));
 }
 
 /*
