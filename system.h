@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.7 1994/08/02 00:24:24 tom Exp $
+/* $Id: system.h,v 3.8 1994/08/09 00:21:06 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -6,6 +6,16 @@
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
  
+#if	!defined(TRUE) || (TRUE != 1)
+#undef  TRUE
+#define	TRUE	(1)
+#endif
+
+#if	!defined(FALSE) || (FALSE != 0)
+#undef  FALSE
+#define	FALSE	(0)
+#endif
+
 /* don't use continuation-lines -- breaks on VAXC */
 #if defined(__STDC__) || defined(__TURBOC__) || defined(vms) || defined(__cplusplus)
 #define ARGS(p) p
@@ -139,5 +149,7 @@ extern void dofree(char *);
 #  define OPT_LINTLIBRARY 1
 # endif
 #endif
+
+#define YYDEBUG 1
 
 #endif	/* SYSTEM_H */

@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.12 1994/08/05 21:29:18 tom Exp $
+# $Id: makefile.in,v 3.13 1994/08/09 00:01:31 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -47,6 +47,7 @@ DOC_FILES = \
 MAK_FILES = \
 	makefile.in \
 	configure.in \
+	aclocal.m4 \
 	config_h.in
 
 H_FILES = \
@@ -122,7 +123,7 @@ makefile: makefile.in config.status
 config.status : configure
 	./config.status --recheck
 
-configure : configure.in
+configure : configure.in aclocal.m4
 	autoconf
 
 shar: $(SOURCES)
