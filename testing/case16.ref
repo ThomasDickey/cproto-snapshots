@@ -19,6 +19,14 @@ void_junk *foo2(void);
 void_junk *foo_void(void_junk void_int);
 void (*Sigdisp(int sig, void (*func)(int sig)))(int sig1);
 void (*sigdisp2(int sig, void (*func)(int sig)))(int sig2);
+int (*K_R_INT_ptr(long *p1, int p2))();
+void (*K_R_VOID_ptr(long *p1, int p2))();
+int *K_R_int_ptr(long *p1, int p2);
+void *K_R_void_ptr(long *p1, int p2);
+int K_R_int_val(long *p1, int p2);
+int K_R_int_val2(long *p1, int p2);
+void K_R_void_val(long *p1, int p2);
+int K_R_void_val2(long *p1, int p2);
 ... edited case16.c ...
 /*
  * Define:
@@ -271,3 +279,57 @@ sigdisp2 (
     void (*func)(int sig)	/* the function pointer */
 ))(int sig2)
 { /* nothing again! */ }
+
+int (*
+K_R_INT_ptr (long *p1, int p2))() { return (*(int(*)())0); }
+
+int (*STD_INT_ptr(long* , int))();
+
+void (*
+K_R_VOID_ptr (long *p1, int p2))() { return (*(void(*)())0); }
+
+void (*STD_VOID_ptr(long* , int))();
+
+int *
+K_R_int_ptr (long *p1, int p2) { return (*(int **)0); }
+
+int **STD_int2_ptr(long* , int);
+
+int *STD_int_ptr(long* , int);
+
+void *
+K_R_void_ptr (long *p1, int p2) { return (*(void **)0); }
+
+void *STD_void_ptr(long* , int);
+
+int 
+K_R_int_val (long *p1, int p2) { return (*(int *)0); }
+
+int 
+K_R_int_val2 (long *p1, int p2) { return (*(int *)0); }
+
+int STD_int_val(long*, int);
+
+void 
+K_R_void_val (long *p1, int p2) { /*void*/ }
+
+int 
+K_R_void_val2 (
+    long *p1,
+    int p2 { /*void*/
+) }
+
+void STD_void_val(long* , int);
+
+extern	xdots_3(int P1,char P2, ...);
+
+extern int (*XSetAfterFunction(long* , int (*) ( long*)))();
+extern XQueryKeymap(long*, char [32]);
+extern Another(long*, int (*)());
+
+extern GenFunc(int *, int *());
+
+/* these are pointers, not actual functions */
+extern void * (*__glob_opendir_hook) (const char *__directory);
+extern const char *(*__glob_readdir_hook) (void * __stream);
+extern void (*__glob_closedir_hook) (void * __stream);

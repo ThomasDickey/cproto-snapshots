@@ -26,6 +26,14 @@ char *whatFuncDefStyle(func_def)
 	return "?";
 }
 
+void dump_parameter(p, level)
+	Parameter *p;
+	int level;
+{
+	dump_declarator(p->declarator, level+1);
+	dump_decl_spec(&(p->decl_spec), level+1);
+}
+
 void dump_param_list(p, level)
 	ParameterList *p;
 	int level;
@@ -33,8 +41,7 @@ void dump_param_list(p, level)
 	struct parameter *q;
 
 	for (q = p->first; q != 0; q = q->next) {
-		dump_declarator(q->declarator, level+1);
-		dump_decl_spec(&(q->decl_spec), level+1);
+		dump_parameter(q, level);
 	}
 }
 

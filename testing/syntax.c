@@ -238,3 +238,46 @@ void (*sigdisp2(sig, func))(int sig2)
 	int sig;		/* the signal value */
 	void (*func)(int sig);	/* the function pointer */
 { /* nothing again! */ }
+
+int (*K_R_INT_ptr(p1, p2))() long *p1; int p2; { return (*(int(*)())0); }
+
+int (*STD_INT_ptr(long* , int))();
+
+void (*K_R_VOID_ptr(p1,p2))() long *p1; int p2; { return (*(void(*)())0); }
+
+void (*STD_VOID_ptr(long* , int))();
+
+int *K_R_int_ptr(p1,p2) long *p1; int p2; { return (*(int **)0); }
+
+int **STD_int2_ptr(long* , int);
+
+int *STD_int_ptr(long* , int);
+
+void *K_R_void_ptr(p1,p2) long *p1; int p2; { return (*(void **)0); }
+
+void *STD_void_ptr(long* , int);
+
+int K_R_int_val(p1,p2) long *p1; int p2; { return (*(int *)0); }
+
+K_R_int_val2(p1,p2) long *p1; int p2; { return (*(int *)0); }
+
+int STD_int_val(long*, int);
+
+void K_R_void_val(p1,p2) long *p1; int p2; { /*void*/ }
+
+K_R_void_val2(p1,p2) long *p1; int p2; { /*void*/ }
+
+void STD_void_val(long* , int);
+
+extern	xdots_3(int P1,char P2, ...);
+
+extern int (*XSetAfterFunction(long* , int (*) ( long*)))();
+extern XQueryKeymap(long*, char [32]);
+extern Another(long*, int (*)());
+
+extern GenFunc(int *, int *());
+
+/* these are pointers, not actual functions */
+extern void * (*__glob_opendir_hook) (const char *__directory);
+extern const char *(*__glob_readdir_hook) (void * __stream);
+extern void (*__glob_closedir_hook) (void * __stream);

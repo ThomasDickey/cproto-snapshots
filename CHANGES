@@ -25,6 +25,8 @@ Patchlevel 10 (dickey, September 1994)
   each function template in lint libraries (useful for processing files that
   define both macros and functions with the same names).
 
+- added several function-pointer regression test-cases
+
 Patchlevel 9 (dickey, August 1994)
 
 - use 'autoconf' to make a UNIX configure-script.
