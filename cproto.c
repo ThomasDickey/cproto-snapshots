@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.9 1993/06/09 17:18:18 tom Exp $
+/* $Id: cproto.c,v 3.10 1994/02/08 16:38:28 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.9 1993/06/09 17:18:18 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.10 1994/02/08 16:38:28 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -537,6 +537,18 @@ char **argv;
     if (proto_macro && define_macro) {
 	printf("\n#undef %s\n", macro_name);
     }
+
+#ifdef DOALLOC
+#ifdef CPP
+    if (cpp_opt != 0) free(cpp_opt);
+    if (cpp_cmd != 0) free(cpp_cmd);
+#endif
+    while (num_inc_dir-- > 2) {
+	free(inc_dir[num_inc_dir]);
+    }
+    free_parser();
+    show_alloc();
+#endif
 
     return SUCCESS;
 }

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.9 1993/06/09 15:22:14 tom Exp $
+/* $Id: grammar.y,v 3.10 1994/02/08 16:30:28 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -144,13 +144,9 @@ translation_unit
 external_declaration
 	: declaration
 	| function_definition
-	| function_definition ';'
+	| ';'
 	| linkage_specification
 	| T_ASM T_ASMARG ';'
-	| error ';'
-	{
-	    yyerrok;
-	}
 	| error T_MATCHRBRACE
 	{
 	    yyerrok;
@@ -821,4 +817,14 @@ char *name;
     free_symbol_table(define_names);
     free_symbol_table(typedef_names);
     free_symbol_table(included_files);
+    free(cur_file->base_name);
+    free(cur_file->file_name);
 }
+
+#ifdef NO_LEAKS
+void
+free_parser()
+{
+    free_symbol_table (type_qualifiers);
+}
+#endif
