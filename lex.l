@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.1 1994/10/12 14:14:56 cthuang Exp $
+/* $Id: lex.l,v 4.2 1994/10/13 17:26:04 cthuang Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -127,7 +127,7 @@ QUOTE		[\"\']
 "/*"			{ save_text(); get_comment(); }
 "//".*$ 		save_text();
 
-"&"			{ /* ignored (apollo) */ }
+"&"			{ save_text(); /* ignored (apollo) */ }
 
 <LEXYACC>^"%%"		{ save_text(); if (++ly_count >= 2) BEGIN INITIAL; }
 <LEXYACC>^"%{"		{ save_text(); BEGIN INITIAL; }
