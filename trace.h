@@ -1,4 +1,4 @@
-/* $Id: trace.h,v 4.2.1.1 2002/01/26 00:19:28 tom Exp $ */
+/* $Id: trace.h,v 4.3 2002/01/26 00:19:28 tom Exp $ */
 
 #ifndef TRACE_H
 #define TRACE_H
