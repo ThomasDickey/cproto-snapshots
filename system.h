@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.15 1994/08/29 11:18:22 tom Exp $
+/* $Id: system.h,v 3.16 1994/08/31 22:52:14 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -68,6 +68,7 @@
 /* Microsoft C preprocessor */
 #ifdef M_I86
 #define CPP "cl /E /nologo"
+#define HAVE_TMPFILE 1
 #endif
 
 /* Vax C */

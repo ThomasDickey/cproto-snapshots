@@ -48,7 +48,7 @@ Patchlevel 9 (dickey, August 1994)
 - tested on MS-DOS with flex 2.37 / byacc 1.9 (built with turboc.mak).
   (Bison uses too much stack space).
 
-- tested on VAX/VMS ? with VAX-C ? and flex ? / bison ?.
+- tested on VAX/VMS 6.1 with VAX-C 3.2 and flex 2.4.6 / bison 1.22.
 
 - moved non-UNIX files into 'porting' subdirectory.
 

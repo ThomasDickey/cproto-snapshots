@@ -1,0 +1,9 @@
+cproto.obj+
+lintlibs.obj+
+getopt.obj+
+semantic.obj+
+strkey.obj+
+symbol.obj+
+y_tab.obj+
+popen.obj+
+getopt.obj

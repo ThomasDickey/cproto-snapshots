@@ -1,16 +1,26 @@
-# $Id: micrsoft.mak,v 3.1 1994/07/25 23:11:37 tom Exp $
+# $Id: micrsoft.mak,v 3.2 1994/08/31 22:47:28 tom Exp $
 #
 # Microsoft C makefile for C prototype generator
+# tested with:
+#	nmake 1.11.
+#	cl 6.00ax.
 
 # Define MSDOS for MS-DOS compatibility.
 # Define TURBO_CPP to pipe the input through the Turbo C preprocessor.
-DEFINES = -DMSDOS
+DEFINES = -DMSDOS -DSTDC_HEADERS
+
+MSC_TOP = d:\msc60ax
+
+# names from MKS tools (ran out of memory in lex; used unix output)
+Y_TAB = ytab
+LEX_YY = lex_yy
 
 LEX = lex
 YACC = yacc
 CC = cl
-CFLAGS = -AC $(DEFINES)
-LIBS = \c7\lib\setargv.obj
+LINK = link
+CFLAGS = -EM -AL $(DEFINES)
+LIBS = $(MSC_TOP)\lib\setargv.obj
 LDFLAGS = /F 1000
 
 DIST1 = README CHANGES cproto.man
@@ -18,20 +28,21 @@ DIST2 = cproto.1 borland.mak micrsoft.mak makefile.in lex.l grammar.y
 DIST3 = system.h cproto.h patchlev.h semantic.h symbol.h
 DIST4 = cproto.c lintlibs.c popen.c semantic.c strkey.c strstr.c symbol.c
 
-OBJECTS = cproto.obj lintlibs.obj getopt.obj semantic.obj strkey.obj symbol.obj y_tab.obj popen.obj
+OBJECTS = cproto.obj lintlibs.obj getopt.obj semantic.obj strkey.obj symbol.obj $(Y_TAB).obj popen.obj getopt.obj
 
 all: cproto.exe
 
-cproto.exe: $(OBJECTS)
+cproto.exe: $(OBJECTS) micrsoft.lnk
+	$(LINK) @micrsoft.lnk
 	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) $(LDFLAGS)
 
-y_tab.obj: y_tab.c lex_yy.c system.h cproto.h symbol.h semantic.h
+$(Y_TAB).obj: $(Y_TAB).c $(LEX_YY).c system.h cproto.h symbol.h semantic.h
 	$(CC) $(CFLAGS) -c $*.c
 
-y_tab.c: grammar.y
+$(Y_TAB).c: grammar.y
 	$(YACC) grammar.y
 
-lex_yy.c: lex.l
+$(LEX_YY).c: lex.l
 	$(LEX) lex.l
 
 cproto.man: cproto.1
@@ -41,8 +52,8 @@ clean:
 	erase *.obj
 	erase *.bak
 	erase *.log
-	erase lex_yy.c
-	erase y_tab.c
+	erase $(LEX_YY).c
+	erase $(Y_TAB).c
 	erase cproto.exe
 
 ci:
