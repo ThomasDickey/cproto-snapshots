@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.32 1994/09/15 00:47:02 tom Exp $
+/* $Id: semantic.c,v 3.33 1994/09/19 23:35:12 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -721,6 +721,13 @@ put_decl_spec (outf, decl_spec)
 FILE *outf;
 DeclSpec *decl_spec;
 {
+    /* An "extern func()" is legal, but we want to be explicit for lint libs */
+#if OPT_LINTLIBRARY
+    if (decl_spec->text[0] == '\0') {
+	free(decl_spec->text);
+    	decl_spec->text = xstrdup("int");
+    }
+#endif
     if (extern_out && !(decl_spec->flags & DS_STATIC) &&
      strkey(decl_spec->text, "extern") == NULL)
 	put_padded(outf, "extern");

@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.10 1994/09/15 00:16:26 tom Exp $
+/* $Id: lintlibs.c,v 3.15 1994/09/19 23:48:36 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -11,6 +11,11 @@
 #include "symbol.h"
 
 #if OPT_LINTLIBRARY
+
+#define PAREN_LEFT  '('
+#define PAREN_RIGHT ')'
+#define BRACE_LEFT  '{'
+#define BRACE_RIGHT '}'
 	int	in_include;
 
 static	SymbolTable *include_list;
@@ -489,23 +494,37 @@ void	put_body(outf, decl_spec, declarator)
 	DeclSpec	*decl_spec;	/* declaration specifier */
 	Declarator	*declarator;
 {
-    char	*s;
+    register char	*spec_text;
 
     if ((declarator->func_def != FUNC_NONE) && LintLibrary()) {
+	strcut(decl_spec->text, "static");
+	strcut(decl_spec->text, "extern");
 	indent(outf);
-	put_string(outf, "{ ");
-	if (strkey(s = decl_spec->text, "void") == NULL) {
-	    if (*s) {
-	    	put_string(outf, "return(*(");
-	    	put_string(outf, s);
-		putchar(' ');
-		for (s = declarator->text; *s == '*'; s++)
-			putchar(*s);
-	    	put_string(outf, "*)0); ");
+	put_char(outf, BRACE_LEFT);
+	if (!*(spec_text = decl_spec->text))
+		spec_text = "void";
+	if (!strcmp(spec_text, "void")
+	 && declarator->text[0] != '*'
+	 && declarator->func_stack->func_def == FUNC_NONE) {
+	    put_string(outf, " /* void */ ");
+	} else {
+	    put_string(outf, " return(*(");
+	    if (declarator->func_stack->func_def == FUNC_NONE) {
+		put_string(outf, spec_text);
+		put_char(outf, ' ');
+		if (declarator->pointer) {
+			char *s = declarator->text;
+			while (*s++ == '*')
+				put_char(outf, '*');
+		}
+		put_char(outf, '*');
+	    } else {
+		put_string(outf, spec_text);
+		put_string(outf, "(*)()");
 	    }
-	} else
-	    put_string(outf, "/* void */ ");
-	put_string(outf, "}");
+	    put_string(outf, ")0); ");
+	}
+	put_char(outf, BRACE_RIGHT);
     } else
 	put_string(outf, ";");
     put_newline(outf);

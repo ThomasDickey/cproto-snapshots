@@ -3,6 +3,15 @@
 #include "trace.h"
 
 static char *whatFuncDefStyle (FuncDefStyle func_def);
+static char *flagsDeclSpec(int flags);
+
+#define PAD char pad[80]; sprintf(pad, "%-*s", level * 3, ".")
+
+#if DEBUG > 1
+#define SHOW_CMTS(p) Trace p;
+#else
+#define SHOW_CMTS(p)
+#endif
 
 static
 char *whatFuncDefStyle(func_def)
@@ -17,21 +26,36 @@ char *whatFuncDefStyle(func_def)
 	return "?";
 }
 
+void dump_param_list(p, level)
+	ParameterList *p;
+	int level;
+{
+	struct parameter *q;
+
+	for (q = p->first; q != 0; q = q->next) {
+		dump_declarator(q->declarator, level+1);
+		dump_decl_spec(&(q->decl_spec), level+1);
+	}
+}
+
 void dump_declarator(d, level)
 	Declarator *d;
 	int	level;
 {
-	char	pad[80];
-	sprintf(pad, "%-*s", level * 3, ".");
+	PAD;
 	Trace("%sdeclarator %p\n",		pad, d);
 	Trace("%s   name /%s/\n",		pad, d->name);
 	Trace("%s   text /%s/\n",		pad, d->text);
-	Trace("%s   begin %ld\n",		pad, d->begin);
-	Trace("%s   begin_comment %ld\n",	pad, d->begin_comment);
-	Trace("%s   end_comment %ld\n",		pad, d->end_comment);
-	Trace("%s   func_dec %s\n",		pad, whatFuncDefStyle(d->func_def));
-#if 0
-    ParameterList params;		/* function parameters */
+	SHOW_CMTS(("%s   begin %ld\n",		pad, d->begin))
+	SHOW_CMTS(("%s   begin_comment %ld\n",	pad, d->begin_comment))
+	SHOW_CMTS(("%s   end_comment %ld\n",	pad, d->end_comment))
+	Trace("%s   func_def %s\n",		pad, whatFuncDefStyle(d->func_def));
+
+#if DEBUG > 1
+	if (d->func_def != FUNC_NONE) {
+		Trace("%s >PARAMS of %p\n", pad, d);
+		dump_param_list(&(d->params), level+1);
+	}
 #endif
 	Trace("%s   pointer %s\n",		pad, d->pointer ? "YES" : "NO");
 
@@ -81,8 +105,9 @@ void dump_decl_spec(d, level)
 	DeclSpec *d;
 	int level;
 {
-	Trace("decl_spec %p\n", d);
-	Trace("  flags %s\n", flagsDeclSpec(d->flags));
-	Trace("  text /%s/\n", d->text);
-	Trace("  begin %ld\n", d->begin);
+	PAD;
+	Trace("%sdecl_spec %p\n",	pad, d);
+	Trace("%s  flags %s\n",		pad, flagsDeclSpec(d->flags));
+	Trace("%s  text /%s/\n",	pad, d->text);
+	SHOW_CMTS(("%s  begin %ld\n",	pad, d->begin))
 }
