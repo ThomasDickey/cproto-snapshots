@@ -213,3 +213,102 @@ void	(*sigdisp2(sig, func))(/*sig2*/)
 		int	sig;
 		void	(*func)();
 		{ return(*(void(*)())0); }
+
+int	(*K_R_INT_ptr(p1, p2))()
+		long	*p1;
+		int	p2;
+		{ return(*(int(*)())0); }
+
+int	(*STD_INT_ptr(p1, p2))()
+		long	*p1;
+		int	p2;
+		{ return(*(int(*)())0); }
+
+void	(*K_R_VOID_ptr(p1, p2))()
+		long	*p1;
+		int	p2;
+		{ return(*(void(*)())0); }
+
+void	(*STD_VOID_ptr(p1, p2))()
+		long	*p1;
+		int	p2;
+		{ return(*(void(*)())0); }
+
+int	*K_R_int_ptr(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int **)0); }
+
+int	**STD_int2_ptr(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int ***)0); }
+
+int	*STD_int_ptr(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int **)0); }
+
+void	*K_R_void_ptr(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(void **)0); }
+
+void	*STD_void_ptr(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(void **)0); }
+
+int	K_R_int_val(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int *)0); }
+
+int	K_R_int_val2(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int *)0); }
+
+int	STD_int_val(p1, p2)
+		long	*p1;
+		int	p2;
+		{ return(*(int *)0); }
+
+void	K_R_void_val(p1, p2)
+		long	*p1;
+		int	p2;
+		{ /* void */ }
+
+void	K_R_void_val2(p1, p2)
+		long	*p1;
+		int	p2;
+		{ /* void */ }
+
+void	STD_void_val(p1, p2)
+		long	*p1;
+		int	p2;
+		{ /* void */ }
+
+int	(*XSetAfterFunction(p1, p2))()
+		long	*p1;
+		int	(*p2)();
+		{ return(*(int(*)())0); }
+
+int	XQueryKeymap(p1, p2)
+		long	*p1;
+		char	p2[32];
+		{ return(*(int *)0); }
+
+int	Another(p1, p2)
+		long	*p1;
+		int	(*p2)();
+		{ return(*(int *)0); }
+
+int	GenFunc(p1, p2)
+		int	*p1;
+		int	*p2();
+		{ return(*(int *)0); }
+
+void	*(*__glob_opendir_hook)();
+const char *(*__glob_readdir_hook)();
+void	(*__glob_closedir_hook)();

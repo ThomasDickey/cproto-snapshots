@@ -78,3 +78,35 @@ void (*sigdisp2(
 	int sig,
 	void (*func)(int sig)
 	))(int sig2);
+int (*K_R_INT_ptr(
+	long *p1,
+	int p2
+	))();
+void (*K_R_VOID_ptr(
+	long *p1,
+	int p2
+	))();
+int *K_R_int_ptr(
+	long *p1,
+	int p2
+	);
+void *K_R_void_ptr(
+	long *p1,
+	int p2
+	);
+int K_R_int_val(
+	long *p1,
+	int p2
+	);
+int K_R_int_val2(
+	long *p1,
+	int p2
+	);
+void K_R_void_val(
+	long *p1,
+	int p2
+	);
+int K_R_void_val2(
+	long *p1,
+	int p2
+	);

@@ -1,4 +1,4 @@
-.\" $Id: cproto.1,v 3.11 1994/08/14 23:48:26 tom Exp $
+.\" $Id: cproto.1,v 3.12 1994/09/23 23:51:44 tom Exp $
 .\"
 .de EX		\"Begin example
 .ne 5
@@ -142,6 +142,16 @@ Use the comment
 /* LINT_EXTERN2 */
 .EE
 to include externs defined in the first level of include-files.
+Use the comment
+.EX
+/* LINT_SHADOWED */
+.EE
+to cause 
+.B cproto
+to put "#undef" directives before each lint library declaration
+(i.e., to avoid conflicts with macros that happen to have to have
+the same name as the functions, thus causing syntax errors).
+.P
 Note that these special comments
 are not supported under VAX/VMS, since there is no
 equivalent for the "-C" option of cpp with VAX-C.
@@ -304,7 +314,7 @@ Options given on the command line override any corresponding
 environment option.
 .
 .SH BUGS
-If an untagged struct, union or enum declaration appears in
+If an un-tagged struct, union or enum declaration appears in
 a generated function prototype or converted function definition,
 the content of the declaration between the braces is empty.
 .LP

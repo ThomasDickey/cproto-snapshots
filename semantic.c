@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.39 1994/09/22 23:46:58 tom Exp $
+/* $Id: semantic.c,v 3.40 1994/09/23 23:32:01 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -447,16 +447,16 @@ int	commented;	/* comment-delimiters already from higher level */
 
 #if OPT_LINTLIBRARY
     if (LintLibrary()) {
+	char *t, *u;
 	s = p->declarator->text;
 	while (*s == '*')
 	    s++;
 	if (*s == '\0') {
-	    char *t = supply_parm(count);
-	    char *u = p->declarator->text;
-	    p->declarator->text = glue_strings(u, t);
+	    u = p->declarator->text;
+	    p->declarator->text = glue_strings(u, supply_parm(count));
 	    free(u);
 	} else if (p->declarator->name[0] == '\0') {
-	    if (strstr(s, "%s") != 0) {
+	    if ((t = strstr(s, "%s")) != 0) {
 		Declarator *q;
 
 		free(p->declarator->name);
@@ -471,23 +471,21 @@ int	commented;	/* comment-delimiters already from higher level */
 			    q->text = xstrdup(temp);
 			} else {
 			    free(q->text);
-			    q->text = concat_string("/*BUG*/", p->declarator->name);
+			    q->text = xstrdup(p->declarator->name);
 			}
 			break;
 		    }
 		}
 	    } else {	/* e.g., s is "[20]" for "char [20]" parameter */
 	    		/* ...or something like "* const *" */
-		char *t = supply_parm(count);	/* "p1" */
-		char *u;
 		while (*s != '\0' && *s != SQUARE_L)
 			s++;
 		u = xstrdup(s);			/* the "[20]" */
 		*s = '\0';
 		if (s != p->declarator->text) {
-			s = glue_strings(p->declarator->text, t);
+			s = glue_strings(p->declarator->text, supply_parm(count));
 		} else {
-			s = xstrdup(t);
+			s = xstrdup(supply_parm(count));
 		}
 		p->declarator->text = glue_strings(s, u);
 		free(u);
