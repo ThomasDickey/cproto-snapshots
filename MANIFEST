@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19941020
+MANIFEST for cproto, version t19941022
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -45,6 +45,7 @@ porting/micrsoft.mak            makefile for Microsoft C
 porting/popen.c                 fake popen/pclose
 porting/turboc.mak              makefile for Turbo C/C++ 3.0 (MS-DOS)
 testing                         subdirectory
+testing/README                  description of files in CPROTO/TESTING
 testing/apollo.c                template for apollo lint-library
 testing/case01.com              test cases from 1993 merge of my changes to cproto
 testing/case01.ref              test case reference: no options

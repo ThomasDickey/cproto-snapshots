@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 4.1.1.1 1994/10/15 20:15:15 tom Exp $
+# $Id: makefile.in,v 4.1.1.2 1994/10/22 23:29:08 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -42,7 +42,6 @@ LDFLAGS		=
 DOC_FILES = \
 	README \
 	CHANGES \
-	$(THIS).man \
 	$(THIS).1
 
 MAK_FILES = \
@@ -79,7 +78,7 @@ JUNK =	\
 OBJECTS = $(THIS).o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
 SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
-all : $(THIS) $(THIS).man
+all : $(THIS)
 
 install: all installdirs
 	$(INSTALL_PROGRAM) $(THIS) $(bindir)/$(THIS)
@@ -96,10 +95,10 @@ $(THIS) : $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
-	$(YACC) grammar.y
+	$(YACC) $^
 
 lex.yy.c : lex.l
-	$(LEX) lex.l
+	$(LEX) $^
 
 $(THIS).man : $(THIS).1
 	- nroff -man $(THIS).1 >$@
@@ -144,12 +143,11 @@ configure : configure.in aclocal.m4
 # revision.
 MANIFEST: patchlev.h
 	manifest -rv$(RELEASE)`fgrep PATCHLEVEL patchlev.h | sed -e s'/^[^0-9]*/_/'` \
-		testing/case*.dcl testing/case*.bat
+		$(THIS).man testing/case*.dcl testing/case*.bat
 
-dist:
-	$(MAKE) MANIFEST
+dist: MANIFEST
 	- rm -f .fname .files
-	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	fgrep PATCHLEVEL patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
 	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
 	rm -rf `cat .fname`
 	TOP=`cat .fname`; mkdir $$TOP `cat .files | grep / | sed -e 's@/.*@@' | sed -e s@\^@$$TOP/@ | uniq`
@@ -164,7 +162,7 @@ dist:
 # <CR><LF> terminated ".bat" files for MS-DOS.
 dist-shar: MANIFEST
 	- rm -f .fname .files
-	cat patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
+	fgrep PATCHLEVEL patchlev.h | sed -e 's/[^0-9.]//g' -e 's/^/$(THIS)-$(RELEASE)./' >.fname
 	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
 	shar -M -n`cat .fname` -opart -l50 `cat .files`
 	- rm -f .fname .files

@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.1 1994/10/12 14:12:48 cthuang Exp $
+/* $Id: semantic.c,v 4.1.1.1 1994/10/21 00:05:38 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -461,6 +461,7 @@ int	commented;	/* comment-delimiters already from higher level */
 	    free(u);
 	} else if (p->declarator->name[0] == '\0') {
 	    if ((t = strstr(s, "%s")) != 0) {
+		int parenthesized = FALSE;
 		Declarator *q;
 
 		free(p->declarator->name);
@@ -473,11 +474,21 @@ int	commented;	/* comment-delimiters already from higher level */
 			    sprintf(temp, "(*%s)", p->declarator->name);
 			    free(q->text);
 			    q->text = xstrdup(temp);
+			    parenthesized = TRUE;
 			} else {
 			    free(q->text);
 			    q->text = xstrdup(p->declarator->name);
 			}
 			break;
+		    }
+		}
+		if (!parenthesized) {
+		    if ((u = strchr(t, PAREN_L)) != 0) { /* e.g., "*%s()" */
+			t = p->declarator->text;
+			u = xmalloc(strlen(t) + 3);
+			(void)sprintf(u, "(%s)", t);
+			p->declarator->text = u;
+			free(t);
 		    }
 		}
 	    } else {	/* e.g., s is "[20]" for "char [20]" parameter */

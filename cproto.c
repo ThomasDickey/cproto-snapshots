@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.1 1994/10/12 14:18:16 cthuang Exp $
+/* $Id: cproto.c,v 4.1.1.1 1994/10/22 23:18:19 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 4.1 1994/10/12 14:18:16 cthuang Exp $";
+static char rcsid[] = "$Id: cproto.c,v 4.1.1.1 1994/10/22 23:18:19 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -18,8 +18,8 @@ extern char *optarg;
 extern int optind;
 #endif
 
-/* Name of the program */
-char progname[] = "cproto";
+/* Name of the program (from argv[0]) */
+char *progname;
 
 /* Program options */
 
@@ -270,7 +270,11 @@ int
 is_path_sep (ch)
 int ch;
 {
+#if defined(MSDOS) || defined(OS2)
     return (ch == '/' || ch == '\\');
+#else
+    return (ch == '/');
+#endif
 }
 
 /* Trim any path name separator from the end of the string.
@@ -600,6 +604,35 @@ char **argv;
 {
     int i;
     FILE *inf;
+
+    /* Get the program name from the 0th argument, stripping the pathname
+     * for readability.
+     */
+    progname = xstrdup(argv[0]);
+#ifdef VMS
+    for (i = strlen(progname)-1; i >= 0; i--) {
+    	if (progname[i] == SQUARE_R
+	||  progname[i] == ':') {
+	    progname += (i + 1);
+	    break;
+	} else if (progname[i] == '.') {
+	    progname[i] = '\0';
+	}
+    }
+#else
+    for (i = strlen(progname)-1; i >= 0; i--) {
+	if (is_path_sep(progname[i])) {
+	    progname += (i + 1);
+	    break;
+	}
+# if defined(MSDOS) || defined(OS2)
+	  else if (progname[i] == '.') {
+	    progname[i] = '\0';
+	}
+# endif
+    }
+#endif
+    argv[0] = progname;	/* do this so getopt is consistent with us */
 
     process_options(&argc, &argv);
 
