@@ -5,6 +5,8 @@ Patchlevel 5
 - corrected instance of fclose on a file pointer after pclose was done (found
   with Electric Fence).
 
+- corrected script make_bat.sh to prevent expansion of \n in argument-string.
+
 - Modified handling of lint library option to allow generation of lint libraries
   for ANSI compilers (set -a -l).
 
