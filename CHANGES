@@ -1,3 +1,8 @@
+Version 4.6a
+1999/12/19
+- add keywords "restrict", "_Bool", "_Complex", "_Imaginary" based on c9x
+  draft.
+- add keywords "__restrict__" and "__restrict", for gcc.
 1999/12/14
 - change vec[] array in yaccExpected() to be dynamically allocated.  It was a
   fixed-size (10 entries) array before.  Also fix problem reported by Wolfgang

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.7.1.1 1999/10/21 23:46:47 tom Exp $
+/* $Id: grammar.y,v 4.7.1.2 1999/12/20 00:04:19 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -822,7 +822,10 @@ void
 init_parser ()
 {
     static char *keywords[] = {
-	"const", "volatile", "interrupt",
+	"const",
+	"restrict",
+	"volatile",
+	"interrupt",
 #ifdef vms
 	"noshare", "readonly",
 #endif
@@ -838,9 +841,11 @@ init_parser ()
 	"__far16",
 #endif
 #else
+	/* gcc aliases */
 	"__const__",    "__const",
 	"__volatile__", "__volatile",
 	"__inline__",   "__inline",
+	"__restrict__", "__restrict",
 #endif
     };
     int i;
