@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.3.1.2 2000/08/10 11:10:34 tom Exp $
+dnl $Id: aclocal.m4,v 4.4 2000/10/29 00:47:16 cthuang Exp $
 dnl
 dnl Macros for cproto configure script (T.Dickey)
 dnl ---------------------------------------------------------------------------
