@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.1.1.1 1995/02/24 11:19:46 tom Exp $
+/* $Id: lintlibs.c,v 4.1.1.2 1995/02/27 23:59:09 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -303,7 +303,6 @@ void	track_in()
 		}
 	} else if (!strcmp(cur_file_name(), base_file)) {
 		in_include = 0;	/* kludgy bison! */
-		flush_varargs();
 	} else {		/* continue or unnest ? */
 		while (strcmp(old_file, cur_file_name())) {
 			in_include--;
