@@ -1,5 +1,5 @@
 # @configure_input@
-# $Id: makefile.in,v 4.3.1.1 1995/01/17 12:02:49 tom Exp $
+# $Id: makefile.in,v 4.4 1995/08/24 01:03:48 cthuang Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -22,7 +22,7 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
 DEFINES		=
-CPPFLAGS	= -I. -I$(srcdir) $(DEFINES) -DHAVE_CONFIG_H @CPPFLAGS@
+CPPFLAGS	= -I$(srcdir) $(DEFINES) -DHAVE_CONFIG_H @CPPFLAGS@
 CFLAGS		= @CFLAGS@ $(CPPFLAGS)
 LIBS		= @LIBS@ @LEXLIB@
 

@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.3.1.1 1995/02/24 11:19:46 tom Exp $
+/* $Id: cproto.h,v 4.4 1995/08/24 01:03:48 cthuang Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -134,6 +134,12 @@ typedef int FuncDeclRole;
 #define FMT_FUNC_COMMENT	3	/* func. def. with parameter comments */
 typedef int FuncFormatType;
 
+/* select scope of declarations to output */
+#define SCOPE_STATIC	1	/* only output declarations with local scope */
+#define SCOPE_EXTERN	2	/* only output declarations with global scope */
+#define SCOPE_ALL	3	/* output all declarations */
+typedef int Scope;
+
 /* Prototype/function definition output format */
 typedef struct func_format {
     char *decl_spec_prefix;	/* output before declaration specifier */
@@ -146,7 +152,7 @@ typedef struct func_format {
 
 /* Program options */
 extern boolean extern_out;
-extern boolean static_out;
+extern Scope scope_out;
 #if OPT_LINTLIBRARY
 extern boolean types_out;
 extern boolean lint_shadowed;

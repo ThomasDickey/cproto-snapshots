@@ -1,4 +1,4 @@
-.\" $Id: cproto.1,v 4.4 1995/01/01 19:34:59 cthuang Exp $
+.\" $Id: cproto.1,v 4.5 1995/08/24 01:03:48 cthuang Exp $
 .\"
 .de EX		\"Begin example
 .ne 5
@@ -211,6 +211,9 @@ This option will output
 .B static
 declarations as well.
 .TP
+.B \-S
+Output only static declarations.
+.TP
 .B \-T
 Copy type definitions from each file.
 (Definitions in included-files are copied, unlike the "-l" option).
@@ -350,7 +353,7 @@ don't support this (e.g., VAX/VMS, MS-DOS).
 .nf
 Chin Huang
 cthuang@io.org
-chin.huang@canrem.com
+cthuang@oce.com
 .sp
 Thomas Dickey
 dickey@clark.net

@@ -1,6 +1,13 @@
 Version 4
 
-Patchlevel 4 (February 1995)
+Patchlevel 4
+
+- Added -S option to only output static declarations.
+
+- Fix: The configure script didn't replace @CFLAGS@, @CPPFLAGS@ and @LDFLAGS@
+  in the makefile generated from makefile.in.
+
+- Fix: The -a option generated incorrect function definitions.
 
 - update test-cases for the -f2 fix in patch 3.
 
