@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: make_bat.sh,v 3.12 1994/11/12 19:09:10 tom Exp $
+# $Id: make_bat.sh,v 3.12.1.2 1995/12/28 01:54:43 tom Exp $
 #
 # This makes a special ".bat" file for testing CPROTO on MSDOS.
 # It won't work properly if /bin/echo tries to expand the backslash sequences.
@@ -7,6 +7,9 @@
 #
 # The MSDOS 'fc' program doesn't return an exit code for differing files.
 # We have to examine the output log...
+TMP=make$$
+rm -f $TMP
+trap "rm -f $TMP" 0 1 2 5 15
 if [ -f /bin/echo ]
 then
 	ECHO=/bin/echo
@@ -28,10 +31,13 @@ if exist $I.out erase $I.out
 if exist $I.dif erase $I.dif
 copy syntax.c $I.c
 EOF
-		CASE="`grep \"CASE[ 	]$i\" run_test.txt`"
-		OPTS=`$ECHO "$CASE"|sed -e 's/^.*=/CPROTO/'`
-		$ECHO "..\\$OPTS -o$I.out -O$I.err $I.c" |sed -e s/\"//g >>$I.bat
-		TEST=`$ECHO $OPTS | sed -e 's/-[at]//'`
+		grep 'CASE[ 	]'$i run_test.txt >$TMP
+		OPTS=`sed -e 's/^.*=/CPROTO/' $TMP`
+		TEST=`sed -e 's/^.*=/CPROTO/' -e 's/-[at]//' $TMP`
+		sed	-e 's/^.*=/CPROTO/' $TMP | \
+		sed	-e 's/^/..\\/' \
+			-e s/\$/\ -o$I.out\ -O$I.err\ $I.c/ \
+			-e s/\"//g >>$I.bat
 		if [ ".$OPTS" !=  ".$TEST" ]
 		then
 		cat >>$I.bat <<EOF
