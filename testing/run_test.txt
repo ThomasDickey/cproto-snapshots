@@ -1,4 +1,4 @@
-$Id: run_test.txt,v 3.5 1994/08/30 11:29:42 tom Exp $
+$Id: run_test.txt,v 3.6 1995/11/30 23:27:18 tom Exp $
 
 CASE 01 = unix, vms, dos =
 
@@ -42,3 +42,4 @@ CASE 20 = unix, vms, dos = -f3
 
 CASE 21 = unix, vms, dos = -f3 -v -"Pint\sfunc(\n\ta,\n\tb\n\t)"
 
+CASE 22 = unix = -l -a
