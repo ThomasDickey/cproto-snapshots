@@ -74,8 +74,7 @@ _FIRST	*func2(p1, p2, p)
 		float	p;
 		{ return(*(_FIRST **)0); }
 
-int	*(func_func)()
-		{ return(*(int **)0); }
+int	*(func_func)();
 
 typedef	int	bool;
 

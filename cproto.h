@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.16 1994/08/14 19:59:16 tom Exp $
+/* $Id: cproto.h,v 3.18 1994/09/22 23:53:59 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -18,6 +18,16 @@
 #else
 #define	ALLOC(cast)	(cast *)xmalloc(sizeof(cast))
 #endif
+
+/* Useful constants (mainly to avoid problems balancing parentheses...) */
+#define PAREN_L       '('
+#define PAREN_R       ')'
+#define SQUARE_L      '['
+#define SQUARE_R      ']'
+#define CURL_L        '{'
+#define CURL_R        '}'
+#define	COMMENT_BEGIN "/*"
+#define COMMENT_END   "*/"
 
 /* Boolean type */
 typedef char boolean;
@@ -139,6 +149,7 @@ extern boolean extern_out;
 extern boolean static_out;
 #if OPT_LINTLIBRARY
 extern boolean types_out;
+extern boolean lint_shadowed;
 #endif
 extern boolean variables_out;
 extern boolean promote_param;
@@ -198,6 +209,7 @@ extern void indent          ARGS((FILE *outf));
 extern int lint_ellipsis    ARGS((Parameter *p));
 extern void ellipsis_varargs ARGS((Declarator *d));
 extern char *supply_parm    ARGS((int count));
+extern int is_actual_func   ARGS((Declarator *d));
 extern void put_body        ARGS((FILE *outf, DeclSpec *decl_spec, Declarator *declarator));
 # ifdef NO_LEAKS
 extern void free_lintlibs   ARGS((void));

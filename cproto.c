@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.22 1994/08/29 12:13:44 tom Exp $
+/* $Id: cproto.c,v 3.23 1994/09/22 00:22:02 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.22 1994/08/29 12:13:44 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.23 1994/09/22 00:22:02 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -35,6 +35,11 @@ boolean static_out = FALSE;
 /* If TRUE, export typedef declarations (needed for lint-libs) */
 #if OPT_LINTLIBRARY
 boolean types_out = FALSE;
+#endif
+
+/* If TRUE, undef functions to avoid shadowing problems */
+#if OPT_LINTLIBRARY
+boolean lint_shadowed = FALSE;
 #endif
 
 /* If TRUE, generate variable declarations */
