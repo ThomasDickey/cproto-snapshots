@@ -2,9 +2,11 @@
 
 /* case14.c */
 
+#include "<built-in>"
+
 int	x3;
 
-typedef	int	x4t;
+typedef int x4t;
 
 char	x6;
 short	x7;
@@ -27,19 +29,19 @@ x4t	x17;
 const	x18 = {0};
 volatile x19;
 
-typedef	struct	_first	{
-	int		a:5;
-	struct	{
-		int	a,b;
-	} b_struct;
-	char		b:16, b1:1;	
-	long		c:16, c1;
-	short		d:16, d1:8, d2;
-	unsigned	e:16;
-	float		f;
-	double		g;
-	struct	_first	*link;
-	}	_FIRST;
+typedef struct _first {
+        int a:5;
+        struct {
+                int a,b;
+        } b_struct;
+        char b:16, b1:1; 
+        long c:16, c1;
+        short d:16, d1:8, d2;
+        unsigned e:16;
+        float f;
+        double g;
+        struct _first *link;
+        } _FIRST;
 
 typedef int badStyle;
 
@@ -50,10 +52,10 @@ void	badFunc(badStyle)
 _FIRST	first;
 _FIRST	last;
 _FIRST	first_last[];
-struct	_second	{
-		enum	{true, false} bool;
-		enum	{wrong=1, right=3} values;
-	} _SECOND;
+struct _second {
+                enum {true, false} bool;
+                enum {wrong=1, right=3} values;
+        } _SECOND;
 int	i[];
 float	f[];
 int	array[][10][20];
@@ -124,27 +126,27 @@ _FIRST	efunc1(p1, p2, p3)
 		long	p3;
 		{ return(*(_FIRST *)0); }
 
-typedef	int	bool;
+typedef int bool;
 
 bool	a1;
 bool	a3;
 
-struct	ZIP1	{ int x1, y1; };
+struct ZIP1 { int x1, y1; };
 
-struct	zip2	{ int x2, y2; } z2;
-struct		{ int x3, y3; } z3;
+struct zip2 { int x2, y2; } z2;
+struct { int x3, y3; } z3;
 
-struct	ZIP4	{ int x4, y4; };
+struct ZIP4 { int x4, y4; };
 
-enum	zap1	{ a,b,c,d } what;
+enum zap1 { a,b,c,d } what;
 enum zap2 what2;
-enum		{a9,b9,c9,d9} what3;
+enum {a9,b9,c9,d9} what3;
 
-typedef	struct	bong	{
-	int	(*func)();
-	} BONG;
+typedef struct bong {
+        int (*func)();
+        } BONG;
 
-typedef	char	*string;
+typedef char *string;
 
 int	junk;
 
@@ -163,7 +165,7 @@ int	veryfunny(a, b, c)
 	/* VARARGS3 */
 int	program(argv, y, zz, z1, z2, z3)
 		string	argv[];
-		struct	alpha { int x,z; } y;
+		struct alpha { int x,z; } y;
 		int	zz;
 		int	z1;
 		int	z2;
@@ -185,12 +187,12 @@ int	junk3()
 BONG	*junk4()
 		{ return(*(BONG **)0); }
 
-typedef	int	extern_junk;
+typedef int extern_junk;
 
 extern_junk *foo()
 		{ return(*(extern_junk **)0); }
 
-typedef	int	void_junk;
+typedef int void_junk;
 
 void_junk *foo2a()
 		{ return(*(void_junk **)0); }

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.8.1.1 2003/01/05 16:14:01 tom Exp $
+/* $Id: grammar.y,v 4.8.1.2 2003/04/05 16:41:14 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -892,6 +892,7 @@ init_parser ()
 #endif
 #ifdef __GNUC__
 	/* gcc aliases */
+	"__builtin_va_arg",
 	"__builtin_va_list",
 	"__const",
 	"__const__",
