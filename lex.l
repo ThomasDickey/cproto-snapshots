@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.6.1.2 2004/03/24 21:32:54 tom Exp $
+/* $Id: lex.l,v 4.6.1.3 2004/03/25 00:39:45 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -148,9 +148,15 @@ QUOTE		[\"\']
 			    char name[MAX_TEXT_SIZE], value[MAX_TEXT_SIZE];
 
 			    save_text();
+
+			    *name = 0;
 			    sscanf(yytext, "define %s", name);
+
 			    get_cpp_directive(buf, sizeof(buf));
+
+			    *value = 0;
 			    sscanf(buf, "%s", value);
+
 			    new_symbol(define_names, name, value, DS_NONE);
 			}
 
@@ -171,16 +177,24 @@ QUOTE		[\"\']
 
 <CPP1>line{WS}+[0-9]+{WS}+\".*$  {
 			    save_text();
+
+			    cur_file->file_name[0] = 0;
 			    sscanf(yytext, "line %d \"%[^\"]\"",
-			     &cur_file->line_num, cur_file->file_name);
+					   &cur_file->line_num,
+					   cur_file->file_name);
+
 			    cur_file->line_num--;
 			    track_in();
 			    finishCpp();
 			}
 <CPP1>[0-9]+{WS}+\".*$  {
 			    save_text();
-			    sscanf(yytext, "%d \"%[^\"]\"", &cur_file->line_num,
-			     cur_file->file_name);
+
+			    cur_file->file_name[0] = 0;
+			    sscanf(yytext, "%d \"%[^\"]\"",
+					   &cur_file->line_num,
+					   cur_file->file_name);
+
 			    cur_file->line_num--;
 			    track_in();
 			    finishCpp();
