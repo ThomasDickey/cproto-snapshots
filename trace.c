@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 4.2 1998/01/19 00:49:33 cthuang Exp $
+/* $Id: trace.c,v 4.2.1.1 2002/01/26 00:01:29 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  *
@@ -37,6 +37,14 @@
 #undef	free
 #endif	/* DOALLOC */
 
+Where(char *file, int line)
+{
+	fflush(stderr);
+	printf("%s @%d\n", file, line);
+	fflush(stdout);
+	Trace("%s @%d\n", file, line);
+}
+
 void
 Trace(char *format, ...)
 {
@@ -48,8 +56,8 @@ Trace(char *format, ...)
 	if (!fp)
 		abort();
 
-	va_start(ap,format);
 	if (format != 0) {
+		va_start(ap,format);
 		vfprintf(fp, format, ap);
 		va_end(ap);
 		(void)fflush(fp);

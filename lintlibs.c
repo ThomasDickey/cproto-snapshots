@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.5 2001/01/26 17:47:20 cthuang Exp $
+/* $Id: lintlibs.c,v 4.4 1998/01/19 00:49:21 cthuang Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -619,16 +619,11 @@ void	put_body(outf, decl_spec, declarator)
 	}
 	put_char(outf, CURL_R);
     } else {
-	if (proto_style == PROTO_LINTLIBRARY
-	 || proto_style == PROTO_ANSI_LLIB) {
-	    /* SVR4 lint complains if we declare const data without an
-	     * initializer.
-	     */
-	    if (strkey(decl_spec->text, "const") != NULL
-	     || strkey(declarator->text, "const") != NULL) {
-		put_string(outf, " = {0}");
-	    }
-	}
+	/* SVR4 lint complains if we declare const data w/o some initializer.
+	 */
+	if (strkey(decl_spec->text, "const") != NULL
+	 || strkey(declarator->text, "const") != NULL)
+	    put_string(outf, " = {0}");
 	put_string(outf, ";");
     }
     put_newline(outf);

@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.9 2000/11/09 05:02:01 cthuang Exp $
+/* $Id: cproto.c,v 4.8.1.5 2002/01/26 00:43:08 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.6c"
+#define VERSION "4.6e"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -172,7 +172,7 @@ char *xstrdup (src) char *src;
 void
 put_error ()
 {
-    fprintf(stderr, "%s:%u: ", cur_file_name(), cur_line_num());
+    fprintf(stderr, "\"%s\", line %u: ", cur_file_name(), cur_line_num());
 }
 
 /* Scan for options from a string.
@@ -798,7 +798,7 @@ char *argv[];
 		sprintf(cpp_cmd, "%s%s %s", cpp, cpp_opt, FileName);
 		inf = popen(cpp_cmd, "r");
 #endif
-		if (inf == NULL) {
+		if (inf == NULL || ferror(inf) || feof(inf)) {
 		    fprintf(stderr, "%s: error running %s\n", progname,
 		     cpp_cmd);
 		    continue;

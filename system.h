@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.8 2000/10/29 19:20:35 cthuang Exp $
+/* $Id: system.h,v 4.7 1998/01/24 01:42:09 cthuang Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -189,7 +189,7 @@ extern char *strstr  ARGS((const char *s, const char *p));
  * support.
  */
 #ifndef OPT_LINTLIBRARY
-# if HAVE_PROG_LINT
+# if HAVE_PROG_LINT || defined(unix)
 #  define OPT_LINTLIBRARY 1
 # endif
 #endif
