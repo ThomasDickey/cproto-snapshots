@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.2 1994/07/25 23:45:36 tom Exp $
+/* $Id: system.h,v 3.6 1994/07/30 19:36:45 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -6,7 +6,8 @@
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
  
-#ifdef __STDC__
+/* don't use continuation-lines -- breaks on VAXC */
+#if defined(__STDC__) || defined(__TURBOC__) || defined(vms) || defined(__cplusplus)
 #define ARGS(p) p
 #else
 #define ARGS(p) ()
@@ -51,14 +52,24 @@
 #define CPP "cl /E /nologo"
 #endif
 
-/* Set configuration parameters for systems on which we cannot run autoconf */
+/* Set configuration parameters for systems on which we cannot run autoconf.
+ * (Assumes Posix unless overridden).
+ */
 #ifndef HAVE_STDLIB_H
 #define HAVE_STDLIB_H 1
+#endif
+
+#ifndef HAVE_STRING_H
+#define HAVE_STRING_H 1
 #endif
 
 #ifndef HAVE_STRSTR
 #define HAVE_STRSTR 1
 #endif
+
+#ifndef HAVE_GETOPT_H
+#define HAVE_GETOPT_H 1
+#endif 
 
 /* Default C preprocessor on UNIX systems */
 #ifndef MSDOS
@@ -89,6 +100,10 @@ extern char *malloc  ARGS((size_t n));
 extern char *realloc ARGS((char *p, size_t n));
 #endif
 
+#if HAVE_UNISTD_H
+#include	<unistd.h>
+#endif
+
 #if STDC_HEADERS || HAVE_STRING_H
 #  include <string.h>
 /* An ANSI string.h and pre-ANSI memory.h might conflict.  */
@@ -113,5 +128,16 @@ extern void dofree(char *);
 #define realloc(p,n) doalloc(p,n)
 #define free(n) dofree(n)
 #endif	/* DOALLOC */
+
+/*
+ * Lint libraries are useful only on systems that are likely to have lint.
+ * The OPT_LINTLIBRARY symbol controls whether we compile in the lint library
+ * support.
+ */
+#ifndef OPT_LINTLIBRARY
+# ifdef unix
+#  define OPT_LINTLIBRARY 1
+# endif
+#endif
 
 #endif	/* SYSTEM_H */

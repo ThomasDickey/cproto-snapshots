@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 3.10 1994/07/25 23:48:27 tom Exp $
+/* $Id: cproto.h,v 3.12 1994/07/30 19:01:07 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -104,7 +104,9 @@ typedef union {
 } YYSTYPE;
 
 /* Prototype styles */
+#if OPT_LINTLIBRARY
 #define PROTO_LINTLIBRARY	-1	/* form lint-library source */
+#endif
 #define PROTO_NONE		0	/* do not output any prototypes */
 #define PROTO_TRADITIONAL	1	/* comment out parameters */
 #define PROTO_ABSTRACT		2	/* comment out parameter names */
@@ -139,7 +141,9 @@ typedef struct func_format {
 /* Program options */
 extern boolean extern_out;
 extern boolean static_out;
+#if OPT_LINTLIBRARY
 extern boolean types_out;
+#endif
 extern boolean variables_out;
 extern boolean promote_param;
 extern PrototypeStyle proto_style;
@@ -163,54 +167,59 @@ extern int in_include;		/* current include-level */
 extern int debug_trace;
 extern char base_file[];
 
-#if __STDC__ || defined(__cplusplus)
-#define P_(s) s
-#else
-#define P_(s) ()
-#endif
-
 /* cproto.c */
-extern char *xmalloc P_((unsigned n));
-extern char *xstrdup P_((char *src));
-extern void put_error P_((void));
-extern int is_path_sep P_((int ch));
-extern char *trim_path_sep P_((char *s));
+extern char *xmalloc        ARGS((unsigned n));
+extern char *xstrdup        ARGS((char *src));
+extern void put_error       ARGS((void));
+extern int is_path_sep      ARGS((int ch));
+extern char *trim_path_sep  ARGS((char *s));
 
 /* lintlibs.c */
-extern void put_string P_((FILE *outf, char *s));
-extern void put_char P_((FILE *outf, int c));
-extern void put_newline P_((FILE *outf));
-extern void put_blankline P_((FILE *outf));
-extern void put_padded P_((FILE *outf, char *s));
-extern void fmt_library P_((int code));
-extern void begin_tracking P_((void));
-extern void track_in P_((void));
-extern int want_typedef P_((void));
-extern void begin_typedef P_((void));
-extern void copy_typedef P_((char *s));
-extern void end_typedef P_((void));
-extern void imply_typedef P_((char *s));
-extern char *implied_typedef P_((void));
-extern void indent P_((FILE *outf));
-extern int lint_ellipsis P_((Parameter *p));
-extern void ellipsis_varargs P_((Declarator *d));
-extern char *supply_parm P_((int count));
-extern void put_body P_((FILE *outf, DeclSpec *decl_spec, Declarator *declarator));
+#if OPT_LINTLIBRARY
+extern void put_string      ARGS((FILE *outf, char *s));
+extern void put_char        ARGS((FILE *outf, int c));
+extern void put_newline     ARGS((FILE *outf));
+extern void put_blankline   ARGS((FILE *outf));
+extern void put_padded      ARGS((FILE *outf, char *s));
+extern void fmt_library     ARGS((int code));
+extern void begin_tracking  ARGS((void));
+extern void track_in        ARGS((void));
+extern int want_typedef     ARGS((void));
+extern void begin_typedef   ARGS((void));
+extern void copy_typedef    ARGS((char *s));
+extern void end_typedef     ARGS((void));
+extern void imply_typedef   ARGS((char *s));
+extern char *implied_typedef ARGS((void));
+extern void indent          ARGS((FILE *outf));
+extern int lint_ellipsis    ARGS((Parameter *p));
+extern void ellipsis_varargs ARGS((Declarator *d));
+extern char *supply_parm    ARGS((int count));
+extern void put_body        ARGS((FILE *outf, DeclSpec *decl_spec, Declarator *declarator));
+#else
+#define put_string(fp,S)    fputs(S, fp)
+#define put_char(fp,C)      fputc(C, fp)
+#define put_padded(fp,S)    fprintf(fp, "%s ", S)
+#define put_body(fp,s,d)    put_string(fp,";")
+#define track_in()
+#define begin_typedef()
+#define copy_typedef()
+#define end_typedef()
+#define imply_typedef(s)
+#define implied_typedef()   ((char *)0)
+#endif
 
 /* strkey.c */
-extern char *strkey P_((char *src, char *key));
-extern void strcut P_((char *src, char *key));
+extern char *strkey         ARGS((char *src, char *key));
+extern void strcut          ARGS((char *src, char *key));
 
 /* grammar.y */
-extern boolean is_typedef_name P_((char *name));
-extern char *cur_file_name P_((void));
-extern unsigned cur_line_num P_((void));
-extern FILE *cur_tmp_file P_((void));
-extern void cur_file_changed P_((void));
-extern long cur_begin_comment P_((void));
-extern char *cur_text P_((void));
-extern void pop_file P_((void));
-extern void init_parser P_((void));
-extern void process_file P_((FILE *infile, char *name));
-
-#undef P_
+extern boolean is_typedef_name ARGS((char *name));
+extern char *cur_file_name  ARGS((void));
+extern unsigned cur_line_num ARGS((void));
+extern FILE *cur_tmp_file   ARGS((void));
+extern void cur_file_changed ARGS((void));
+extern long cur_begin_comment ARGS((void));
+extern char *cur_text       ARGS((void));
+extern void pop_file        ARGS((void));
+extern void init_parser     ARGS((void));
+extern void process_file    ARGS((FILE *infile, char *name));

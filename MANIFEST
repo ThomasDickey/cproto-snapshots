@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940726
+MANIFEST for cproto, version t19940730
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -30,9 +30,11 @@ system.h                        system-dependent definitions, coordinated with c
 trace.c                         debugging support for CPROTO
 porting                         subdirectory
 porting/borland.mak             makefile for Borland C
+porting/getopt.c                free version of getopt
 porting/getopt.h                header file for getopt
 porting/micrsoft.mak            makefile for Microsoft C
 porting/popen.c                 fake popen/pclose
+porting/turboc.mak              makefile for Turbo C/C++ 3.0 (MS-DOS)
 testing                         subdirectory
 testing/apollo.c                template for apollo lint-library
 testing/case01.com              test cases from 1993 merge of my changes to cproto
@@ -68,8 +70,11 @@ testing/case15.ref              test case reference: apollo lint library (sr10.3
 testing/case16.com              test cases from 1993 merge of my changes to cproto
 testing/case16.ref              test case reference: -a
 testing/descrip.mms             VAX MMS-script for CPROTO/TESTING directory
+testing/make_dcl.sh             script to generate UNIX/VMS ".dcl" files
 testing/makefile                UNIX makefile for CPROTO/TESTING directory
 testing/run                     test cases from 1993 merge of my changes to cproto
 testing/run_test.com            VAX/VMS test script for CPROTO
 testing/run_test.sh             UNIX test-script for CPROTO
+testing/run_test.txt            template for test-scripts
 testing/syntax.c                odds & ends of syntax to use for testing
+testing/testunix.sh             runs UNIX test scripts

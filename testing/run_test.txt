@@ -1,0 +1,31 @@
+$Id: run_test.txt,v 3.1 1994/07/30 21:40:30 tom Exp $
+
+CASE 01 = unix, vms, dos =
+
+CASE 02 = unix, vms, dos = -f0
+
+CASE 03 = unix, vms, dos = -c -f1
+
+CASE 04 = unix, vms, dos = -c -f2
+
+CASE 05 = unix, vms, dos = -c -f3
+
+CASE 06 = unix, vms, dos = -c -f3 -v
+
+CASE 07 = unix, vms, dos = -c -f3 -v -e
+
+CASE 09 = unix, vms, dos = -c -f3 -v -P"int func(\n\ta,\n\tb\n\t)"
+
+CASE 10 = unix, vms, dos = -"T"
+
+CASE 11 = unix, vms, dos = -l
+
+CASE 12 = unix, vms, dos = -s
+
+CASE 13 = unix, vms, dos = -l -s
+
+CASE 14 = unix, vms, dos = -l -x
+
+CASE 15 = apollo = -D__STDC__ -D__attribute='#attributes' -l apollo.c
+
+CASE 16 = unix	= -a

@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.12 1994/07/26 00:29:44 tom Exp $
+/* $Id: semantic.c,v 3.15 1994/07/30 20:57:47 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -10,10 +10,17 @@
 #define	COMMENT_BEGIN "/*"
 #define COMMENT_END   "*/"
 
+#if OPT_LINTLIBRARY
+static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
+#define	PutParameter(fp,p,f,n,c)		put_parameter(fp, p, f, n, c)
+#else
+static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int commented));
+#define	PutParameter(fp,p,f,n,c)		put_parameter(fp, p, c)
+#endif
+
 static	char *		concat_string		ARGS((char *a, char *b));
 static	boolean		is_void_parameter	ARGS((Parameter *p));
 static	Parameter *	search_parameter_list	ARGS((ParameterList *params, char *name));
-static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
 static	void		put_param_list		ARGS((FILE *outf, Declarator *declarator, int commented));
 static	void		put_parameters		ARGS((FILE *outf, Declarator *declarator, int commented));
 static	void		put_func_declarator	ARGS((FILE *outf, Declarator *declarator, int commented));
@@ -45,10 +52,12 @@ char *text;
 long offset;
 int flags;
 {
+#if OPT_LINTLIBRARY
     if (LintLibrary()) {
 	if (!strcmp(text, "register"))
 	    text = "";
     }
+#endif
     decl_spec->text = xstrdup(text);
     decl_spec->begin = offset;
     decl_spec->flags = flags;
@@ -373,16 +382,23 @@ DeclaratorList *declarators;
 /* Output a function parameter.
  */
 static int
-put_parameter (outf, p, name_only, count, commented)
+put_parameter (outf, p,
+#if OPT_LINTLIBRARY
+	name_only, count,
+#endif
+	commented)
 FILE *outf;
 Parameter *p;
+#if OPT_LINTLIBRARY
 int	name_only;	/* nonzero if we only show the parameter name */
 int	count;		/* index in parameter list if we haven't names */
+#endif
 int	commented;	/* comment-delimiters already from higher level */
 {
     char	*s;
     char	gap = ' ';
 
+#if OPT_LINTLIBRARY
     if (name_only) {
 	s = p->declarator->name;
 	if (LintLibrary()) {
@@ -394,8 +410,10 @@ int	commented;	/* comment-delimiters already from higher level */
 	put_string(outf, s);	/* ... remainder of p->declarator.name */
 	return (TRUE);
     }
+#endif
 
     s = p->decl_spec.text;
+#if OPT_LINTLIBRARY
     if (LintLibrary()) {
 	if (is_void_parameter(p))
 	    return (FALSE);
@@ -405,20 +423,23 @@ int	commented;	/* comment-delimiters already from higher level */
 	if (strlen(s) < 8)
 	    gap = '\t';
     }
+#endif
 
     put_string(outf, s);
 
+#if OPT_LINTLIBRARY
     if (LintLibrary()) {
     	s = p->declarator->text;
 	while (*s == '*')
 	    s++;
 	if (*s == '\0') {
-	    int len = s - p->declarator->text;
+	    int len = (int)(s - p->declarator->text);
 	    char *t = supply_parm(count);
     	    p->declarator->text = concat_string(p->declarator->text, t);
 	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
 	}
     }
+#endif
 
     if (p->declarator->text[0] != '\0') {
 	if (strcmp(p->declarator->text, "...") != 0) {
@@ -440,9 +461,11 @@ FILE *outf;
 Declarator *declarator;
 int commented;
 {
+#if OPT_LINTLIBRARY
+    int count = 0;
+#endif
     Parameter *p;
     int f;
-    int count = 0;
     int hide_it = (where == FUNC_PROTO) && (proto_style == PROTO_TRADITIONAL);
     int do_cmt = proto_comments && hide_it;
 
@@ -450,7 +473,11 @@ int commented;
     if (hide_it && !do_cmt) {
 	;
     } else if (is_void_parameter(p)) {
-	if (p != NULL && !LintLibrary())
+	if (p != NULL
+#if OPT_LINTLIBRARY
+	 && !LintLibrary()
+#endif
+	 )
 	    put_string(outf, "void");
     } else {
 	f = (declarator == func_declarator) ? format : FMT_OTHER;
@@ -461,18 +488,20 @@ int commented;
 	    put_string(outf, COMMENT_BEGIN);
 		
 	put_string(outf, fmt[f].first_param_prefix);
-	(void)put_parameter(outf, p, LintLibrary(), ++count, commented);
+	(void)PutParameter(outf, p, LintLibrary(), ++count, commented);
 
 	while (p->next != NULL) {
+#if OPT_LINTLIBRARY
 	    if (lint_ellipsis(p->next))
 	    	break;
+#endif
 	    put_char(outf, ',');
 	    if (where == FUNC_DEF && p->comment != NULL)
 		put_string(outf, p->comment);
 
 	    p = p->next;
 	    put_string(outf, fmt[f].middle_param_prefix);
-	    (void)put_parameter(outf, p, LintLibrary(), ++count, commented);
+	    (void)PutParameter(outf, p, LintLibrary(), ++count, commented);
 	}
 	if (where == FUNC_DEF && p->comment != NULL)
 	    put_string(outf, p->comment);
@@ -607,17 +636,19 @@ int commented;
 	put_char(outf, ')');
     }
 
+#if OPT_LINTLIBRARY
     if (LintLibrary()) {
 	Parameter	*p = declarator->params.first;
 	int		count = 0;
 	while (p != 0) {
 		if (lint_ellipsis(p))
 			break;
-		if (put_parameter(outf, p, FALSE, ++count, commented))
+		if (PutParameter(outf, p, FALSE, ++count, commented))
 			putchar(';');
 		p = p->next;
 	}
     }
+#endif
 }
 
 /* Output a declarator.
@@ -674,8 +705,10 @@ DeclSpec *decl_spec;		/* declaration specifier */
 DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
-    boolean	defines = (strchr(decl_spec->text, '{') != 0);
     int	commented = FALSE;
+
+#if OPT_LINTLIBRARY
+    boolean	defines = (strchr(decl_spec->text, '{') != 0);
 
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
@@ -686,10 +719,13 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	put_string(stdout, ";\n");
 	return;
     }
+#endif
 
     if (!variables_out || (decl_spec->flags & (DS_EXTERN|DS_JUNK))) {
+#if OPT_LINTLIBRARY
 	if (in_include >= extern_in)	/* -x option not set? */
 	    return;
+#endif
 	strcut(decl_spec->text, "extern");
     }
     if (!static_out && (decl_spec->flags & DS_STATIC))
@@ -702,11 +738,16 @@ DeclaratorList *decl_list;	/* list of declared variables */
     for (d = decl_list->first; d != NULL; d = d->next) {
 	if (d->func_def == FUNC_NONE
 	 || d->head->func_stack->pointer
-	 || (in_include < extern_in)) {
+#if OPT_LINTLIBRARY
+	 || (in_include < extern_in)
+#endif
+	   ) {
+#if OPT_LINTLIBRARY
 	    if (LintLibrary() && d->func_def != FUNC_NONE)
 		ellipsis_varargs(d);
 	    else if (types_out)
 	    	fmt_library(2);
+#endif
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
 	    put_declarator(stdout, d, commented);
@@ -787,10 +828,12 @@ Declarator *declarator;
 	strcut(p->decl_spec.text, "auto");
     }
 
+#if OPT_LINTLIBRARY
     if (LintLibrary())
 	ellipsis_varargs(declarator);
     else if (types_out)
     	fmt_library(0);
+#endif
 
     func_declarator = declarator->head;
     if (uses_varargs(func_declarator)) {
@@ -836,18 +879,20 @@ put_param_decl (declarator, commented)
 Declarator *declarator;
 int commented;
 {
-    Parameter *p;
+#if OPT_LINTLIBRARY
     int count = 0;
+#endif
+    Parameter *p;
 
     p = declarator->params.first;
     if (!is_void_parameter(p)) {
 	fputc('\n', cur_tmp_file());
-	(void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
+	(void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
 	    fputc('\n', cur_tmp_file());
-	    (void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
+	    (void)PutParameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	    fputc(';', cur_tmp_file());
 	    p = p->next;
 	}
@@ -864,7 +909,9 @@ Declarator *declarator;
     Parameter *p;
     ParameterList *params;
     char *comment;
-    int comment_len, n;
+    int n;
+    unsigned comment_len;
+    long diff;
 
     /* Do nothing if the function is already defined in the desired style
      * or if the function uses varargs.
@@ -878,10 +925,14 @@ Declarator *declarator;
      * Read the temporary file from after the last ) or ; to the
      * end of the file.
      */
-    comment_len = (size_t)(ftell(cur_tmp_file()) - cur_begin_comment());
-    comment = xmalloc(comment_len);
-    fseek(cur_tmp_file(), cur_begin_comment(), 0);
-    fread(comment, sizeof(char), comment_len, cur_tmp_file());
+    if ((diff = (ftell(cur_tmp_file()) - cur_begin_comment())) > 0) {
+    	comment_len = diff;
+    	comment = xmalloc(comment_len);
+    	fseek(cur_tmp_file(), cur_begin_comment(), 0);
+    	fread(comment, sizeof(char), comment_len, cur_tmp_file());
+    } else {
+	comment_len = 0;
+    }
 
     format = FMT_FUNC;
     if (func_declarator->func_def == FUNC_TRADITIONAL) {
@@ -920,19 +971,24 @@ Declarator *declarator;
 
     if (func_style == FUNC_BOTH) {
 	char *cur_func;
-	int func_len;
+	unsigned func_len;
 
 	/* Save the current function definition head. */
-	func_len = (int)(cur_begin_comment() - decl_spec->begin);
-	cur_func = xmalloc(func_len);
-	fread(cur_func, sizeof(char), func_len, cur_tmp_file());
+	if ((diff = (cur_begin_comment() - decl_spec->begin)) > 0) {
+	    func_len = diff;
+	    cur_func = xmalloc(func_len);
+	    fread(cur_func, sizeof(char), func_len, cur_tmp_file());
+	} else {
+	    func_len = 0;
+	}
 
 	fseek(cur_tmp_file(), decl_spec->begin, 0);
 	fprintf(cur_tmp_file(), "%s\n\n", func_directive);
 
 	/* Output new style function definition head. */
 	if (func_declarator->func_def == FUNC_ANSI) {
-	    fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
+	    if (func_len != 0)
+		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
 	    fputs(decl_spec->text, cur_tmp_file());
@@ -945,7 +1001,8 @@ Declarator *declarator;
 
 	/* Output old style function definition head. */
 	if (func_declarator->func_def == FUNC_TRADITIONAL) {
-	    fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
+	    if (func_len != 0)
+		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
 	    fputs(decl_spec->text, cur_tmp_file());
@@ -961,7 +1018,9 @@ Declarator *declarator;
 	if (*comment != '\n')
 	    fputc('\n', cur_tmp_file());
 	func_style = FUNC_BOTH;
-	free(cur_func);
+
+	if (func_len != 0)
+	    free(cur_func);
 
     } else {
 	/* Output declarator specifiers. */

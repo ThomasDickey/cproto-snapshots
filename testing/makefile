@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.1 1992/10/16 14:35:34 dickey Exp $
+# $Id: makefile,v 3.2 1994/07/30 21:59:25 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -6,16 +6,10 @@ TOP	= ../../../../src
 include $(TOP)/td_lib/support/td_lib.mk
 
 ####### (Standard Lists) #######################################################
-COM_FILES=\
-	case1.com	case2.com	case3.com	case4.com\
-	case5.com	case6.com	case7.com	case8.com\
-	case9.com	case10.com	case11.com	case12.com\
-	case13.com	case14.com
-
 REF_FILES=\
-	case1.ref	case2.ref	case3.ref	case4.ref\
-	case5.ref	case6.ref	case7.ref	case8.ref\
-	case9.ref	case10.ref	case11.ref	case12.ref\
+	case01.ref	case02.ref	case03.ref	case04.ref\
+	case05.ref	case06.ref	case07.ref	case08.ref\
+	case09.ref	case10.ref	case11.ref	case12.ref\
 	case13.ref	case14.ref
 
 TESTDATA=\
@@ -33,7 +27,7 @@ ALL	=
 
 ####### (Standard Productions) #################################################
 all:	$(SOURCES) $(ALL) $B/$(THIS) ; @echo 'Type "make run_test"'
-clean:				; rm -f $(CLEAN)
+clean:				; rm -f $(CLEAN) *.dcl *.err
 clobber:	clean		; rm -f $(ALL)
 destroy:			; $(DESTROY)
 sources:	$(SOURCES)
