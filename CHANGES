@@ -3,20 +3,27 @@ Version 3
 Patchlevel 10 (dickey, September 1994)
 
 - corrected two malloc-defects in lint library generation (one place where
-  generated parameter name was copied rather than allocated, and another
-  memory leak).
+  generated parameter name was copied rather than allocated, and another memory
+  leak).
 
 - corrected generation of lint library function body, to handle function
   pointers.
 
-- changed the implicit lint library function type from "" to "void", to
-  avoid special-cases in the function-body generation.
+- changed the implicit lint library function type from "" to "void", to avoid
+  special-cases in the function-body generation.
 
 - added logic using 'NestedParams' to suppress prototype-arguments in lint
   library function-pointer arguments.
 
 - corrected lint-library function parameter derived from prototype "char [2]"
   (parameter name wasn't supplied).
+
+- added PRINTFLIKE and SCANFLIKE to the comments interpreted for the lint
+  library translation.
+
+- added new comment keyword "LINT_SHADOWED" to generate "#undef symbol" before
+  each function template in lint libraries (useful for processing files that
+  define both macros and functions with the same names).
 
 Patchlevel 9 (dickey, August 1994)
 

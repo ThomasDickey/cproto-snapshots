@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.23 1994/08/29 11:21:02 tom Exp $
+/* $Id: lex.l,v 3.24 1994/09/22 00:16:36 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -430,20 +430,33 @@ char	*keyword;
 int	len;
 {
 	if (len != 0) {
+		int	value;
 		keyword[len] = '\0';
 
+		/* these are recognized by some lint-programs */
 		if (!strcmp(keyword, "VARARGS"))
 			CmtVal.Varargs = -1;
-		else if (sscanf(keyword, "VARARGS%d", &CmtVal.Varargs) == 1)
-			;
+		else if (sscanf(keyword, "VARARGS%d", &value) == 1)
+			CmtVal.Varargs = value;
+		else if (!strcmp(keyword, "PRINTFLIKE"))
+			CmtVal.Varargs = 1;
+		else if (sscanf(keyword, "PRINTFLIKE%d", &value) == 1)
+			CmtVal.Varargs = value;
+		else if (!strcmp(keyword, "SCANFLIKE"))
+			CmtVal.Varargs = 2;
+		else if (sscanf(keyword, "SCANFLIKE%d", &value) == 1)
+			CmtVal.Varargs = value;
+		/* these are extensions added to simplify library-generation */
 		else if (!strcmp(keyword, "LINT_EXTERN"))
 			CmtVal.Externs = MAX_INC_DEPTH;
-		else if (sscanf(keyword, "LINT_EXTERN%d", &CmtVal.Externs) == 1)
-			;
+		else if (sscanf(keyword, "LINT_EXTERN%d", &value) == 1)
+			CmtVal.Externs = value;
 		else if (!strcmp(keyword, "LINT_PREPRO"))
 			CmtVal.Preproz = 1;
-		else if (sscanf(keyword, "LINT_PREPRO%d", &CmtVal.Preproz) == 1)
-			;
+		else if (sscanf(keyword, "LINT_PREPRO%d", &value) == 1)
+			CmtVal.Preproz = value;
+		else if (!strcmp(keyword, "LINT_SHADOWED"))
+			lint_shadowed = TRUE;
 	}
 	return 0;
 }

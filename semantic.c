@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.36 1994/09/21 23:32:56 tom Exp $
+/* $Id: semantic.c,v 3.39 1994/09/22 23:46:58 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -6,11 +6,6 @@
 #include <stdio.h>
 #include "cproto.h"
 #include "semantic.h"
-
-#define CURL_L        '{'
-#define CURL_R        '}'
-#define	COMMENT_BEGIN "/*"
-#define COMMENT_END   "*/"
 
 #if OPT_LINTLIBRARY
 static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int name_only, int count, int commented));
@@ -482,8 +477,12 @@ int	commented;	/* comment-delimiters already from higher level */
 		    }
 		}
 	    } else {	/* e.g., s is "[20]" for "char [20]" parameter */
+	    		/* ...or something like "* const *" */
 		char *t = supply_parm(count);	/* "p1" */
-		char *u = xstrdup(s);		/* the "[20]" */
+		char *u;
+		while (*s != '\0' && *s != SQUARE_L)
+			s++;
+		u = xstrdup(s);			/* the "[20]" */
 		*s = '\0';
 		if (s != p->declarator->text) {
 			s = glue_strings(p->declarator->text, t);
@@ -703,7 +702,7 @@ int commented;
     }
 
     /* Substitute place holder with function parameters. */
-    put_char(outf, *t++ = '(');
+    put_char(outf, *t++ = PAREN_L);
     put_parameters(outf, declarator, commented);
     put_string(outf, t);
 
@@ -711,7 +710,7 @@ int commented;
      && (func_declarator == declarator
       || func_declarator == declarator->head)
      && proto_macro) {
-	put_char(outf, ')');
+	put_char(outf, PAREN_R);
     }
 }
 
@@ -804,9 +803,11 @@ DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
     int	commented = FALSE;
+    int	saveNest = NestedParams;
 
 #if OPT_LINTLIBRARY
     boolean	defines = (strchr(decl_spec->text, CURL_L) != 0);
+    int		is_func;
 
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
@@ -850,21 +851,32 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    if (already_declared(d->name))
 		continue;
 
-	    if (LintLibrary() && d->func_def != FUNC_NONE)
+	    /*
+	     * Try to distinguish function declarations from function pointer
+	     * declarations, so that we don't unintentionally emit lint-library
+	     * arguments for function pointers.
+	     */
+	    is_func = is_actual_func(d);
+
+	    if (is_func) {
 		ellipsis_varargs(d);
-	    else if (types_out)
-		fmt_library(2);
-    	    if (LintLibrary())
+	    } else {
+		NestedParams = 2;	/* disable params altogether */
+		if (types_out)
+		    fmt_library(2);
+	    }
+    	    if (lint_shadowed && LintLibrary())
 		printf("#undef %s\n", d->name);
 #endif
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
 	    put_declarator(stdout, d, commented);
 #if OPT_LINTLIBRARY
-	    if (d->func_def != FUNC_NONE)
+	    if (is_func)
 		put_llib_params(d, commented);
 #endif
 	    put_body(stdout, decl_spec, d);
+	    NestedParams = saveNest;
 	}
     }
 }
@@ -966,7 +978,7 @@ Declarator *declarator;
     NestedParams = 0;
 
 #if OPT_LINTLIBRARY
-    if (LintLibrary())
+    if (lint_shadowed && LintLibrary())
 	printf("#undef %s\n", declarator->name);
 #endif
     put_string(stdout, fmt[format].decl_spec_prefix);
