@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940804
+MANIFEST for cproto, version t19940805
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -29,6 +29,7 @@ symbol.c                        symbol-table support for CPROTO
 symbol.h                        interface definitions for symbol.c
 system.h                        system-dependent definitions, coordinated with config.h
 trace.c                         debugging support for CPROTO
+yyerror.c                       enhanced error reporting support for yacc/bison
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
 porting/borland.mak             makefile for Borland C

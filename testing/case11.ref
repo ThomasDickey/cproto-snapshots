@@ -103,6 +103,13 @@ typedef	char	*string;
 		char	**argv;
 		{ }
 
+	/* VARARGS */
+int	veryfunny(a, b, c)
+		char	*a;
+		long	b;
+		long	c;
+		{ return(*(int *)0); }
+
 	/* VARARGS3 */
 int	program(argv, y, zz, z1, z2, z3)
 		string	argv[];

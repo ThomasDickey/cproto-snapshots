@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.17 1994/07/31 18:12:26 tom Exp $
+/* $Id: lex.l,v 3.19 1994/08/05 21:20:38 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -96,7 +96,6 @@ static void put_quoted        ARGS((int c));
 static int decipher_comment   ARGS((char *keyword, int len));
 #endif
 
-extern void yyerror ARGS((char *s));
 #ifdef yywrap
 #undef yywrap
 #endif
@@ -545,12 +544,14 @@ get_comment ()
 	    fputc(c, cur_file->tmp_file);
 
 #if OPT_LINTLIBRARY
-	if (CmtVal.Preproz > 0)
+	if (CmtVal.Preproz > 0) {
 	    fputc(c, stdout); 
-	if (isspace(c))
+	}
+	if (!(isalnum(c) || c == '_' || c == '$')) {
 	    len = decipher_comment(keyword, len);
-	else if (len+1 < sizeof(keyword))
+	} else if (len+1 < sizeof(keyword)) {
 	    keyword[len++] = c;
+	}
 #endif
 
 	switch (c) {

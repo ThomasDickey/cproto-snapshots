@@ -6,6 +6,7 @@ _FIRST *func1();
 _FIRST *func2();
 int *(func_func)();
 int main();
+int veryfunny();
 int program();
 int junk0();
 int junk1();

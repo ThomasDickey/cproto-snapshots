@@ -36,6 +36,7 @@ extern enum zap1 what;
 extern enum zap2 what2;
 extern enum {} what3;
 extern int main P_((register argc, char **argv));
+extern int veryfunny P_((char *a, long b, long c));
 extern int program P_((string argv[], struct alpha y, int zz, int z1, int z2, int z3));
 extern int junk0 P_((void));
 extern int junk1 P_((void));

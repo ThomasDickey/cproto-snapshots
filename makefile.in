@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.11 1994/08/02 00:46:19 tom Exp $
+# $Id: makefile.in,v 3.12 1994/08/05 21:29:18 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -62,7 +62,8 @@ C_FILES = \
 	semantic.c \
 	strkey.c \
 	strstr.c \
-	symbol.c
+	symbol.c \
+	yyerror.c
 
 AUX_FILES = \
 	mkdirs.sh \
@@ -150,4 +151,4 @@ semantic.o: cproto.h config.h system.h semantic.h
 strkey.o: cproto.h config.h system.h 
 strstr.o: config.h
 symbol.o: cproto.h config.h system.h symbol.h
-y.tab.o: cproto.h config.h system.h symbol.h semantic.h lex.yy.c
+y.tab.o: cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c
