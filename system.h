@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.13 1994/08/14 20:33:32 tom Exp $
+/* $Id: system.h,v 3.14 1994/08/15 13:14:04 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -168,6 +168,10 @@ extern void dofree(char *);
 # ifdef unix
 #  define OPT_LINTLIBRARY 1
 # endif
+#endif
+
+#if BISON_HAS_YYTNAME || YACC_HAS_YYTOKS || YACC_HAS_YYTOKS_2 || YACC_HAS_YYNAME
+# define YYDEBUG 1
 #endif
 
 #if HAVE_LIBDBMALLOC

@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 3.2 1994/08/11 00:34:41 tom Exp $
+dnl $Id: aclocal.m4,v 3.3 1994/08/15 13:17:44 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -38,6 +38,7 @@ for COND in BISON_HAS_YYTNAME YACC_HAS_YYTOKS YACC_HAS_YYTOKS_2 YACC_HAS_YYNAME
 do
 AC_COMPILE_CHECK(error-reporting with $COND,
 [#define $COND 1
+#define YYDEBUG 1
 $td_incl],,[
 AC_DEFINE($COND)
 break

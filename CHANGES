@@ -37,6 +37,12 @@ Patchlevel 9 (dickey, August 1994)
 - tested on Solaris with lex/yacc and flex 2.4.6 / bison 1.22
   (SunOS explorer 5.3 Generic_101318-42 sun4m sparc; gcc 2.6.0)
 
+- tested on SunOS 4.1.1 with lex/yacc and flex 2.4.6 / bison 1.22
+  (SunOS calvin 4.1.1 1 sun4c)
+
+- tested on IRIX with lex/yacc
+  (IRIX dbs3 5.2 02282015 IP19 mips)
+
 - tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22 / byacc 1.9
 
 - tested on MS-DOS with flex 2.37 / byacc 1.9 (built with turboc.mak).
