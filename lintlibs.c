@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.1.1.2 1995/02/27 23:59:09 tom Exp $
+/* $Id: lintlibs.c,v 4.1.1.3 1995/02/28 00:33:49 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -147,6 +147,9 @@ static	char	*strip_name(s)
 static	char	*strip_name(s)
 	char	*s;
 	{
+		static	char	GccLeaf[] = "/gcc-lib/";
+		static	char	IncLeaf[] = "/include/";
+		char *t;
 		register int	n;
 		register size_t	len;
 		int standard = FALSE;
@@ -167,6 +170,12 @@ static	char	*strip_name(s)
 			quote_r = '"';
 			if (*s == '.' && is_path_sep(s[1]))
 				s += 2;
+			else if ((t = strstr(s, GccLeaf)) != 0
+			     &&  (t = strstr(t, IncLeaf)) != 0) {
+			  	s = t+sizeof(IncLeaf)-1;
+				quote_l = '<';
+				quote_r = '>';
+			}
 		}
 		return s;
 	}

@@ -1,6 +1,6 @@
 Version 4
 
-Patchlevel 4 (february 1995)
+Patchlevel 4 (February 1995)
 
 - update test-cases for the -f2 fix in patch 3.
 
@@ -13,6 +13,10 @@ Patchlevel 4 (february 1995)
 - added calls for 'flush_varargs()' to correct situation in lint-library output
   where VARARGS comments were not reset properly when a function
   was skipped.
+
+- improved the logic of 'strip_name()' (used to compute include-directives for
+  the lint-library option) so that it recognizes the conventional include
+  directory created by a GCC install.
 
 Patchlevel 3
 
