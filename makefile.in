@@ -1,4 +1,4 @@
-# $Id: makefile.in,v 3.14 1994/08/10 00:52:07 tom Exp $
+# $Id: makefile.in,v 3.15 1994/08/11 00:38:14 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -103,7 +103,7 @@ $(THIS).man : $(THIS).1
 	nroff -man $(THIS).1 >$@
 
 clean :
-	rm -f *.o *.bak *.log *.man *.out $(JUNK) tags
+	rm -f *.o *.bak *.log *.man *.out $(JUNK) tags default.h
 
 clobber : clean
 	rm -f $(THIS)
@@ -132,10 +132,10 @@ shar: $(SOURCES)
 default.h: $(C_FILES) lex.yy.c
 	./$(THIS) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
 
-lint: $(C_FILES)
+lint: $(C_FILES) $(JUNK)
 	$(LINT) $(CPP_OPTS) -lyacc $(C_FILES) y.tab.c >$@.out
 
-llib: $(C_FILES)
+llib: $(C_FILES) $(JUNK)
 	./$(THIS) -l $(CPP_OPTS) $(C_FILES) y.tab.c >$@.out
 
 tags: $(H_FILES) $(C_FILES) $(AUX_FILES)

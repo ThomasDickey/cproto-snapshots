@@ -35,6 +35,8 @@ Patchlevel 9 (dickey, August 1994)
 
 - tested on MS-DOS with flex 2.37 / bison 1.22 (built with turboc.mak).
 
+- tested on VAX/VMS ? with VAX-C ? and flex ? / bison ?.
+
 - moved non-UNIX files into 'porting' subdirectory.
 
 - added 'testing' subdirectory, for simple regression tests.

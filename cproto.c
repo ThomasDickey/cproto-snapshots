@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.14 1994/08/10 00:47:05 tom Exp $
+/* $Id: cproto.c,v 3.16 1994/08/12 23:12:14 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.14 1994/08/10 00:47:05 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.16 1994/08/12 23:12:14 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -117,6 +117,7 @@ unsigned n;
 	fprintf(stderr, "%s: out of memory\n", progname);
 	exit(FAIL);
     }
+    *p = '\0';
     return p;
 }
 
@@ -290,6 +291,35 @@ usage ()
     exit(FAIL);
 }
 
+#ifdef	vms
+static	char	*cpp_defines;
+static	char	*cpp_include;
+static	char	*cpp_undefns;
+
+static	void	add2list ARGS((char *dst, char *src));
+static	void	add_option ARGS((char *keyword, char *src));
+
+static void
+add2list(dst, src)
+	char	*dst;
+	char	*src;
+{
+	if (*dst)
+		strcat(dst, ",");
+	strcat(dst, src);
+}
+
+static void
+add_option(keyword, src)
+	char	*keyword;
+	char	*src;
+{
+	if (*src)
+		(void)sprintf(cpp_opt + strlen(cpp_opt),
+			" /%s=(%s)", keyword, src);
+}
+#endif	/* vms */
+
 #define MAX_OPTIONS 40
 
 /* Process the command line options.
@@ -303,8 +333,10 @@ char ***pargv;
     char **argv, *eargv[MAX_OPTIONS], **nargv;
     int i, c;
     char *s;
-#ifdef CPP
+#if defined(CPP)
     unsigned n;
+#endif
+#if defined(CPP) && !defined(vms)
     char tmp[MAX_TEXT_SIZE];
 #endif
 
@@ -330,27 +362,49 @@ char ***pargv;
     for (i = 0; i < argc; ++i) {
 	n += strlen(argv[i]) + 1;
     }
+#ifdef	vms
+    cpp_include = xmalloc(n+argc);
+    cpp_defines = xmalloc(n+argc);
+    cpp_undefns = xmalloc(n+argc);
+    n += 30;	/* for keywords */
+#endif
     cpp_opt = xmalloc(n);
-    *cpp_opt = '\0';
     cpp_cmd = xmalloc(n);
 #endif
 
     while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vvo:Tlx")) != EOF) {
 	switch (c) {
 	case 'I':
+#ifdef	vms
+	    add2list(cpp_include, optarg);
+	    break;
+#else	/* unix */
 	    if (num_inc_dir < MAX_INC_DIR) {
 		inc_dir[num_inc_dir++] = trim_path_sep(xstrdup(optarg));
 	    } else {
 		fprintf(stderr, "%s: too many include directories\n",
 		    progname);
 	    }
+#endif
+		/*FALLTHRU*/
 	case 'D':
+#ifdef	vms
+	    add2list(cpp_defines, optarg);
+	    break;
+#endif
+		/*FALLTHRU*/
 	case 'U':
+#ifdef	vms
+	    add2list(cpp_undefns, optarg);
+	    break;
+#else	/* UNIX, etc. */
 #ifdef CPP
 	    sprintf(tmp, " -%c%s", c, optarg);
 	    strcat(cpp_opt, tmp);
 #endif
+#endif
 	    break;
+
 	case 'a':
 	    func_style = FUNC_ANSI;
 	    break;
@@ -483,6 +537,12 @@ char ***pargv;
 	}
     }
 
+#ifdef	vms
+    add_option("includes", cpp_include);
+    add_option("define",   cpp_defines);
+    add_option("undefine", cpp_undefns);
+#endif
+
     *pargc = argc;
     *pargv = argv;
 }
@@ -522,7 +582,7 @@ char **argv;
     } else {
 	for (i = optind; i < argc; ++i) {
 #ifdef CPP
-# if HAVE_LINK
+# if CPP_DOES_ONLY_C_FILES
 	    /*
 	     * GCC (and possibly other compilers) don't pass-through the ".l"
 	     * and ".y" files to the C preprocessor stage.  Fix this by
@@ -536,7 +596,9 @@ char **argv;
 	    char *s = strcpy(temp, argv[i]);
 	    int len = strlen(temp);
 	    s += len - 1;
-	    if (len > 2 && s[-1] == '.' && *s == 'l' || *s == 'y') {
+	    if ((len > 2)
+	     && (s[-1] == '.')
+	     && (*s == 'l' || *s == 'y')) {
 		while (s != temp && s[-1] != '/')
 		    s--;
 		(void)strcpy(s, "XXXXXX.c");
@@ -547,10 +609,27 @@ char **argv;
 #  define FileName temp
 # else
 #  define FileName argv[i]
+#  ifdef vms
+	    char temp[BUFSIZ];
+	    (void)strcpy(temp, FileName);
+#  endif
 # endif
 	    if (func_style == FUNC_NONE && cpp != NULL) {
+#ifdef vms
+		/*
+		 * Assume the 'cpp' command contains a "%s" for the name of
+		 * the file that we're writing to.
+		 */
+		sprintf(cpp_cmd, cpp,
+			mktemp(strcpy(temp, "sys$scratch:XXXXXX")));
+		sprintf(cpp_cmd + strlen(cpp_cmd), "%s %s", cpp_opt, FileName);
+		system(cpp_cmd);
+		inf = fopen(temp, "r");
+#else
 		sprintf(cpp_cmd, "%s%s %s", cpp, cpp_opt, FileName);
-		if ((inf = popen(cpp_cmd, "r")) == NULL) {
+		inf = popen(cpp_cmd, "r");
+#endif
+		if (inf == NULL) {
 		    fprintf(stderr, "%s: error running %s\n", progname,
 		     cpp_cmd);
 		    continue;
@@ -572,7 +651,7 @@ char **argv;
 #ifdef CPP
 	    if (func_style == FUNC_NONE && cpp != NULL) {
 		pclose(inf);
-#if HAVE_LINK
+#if CPP_DOES_ONLY_C_FILES || defined(vms)
 		if (strcmp(argv[i], temp)) {
 			(void)unlink(temp);
 		}
@@ -580,7 +659,7 @@ char **argv;
 	    } else {
 		pop_file();
 	    }
-#else
+#else	/* no CPP defined */
 	    pop_file();
 #endif
 	}
@@ -594,6 +673,11 @@ char **argv;
 #ifdef CPP
     if (cpp_opt != 0) free(cpp_opt);
     if (cpp_cmd != 0) free(cpp_cmd);
+#ifdef	vms
+    if (cpp_include != 0) free(cpp_include);
+    if (cpp_defines != 0) free(cpp_defines);
+    if (cpp_undefns != 0) free(cpp_undefns);
+#endif
 #endif
     while (num_inc_dir-- > 2) {
 	free(inc_dir[num_inc_dir]);

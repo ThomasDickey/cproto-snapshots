@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940810
+MANIFEST for cproto, version t19940812
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -34,6 +34,7 @@ yyerror.c                       enhanced error reporting support for yacc/bison
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
 porting/borland.mak             makefile for Borland C
+porting/descrip.mms             makefile for VAX/C (with MMS)
 porting/getopt.c                free version of getopt
 porting/getopt.h                header file for getopt
 porting/micrsoft.mak            makefile for Microsoft C

@@ -1,4 +1,4 @@
-/* $Id: system.h,v 3.9 1994/08/10 00:47:30 tom Exp $
+/* $Id: system.h,v 3.10 1994/08/12 23:05:32 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -60,6 +60,14 @@
 /* Microsoft C preprocessor */
 #ifdef M_I86
 #define CPP "cl /E /nologo"
+#endif
+
+/* Vax C */
+#ifdef vms
+#define CPP "cc /preprocess_only=%s"
+#define unlink remove
+#define HAVE_TMPFILE 1
+#define HAVE_GETOPT_H 1
 #endif
 
 /* Set configuration parameters for systems on which we cannot run autoconf.
