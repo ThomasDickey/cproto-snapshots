@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 4.7.1.4 2000/08/10 11:09:24 Carsten.Leonhardt Exp $
+# $Id: Makefile.in,v 4.8 2000/10/29 00:47:16 cthuang Exp $
 #
 # UNIX template-makefile for C prototype generator
 

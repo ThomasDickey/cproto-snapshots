@@ -9,9 +9,4 @@ prototype generators because it uses a yacc generated parser.  By ignoring all
 the input between braces, I avoided implementing the entire C language grammar.
 
 Cproto is in the public domain, except for the configure script which is
-copyrighted by the Free Software Foundation, Inc.  If you have any comments
-or find any bugs, please let me know.
-
-Chin Huang
-cthuang@vex.net
-cthuang@interlog.com
+copyrighted by the Free Software Foundation, Inc.
