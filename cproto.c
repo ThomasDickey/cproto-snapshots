@@ -1,10 +1,9 @@
-/* $Id: cproto.c,v 3.8 1993/05/26 01:36:41 cthuang Exp $
+/* $Id: cproto.c,v 3.9 1993/06/09 17:18:18 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#ifndef lint
-static char rcsid[] = "$Id: cproto.c,v 3.8 1993/05/26 01:36:41 cthuang Exp $";
-#endif
+static char rcsid[] = "$Id: cproto.c,v 3.9 1993/06/09 17:18:18 tom Exp $";
+
 #include <stdio.h>
 #include <ctype.h>
 #include "cproto.h"
@@ -20,11 +19,17 @@ char progname[] = "cproto";
 
 /* Program options */
 
+/* If nonzero, output variables declared "extern" in include-files */
+int extern_in = 0;
+
 /* If TRUE, output "extern" before global declarations */
 boolean extern_out = FALSE;
 
 /* If TRUE, generate static declarations */
 boolean static_out = FALSE;
+
+/* If TRUE, export typedef declarations */
+boolean types_out = FALSE;
 
 /* If TRUE, generate variable declarations */
 boolean variables_out = FALSE;
@@ -99,7 +104,7 @@ unsigned n;
 
     if ((p = malloc(n)) == NULL) {
 	fprintf(stderr, "%s: out of memory\n", progname);
-	exit(1);
+	exit(FAIL);
     }
     return p;
 }
@@ -208,6 +213,16 @@ char *src;
     return result;
 }
 
+/*
+ * Returns true iff the character is a pathleaf separator
+ */
+int
+is_path_sep (ch)
+int ch;
+{
+    return (ch == '/' || ch == '\\');
+}
+
 /* Trim any path name separator from the end of the string.
  * Return a pointer to the string.
  */
@@ -215,13 +230,11 @@ char *
 trim_path_sep (s)
 char *s;
 {
-    char ch;
     int n;
 
     n = strlen(s);
     if (n > 0) {
-	ch = s[n-1];
-	if (ch == '/' || ch == '\\')
+	if (is_path_sep(s[n-1]))
 	    s[n-1] = '\0';
     }
     return s;
@@ -239,10 +252,14 @@ usage ()
     fputs("  -c               Enable comments in prototype parameters\n", stderr);
     fputs("  -e               Output \"extern\" keyword before global declarations\n", stderr);
     fputs("  -f n             Set function prototype style (0 to 3)\n", stderr);
+    fputs("  -l               Generate output in lint-library style\n", stderr);
+    fputs("  -o file          Redirect output to file\n", stderr);
     fputs("  -p               Disable formal parameter promotion\n", stderr);
     fputs("  -q               Disable include file read failure messages\n", stderr);
     fputs("  -s               Output static declarations\n", stderr);
+    fputs("  -T               Output type definitions\n", stderr);
     fputs("  -v               Output variable declarations\n", stderr);
+    fputs("  -x               Output variables and functions declared \"extern\"\n", stderr);
     fputs("  -m               Put macro around prototype parameters\n", stderr);
     fputs("  -M name          Set name of prototype macro\n", stderr);
     fputs("  -d               Omit prototype macro definition\n", stderr);
@@ -255,7 +272,7 @@ usage ()
     fputs("  -E command       Run specified C preprocessor command\n", stderr);
     fputs("  -E 0             Do not run any C preprocessor\n", stderr);
     fputs("  -V               Print version information\n", stderr);
-    exit(1);
+    exit(FAIL);
 }
 
 #define MAX_OPTIONS 40
@@ -303,7 +320,7 @@ char ***pargv;
     cpp_cmd = xmalloc(n);
 #endif
 
-    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vv")) != EOF) {
+    while ((c = getopt(argc, argv, "aB:bC:cD:dE:eF:f:I:mM:P:pqstU:Vvo:Tlx")) != EOF) {
 	switch (c) {
 	case 'I':
 	    if (num_inc_dir < MAX_INC_DIR) {
@@ -416,10 +433,31 @@ char ***pargv;
 	    break;
 	case 'V':
 	    fprintf(stderr, "%s patchlevel %d\n", rcsid, PATCHLEVEL);
-	    exit(1);
+	    exit(FAIL);
 	    break;
 	case 'v':
 	    variables_out = TRUE;
+	    break;
+	/* options added by dickey */
+	case 'o':
+	    if (freopen(optarg, "w", stdout) == 0) {
+		perror(optarg);
+		exit(FAIL);
+  	    }
+	    break;
+	case 'T':	/* emit typedefs */
+	    types_out = TRUE;
+	    break;
+	case 'l':
+	    func_style    = FUNC_NONE;
+	    proto_style   = PROTO_LINTLIBRARY;
+	    extern_out    = FALSE;
+	    types_out     = TRUE;
+	    variables_out = TRUE;
+	    (void)strcat(cpp_opt, " -C");
+	    break;
+	case 'x':
+	    extern_in = MAX_INC_DEPTH;
 	    break;
 	default:
 	    usage();
@@ -439,6 +477,9 @@ char **argv;
     FILE *inf;
 
     process_options(&argc, &argv);
+
+    if (LintLibrary())
+    	put_string(stdout, "/* LINTLIBRARY */\n");
 
     if (proto_macro && define_macro) {
 	printf("#if __STDC__ || defined(__cplusplus)\n");
@@ -497,5 +538,5 @@ char **argv;
 	printf("\n#undef %s\n", macro_name);
     }
 
-    return 0;
+    return SUCCESS;
 }

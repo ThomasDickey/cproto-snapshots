@@ -1,4 +1,4 @@
-# $Id: Makefile.bc,v 3.2 1993/05/26 01:34:15 cthuang Exp $
+# $Id: Makefile.bc,v 3.3 1993/06/09 18:14:02 tom Exp $
 #
 # Borland C++ makefile for C prototype generator
 
@@ -15,9 +15,9 @@ LIBS = \bc\lib\wildargs.obj
 DIST1 = README CHANGES cproto.man
 DIST2 = cproto.1 Makefile.bc Makefile.msc Makefile.uni lex.l grammar.y
 DIST3 = config.h cproto.h patchlev.h semantic.h symbol.h
-DIST4 = cproto.c popen.c semantic.c strstr.c symbol.c
+DIST4 = cproto.c popen.c lintlibs.c semantic.c strkey.c strstr.c symbol.c
 
-OBJECTS = cproto.obj getopt.obj popen.obj semantic.obj symbol.obj y_tab.obj
+OBJECTS = cproto.obj lintlibs.obj getopt.obj popen.obj semantic.obj strkey.obj strstr.obj symbol.obj y_tab.obj
 
 all: cproto.exe
 
@@ -54,8 +54,10 @@ shar:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-cproto.obj: config.h cproto.h
+cproto.obj: config.h cproto.h symbol.h
+lintlibs.obj: config.h cproto.h symbol.h semantic.h
 popen.obj: config.h cproto.h
 semantic.obj: config.h cproto.h symbol.h semantic.h
+strkey.obj: cproto.h config.h
 strstr.obj: config.h
 symbol.obj: config.h cproto.h symbol.h

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.8 1993/05/26 01:48:42 cthuang Exp $
+/* $Id: grammar.y,v 3.9 1993/06/09 15:22:14 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -59,6 +59,7 @@
 %type <param_list> opt_identifier_list identifier_list
 %type <text> struct_or_union pointer opt_type_qualifiers type_qualifier_list
 	any_id
+%type <text> enumeration
 
 %{
 #include <stdio.h>
@@ -113,6 +114,20 @@ typedef struct {
 static IncludeStack *cur_file;	/* current input file */
 
 extern void yyerror();
+
+/* Flags to enable us to find if a procedure returns a value.
+ */
+static	int	return_val,	/* nonzero on BRACES iff return-expression found */
+		returned_at;	/* marker for token-number to set 'return_val' */
+
+static char *
+dft_decl_spec()
+{
+	return	(LintLibrary() && !return_val)
+			? ""
+			: "int";
+}
+
 %}
 %%
 
@@ -163,7 +178,10 @@ linkage_specification
 declaration
 	: decl_specifiers ';'
 	{
+	    if (types_out)
+		gen_declarations(&$1, (DeclaratorList *)0);
 	    free_decl_spec(&$1);
+	    end_typedef();
 	}
 	| decl_specifiers init_declarator_list ';'
 	{
@@ -174,13 +192,24 @@ declaration
 		free_decl_list(&$2);
 	    }
 	    free_decl_spec(&$1);
+	    end_typedef();
 	}
-	| T_TYPEDEF decl_specifiers
+	| any_typedef decl_specifiers
 	{
 	    cur_decl_spec_flags = $2.flags;
 	    free_decl_spec(&$2);
 	}
 	  opt_declarator_list ';'
+	{
+	    end_typedef();
+	}
+	;
+
+any_typedef
+	: T_TYPEDEF
+	{
+	    begin_typedef();
+	}
 	;
 
 opt_declarator_list
@@ -245,20 +274,19 @@ function_definition
 	    func_params->begin_comment = cur_file->begin_comment;
 	    func_params->end_comment = cur_file->end_comment;
 	}
-	  opt_declaration_list T_LBRACE
+	  opt_declaration_list T_LBRACE T_MATCHRBRACE
 	{
 	    DeclSpec decl_spec;
 
 	    func_params = NULL;
 
-	    new_decl_spec(&decl_spec, "int", $1->begin, DS_NONE);
+	    new_decl_spec(&decl_spec, dft_decl_spec(), $1->begin, DS_NONE);
 	    if (cur_file->convert)
 		gen_func_definition(&decl_spec, $1);
 	    gen_prototype(&decl_spec, $1);
 	    free_decl_spec(&decl_spec);
 	    free_declarator($1);
 	}
-	  T_MATCHRBRACE
 	;
 
 opt_declaration_list
@@ -379,13 +407,17 @@ type_qualifier
 struct_or_union_specifier
 	: struct_or_union any_id braces
 	{
-	    sprintf(buf, "%s %s", $1.text, $2.text);
-	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
+	    char *s = implied_typedef();
+	    if (s == 0)
+	        (void)sprintf(s = buf, "%s %s", $1.text, $2.text);
+	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
 	| struct_or_union braces
 	{
-	    sprintf(buf, "%s {}", $1.text);
-	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
+	    char *s = implied_typedef();
+	    if (s == 0)
+		(void)sprintf(s = buf, "%s {}", $1.text);
+	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
 	| struct_or_union any_id
 	{
@@ -396,7 +428,13 @@ struct_or_union_specifier
 
 struct_or_union
 	: T_STRUCT
+	{
+	    imply_typedef($$.text);
+	}
 	| T_UNION
+	{
+	    imply_typedef($$.text);
+	}
 	;
 
 init_declarator_list
@@ -432,19 +470,32 @@ init_declarator
 	;
 
 enum_specifier
-	: T_ENUM any_id braces
+	: enumeration any_id braces
+	{
+	    char *s = implied_typedef();
+	    if (s == 0)
+		(void)sprintf(s = buf, "enum %s", $2.text);
+	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
+	}
+	| enumeration braces
+	{
+	    char *s = implied_typedef();
+	    if (s == 0)
+		(void)sprintf(s = buf, "%s {}", $1.text);
+	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
+	}
+	| enumeration any_id
 	{
 	    sprintf(buf, "enum %s", $2.text);
 	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
 	}
-	| T_ENUM braces
+	;
+
+enumeration
+	: T_ENUM
 	{
-	    new_decl_spec(&$$, "enum {}", $1.begin, DS_NONE);
-	}
-	| T_ENUM any_id
-	{
-	    sprintf(buf, "enum %s", $2.text);
-	    new_decl_spec(&$$, buf, $1.begin, DS_NONE);
+	    imply_typedef("enum");
+	    $$ = $1;
 	}
 	;
 
@@ -574,7 +625,7 @@ parameter_declaration
 	| decl_specifiers
 	{
 	    check_untagged(&$1);
-	    $$ = new_parameter(&$1, NULL);
+	    $$ = new_parameter(&$1, (Declarator *)0);
 	}
 	;
 
@@ -697,6 +748,9 @@ init_parser ()
 {
     static char *keywords[] = {
 	"const", "volatile", "interrupt",
+#ifdef VMS
+	"noshare", "readonly",
+#endif
 #if defined(MSDOS) || defined(OS2)
 	"cdecl", "far", "huge", "near", "pascal",
 	"_cdecl", "_export", "_far", "_fastcall", "_fortran", "_huge",
@@ -753,9 +807,16 @@ char *name;
     ly_count = 0;
     func_params = NULL;
     yyin = infile;
-    include_file(name, func_style != FUNC_NONE);
-    if (file_comments)
-	printf("/* %s */\n", cur_file_name());
+    include_file(strcpy(base_file, name), func_style != FUNC_NONE);
+    if (file_comments) {
+    	if (LintLibrary()) {
+	    put_blankline(stdout);
+	    begin_tracking();
+	}
+	put_string(stdout, "/* ");
+	put_string(stdout, cur_file_name());
+	put_string(stdout, " */\n");
+    }
     yyparse();
     free_symbol_table(define_names);
     free_symbol_table(typedef_names);

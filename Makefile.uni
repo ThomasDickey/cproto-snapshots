@@ -1,4 +1,4 @@
-# $Id: Makefile.uni,v 3.6 1993/05/26 01:34:15 cthuang Exp $
+# $Id: Makefile.uni,v 3.7 1993/06/09 18:14:02 tom Exp $
 #
 # UNIX makefile for C prototype generator
 
@@ -6,16 +6,17 @@
 # Define NEED_tmpfile if your system does not have the ANSI function tmpfile()
 #DEFINES = -DBSD
 
-LEX = lex
-YACC = yacc
+# CC = gcc -Wall -Wshadow
+LEX = lex		# "lex" or "flex"
+YACC = yacc		# "yacc" or "bison -y"
 CFLAGS = $(DEFINES)
 
 DIST1 = README CHANGES cproto.man
 DIST2 = cproto.1 Makefile.bc Makefile.msc Makefile.uni lex.l grammar.y
 DIST3 = config.h cproto.h patchlev.h semantic.h symbol.h
-DIST4 = cproto.c popen.c semantic.c strstr.c symbol.c
+DIST4 = cproto.c popen.c lintlibs.c semantic.c strkey.c strstr.c symbol.c
 
-OBJECTS = cproto.o semantic.o strstr.o symbol.o y.tab.o
+OBJECTS = cproto.o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
 
 all: cproto cproto.man
 
@@ -32,7 +33,10 @@ cproto.man: cproto.1
 	nroff -man cproto.1 >$@
 
 clean:
-	rm -f *.o *.bak *.log cproto lex.yy.c y.tab.c
+	rm -f *.o *.bak *.log *.man *.out y.tab.c lex.yy.c tags
+
+clobber: clean
+	rm -f cproto
 
 ci:
 	ci -u3 $(DIST2) $(DIST3) $(DIST4)
@@ -41,13 +45,25 @@ shar:
 	shar $(DIST1) $(DIST2) >cproto.sh1
 	shar $(DIST3) $(DIST4) >cproto.sh2
 
+default.h: $(DIST4)
+	./cproto -e -v -m $(DEFINES) -UNEEDED cproto.c lintlibs.c semantic.c strkey.c symbol.c grammar.y >$@
+
+lint: $(DIST4)
+	tdlint $(DEFINES) -lyacc cproto.c lintlibs.c semantic.c strkey.c symbol.c y.tab.c >lint.out
+llib:
+	./cproto -l $(DEFINES) cproto.c lintlibs.c semantic.c strkey.c symbol.c y.tab.c >$@.out
+
+tags: $(DIST3) $(DIST4)
+	ctags -t $(DIST3) $(DIST4)
 depend:
 	makedepend $(DIST4) y.tab.c
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-cproto.o: config.h cproto.h
+cproto.o: config.h cproto.h symbol.h
+lintlibs.o: config.h cproto.h symbol.h semantic.h
 semantic.o: config.h cproto.h symbol.h semantic.h
+strkey.o: cproto.h config.h
 strstr.o: config.h
 symbol.o: config.h cproto.h symbol.h
 y.tab.o: config.h cproto.h symbol.h semantic.h lex.yy.c
