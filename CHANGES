@@ -12,6 +12,12 @@ Patchlevel 10 (dickey, September 1994)
 - changed the implicit lint library function type from "" to "void", to
   avoid special-cases in the function-body generation.
 
+- added logic using 'NestedParams' to suppress prototype-arguments in lint
+  library function-pointer arguments.
+
+- corrected lint-library function parameter derived from prototype "char [2]"
+  (parameter name wasn't supplied).
+
 Patchlevel 9 (dickey, August 1994)
 
 - use 'autoconf' to make a UNIX configure-script.

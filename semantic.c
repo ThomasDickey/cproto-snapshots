@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.33 1994/09/19 23:35:12 tom Exp $
+/* $Id: semantic.c,v 3.35 1994/09/21 01:17:04 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -21,6 +21,7 @@ static	int		put_parameter		ARGS((FILE *outf, Parameter *p, int commented));
 #endif
 
 static	char *		concat_string		ARGS((char *a, char *b));
+static	char *		glue_strings		ARGS((char *a, char *b));
 static	boolean		is_void_parameter	ARGS((Parameter *p));
 static	Parameter *	search_parameter_list	ARGS((ParameterList *params, char *name));
 static	void		put_param_list		ARGS((FILE *outf, Declarator *declarator, int commented));
@@ -47,6 +48,11 @@ static int where;
 
 /* Output format to use */
 static int format;
+
+/* Function-parameter level, used to simplify logic that comments/suppresses
+ * function parameters in the output.
+ */
+static NestedParams;
 
 /* Initialize a new declaration specifier part.
  */
@@ -90,6 +96,18 @@ char *a, *b;
     result = xmalloc(strlen(a) + strlen(b) + 2);
     strcpy(result, a);
     strcat(result, " ");
+    strcat(result, b);
+    return result;
+}
+
+static char *
+glue_strings (a, b)	/* concatenate w/o embedded blank */
+char *a, *b;
+{
+    char *result;
+
+    result = xmalloc(strlen(a) + strlen(b) + 2);
+    strcpy(result, a);
     strcat(result, b);
     return result;
 }
@@ -438,32 +456,43 @@ int	commented;	/* comment-delimiters already from higher level */
 	while (*s == '*')
 	    s++;
 	if (*s == '\0') {
-	    int len = (int)(s - p->declarator->text);
 	    char *t = supply_parm(count);
 	    char *u = p->declarator->text;
-	    p->declarator->text = concat_string(u, t);
+	    p->declarator->text = glue_strings(u, t);
 	    free(u);
-	    (void)strcpy(p->declarator->text + len, t);	/* trim embedded ' ' */
-	} else if (strstr(s, "%s") != 0
-	 && p->declarator->name[0] == '\0') {
-	    Declarator *q;
+	} else if (p->declarator->name[0] == '\0') {
+	    if (strstr(s, "%s") != 0) {
+		Declarator *q;
 
-	    free(p->declarator->name);
-	    p->declarator->name = xstrdup(supply_parm(count));
+		free(p->declarator->name);
+		p->declarator->name = xstrdup(supply_parm(count));
 
-	    for (q = p->declarator; q != 0; q = q->func_stack) {
-		if (q->func_def == FUNC_NONE) {
-		    if (!strcmp(q->text, "(*)")) {
-			char temp[20];
-			sprintf(temp, "(*%s)", p->declarator->name);
-			free(q->text);
-			q->text = xstrdup(temp);
-		    } else {
-			free(q->text);
-			q->text = concat_string("/*BUG*/", p->declarator->name);
+		for (q = p->declarator; q != 0; q = q->func_stack) {
+		    if (q->func_def == FUNC_NONE) {
+			if (!strcmp(q->text, "(*)")) {
+			    char temp[20];
+			    sprintf(temp, "(*%s)", p->declarator->name);
+			    free(q->text);
+			    q->text = xstrdup(temp);
+			} else {
+			    free(q->text);
+			    q->text = concat_string("/*BUG*/", p->declarator->name);
+			}
+			break;
 		    }
-		    break;
 		}
+	    } else {	/* e.g., s is "[20]" for "char [20]" parameter */
+		char *t = supply_parm(count);	/* "p1" */
+		char *u = xstrdup(s);		/* the "[20]" */
+		*s = '\0';
+		if (s != p->declarator->text) {
+			s = glue_strings(p->declarator->text, t);
+		} else {
+			s = xstrdup(t);
+		}
+		p->declarator->text = glue_strings(s, u);
+		free(u);
+		free(s);
 	    }
 	}
     }
@@ -557,6 +586,7 @@ int commented;
 {
     Parameter *p;
 
+    NestedParams++;
     if (where == FUNC_DEF && func_style == FUNC_TRADITIONAL) {
 
 	/* Output parameter name list for traditional function definition. */
@@ -586,9 +616,13 @@ int commented;
 		put_string(outf, COMMENT_END);
 	    }
 	} else if (proto_style != PROTO_NONE) {
-	    put_param_list(outf, declarator, commented);
+#if OPT_LINTLIBRARY
+	    if (!LintLibrary() || NestedParams <= 1)
+#endif
+	    	put_param_list(outf, declarator, commented);
 	}
     }
+    NestedParams--;
 }
 
 /* Output a function declarator.
@@ -745,6 +779,7 @@ int commented;
 	Parameter *p;
 	int	count = 0;
 
+	NestedParams++;
 	p = (declarator->func_stack->func_def != FUNC_NONE)
 		? declarator->func_stack->params.first
 		: declarator->params.first;
@@ -756,6 +791,7 @@ int commented;
 			putchar(';');
 		p = p->next;
 	}
+	NestedParams--;
 }
 #endif
 
@@ -801,6 +837,8 @@ DeclaratorList *decl_list;	/* list of declared variables */
     func_declarator = NULL;
     where = FUNC_OTHER;
     format = FMT_OTHER;
+    NestedParams = 0;
+
     for (d = decl_list->first; d != NULL; d = d->next) {
 	if (d->func_def == FUNC_NONE
 	 || d->head->func_stack->pointer
@@ -923,6 +961,8 @@ Declarator *declarator;
 
     where = FUNC_PROTO;
     format = FMT_PROTO;
+    NestedParams = 0;
+
     put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);
@@ -944,8 +984,11 @@ Declarator *declarator;
      */
     fseek(cur_tmp_file(), declarator->begin, 0);
     func_declarator = NULL;
+
     where = FUNC_DEF;
     format = FMT_FUNC;
+    NestedParams = 0;
+
     put_func_declarator(cur_tmp_file(), declarator, FALSE);
     cur_file_changed();
 }
@@ -1017,6 +1060,8 @@ Declarator *declarator;
     }
 
     format = FMT_FUNC;
+    NestedParams = 0;
+
     if (func_declarator->func_def == FUNC_TRADITIONAL
      || func_declarator->func_def == FUNC_BOTH) {
 	/* Save the text before the parameter declarations. */

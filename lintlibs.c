@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.15 1994/09/19 23:48:36 tom Exp $
+/* $Id: lintlibs.c,v 3.16 1994/09/21 00:13:16 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -14,8 +14,9 @@
 
 #define PAREN_LEFT  '('
 #define PAREN_RIGHT ')'
-#define BRACE_LEFT  '{'
-#define BRACE_RIGHT '}'
+#define CURL_L      '{'
+#define CURL_R      '}'
+
 	int	in_include;
 
 static	SymbolTable *include_list;
@@ -500,7 +501,7 @@ void	put_body(outf, decl_spec, declarator)
 	strcut(decl_spec->text, "static");
 	strcut(decl_spec->text, "extern");
 	indent(outf);
-	put_char(outf, BRACE_LEFT);
+	put_char(outf, CURL_L);
 	if (!*(spec_text = decl_spec->text))
 		spec_text = "void";
 	if (!strcmp(spec_text, "void")
@@ -524,7 +525,7 @@ void	put_body(outf, decl_spec, declarator)
 	    }
 	    put_string(outf, ")0); ");
 	}
-	put_char(outf, BRACE_RIGHT);
+	put_char(outf, CURL_R);
     } else
 	put_string(outf, ";");
     put_newline(outf);
