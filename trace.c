@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 4.1.1.1 1996/04/27 12:54:38 tom Exp $
+/* $Id: trace.c,v 4.2 1998/01/19 00:49:33 cthuang Exp $
  *
  * Simple malloc debugging (for finding leaks)
  *

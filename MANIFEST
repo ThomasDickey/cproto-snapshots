@@ -1,8 +1,9 @@
-MANIFEST for cproto, version t19980118
+MANIFEST for cproto, version t19980119
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
 Makefile.bc                     v3_7 base
+Makefile.in                     top-level makefile template
 Makefile.msc                    v3_7 base
 Makefile.uni                    v3_7 base
 README                          overview of the CPROTO program
