@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.5.1.1 1999/01/03 13:38:09 tom Exp $
+/* $Id: lex.l,v 4.5.1.2 1999/12/19 23:49:32 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -231,6 +231,11 @@ QUOTE		[\"\']
 <INITIAL>static 	{ save_text_offset(); return T_STATIC; }
 <INITIAL>typedef	{ save_text_offset(); return T_TYPEDEF; }
 <INITIAL>inline 	{ save_text_offset(); return T_INLINE; }
+
+<INITIAL>_Bool		{ save_text_offset(); return T_Bool; }
+<INITIAL>_Complex	{ save_text_offset(); return T_Complex; }
+<INITIAL>_Imaginary	{ save_text_offset(); return T_Imaginary; }
+
 <INITIAL>char		{ save_text_offset(); return T_CHAR; }
 <INITIAL>double 	{ save_text_offset(); return T_DOUBLE; }
 <INITIAL>float		{ save_text_offset(); return T_FLOAT; }
@@ -240,6 +245,7 @@ QUOTE		[\"\']
 <INITIAL>short		{ save_text_offset(); return T_SHORT; }
 <INITIAL>signed 	{ save_text_offset(); return T_SIGNED; }
 <INITIAL>unsigned	{ save_text_offset(); return T_UNSIGNED; }
+
 <INITIAL>enum		{ save_text_offset(); return T_ENUM; }
 <INITIAL>struct 	{ save_text_offset(); return T_STRUCT; }
 <INITIAL>union		{ save_text_offset(); return T_UNION; }
@@ -451,7 +457,7 @@ save_text ()
 #if OPT_LINTLIBRARY
     if (!in_cpp)
     	copy_typedef(yytext);
-#endif	
+#endif
     if (cur_file->convert) {
 	fputs(yytext, cur_file->tmp_file);
     }
@@ -543,7 +549,7 @@ int c;
 # if OPT_LINTLIBRARY
 	if (!in_cpp)
 	    copy_typedef(temp);
-# endif	
+# endif
 	if (cur_file->convert) {
 	    fputs(temp, cur_file->tmp_file);
 	}
@@ -639,7 +645,7 @@ get_comment ()
 	    cur_file->line_num++;
 #if OPT_LINTLIBRARY
 	    if (cmtVal.preproz != 0 && lastc != '\0')
-		fputc(lastc, stdout); 
+		fputc(lastc, stdout);
 	    if (cmtVal.preproz > 0)	/* if negative, we pass everything */
 		cmtVal.preproz -= 1;
 #endif
@@ -669,7 +675,7 @@ get_comment ()
 		if (cmtVal.externs != -1)
 		    extern_in = cmtVal.externs;
 		if (cmtVal.preproz != 0)
-		    fputc('\n', stdout); 
+		    fputc('\n', stdout);
 #endif
 		return;
 	    }
@@ -677,7 +683,7 @@ get_comment ()
 	default:
 #if OPT_LINTLIBRARY
 	    if (cmtVal.preproz != 0 && lastc != '\0')
-		fputc(lastc, stdout); 
+		fputc(lastc, stdout);
 #endif
 	    break;
 	}
@@ -694,7 +700,7 @@ char *dest;		/* buffer to store directive text */
 unsigned n;		/* size of buffer to store directive text */
 {
     char c, lastc[4];
-    
+
     lastc[0] = lastc[1] = lastc[2] = lastc[3] = '\0';
     if (dest != NULL)
 	*dest = '\0';
@@ -780,7 +786,7 @@ cur_text ()
 /*
  * tmpfile() - return a FILE* for a temporary file that will be
  * removed automatically when the program exits.
- * 
+ *
  * Not all systems have the ANSI tmpfile() function yet...
  *
  * DaviD W. Sanderson (dws@cs.wisc.edu)
