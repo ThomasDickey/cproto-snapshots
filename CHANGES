@@ -27,9 +27,11 @@ Patchlevel 9 (dickey, August 1994)
 - modified the grammar.y file to try to recover from errors at the next
   semicolon (as well as the next right curly bracket).
 
+- modified to process lex/yacc files with gcc as C-preprocessor.
+
 - tested on Solaris ? with lex/yacc and flex ? / bison ?
 
-- tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22
+- tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22 / byacc 1.9
 
 - tested on MS-DOS with flex 2.37 / bison 1.22 (built with turboc.mak).
 
