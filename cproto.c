@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 3.11 1994/07/25 23:54:38 tom Exp $
+/* $Id: cproto.c,v 3.12 1994/07/30 19:10:18 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-static char rcsid[] = "$Id: cproto.c,v 3.11 1994/07/25 23:54:38 tom Exp $";
+static char rcsid[] = "$Id: cproto.c,v 3.12 1994/07/30 19:10:18 tom Exp $";
 
 #include <stdio.h>
 #include <ctype.h>
@@ -32,8 +32,10 @@ boolean extern_out = FALSE;
 /* If TRUE, generate static declarations */
 boolean static_out = FALSE;
 
-/* If TRUE, export typedef declarations */
+/* If TRUE, export typedef declarations (needed for lint-libs) */
+#if OPT_LINTLIBRARY
 boolean types_out = FALSE;
+#endif
 
 /* If TRUE, generate variable declarations */
 boolean variables_out = FALSE;
@@ -261,12 +263,16 @@ usage ()
     fputs("  -c               Enable comments in prototype parameters\n", stderr);
     fputs("  -e               Output \"extern\" keyword before global declarations\n", stderr);
     fputs("  -f n             Set function prototype style (0 to 3)\n", stderr);
+#if OPT_LINTLIBRARY
     fputs("  -l               Generate output in lint-library style\n", stderr);
+#endif
     fputs("  -o file          Redirect output to file\n", stderr);
     fputs("  -p               Disable formal parameter promotion\n", stderr);
     fputs("  -q               Disable include file read failure messages\n", stderr);
     fputs("  -s               Output static declarations\n", stderr);
+#if OPT_LINTLIBRARY
     fputs("  -T               Output type definitions\n", stderr);
+#endif
     fputs("  -v               Output variable declarations\n", stderr);
     fputs("  -x               Output variables and functions declared \"extern\"\n", stderr);
     fputs("  -m               Put macro around prototype parameters\n", stderr);
@@ -454,6 +460,7 @@ char ***pargv;
 		exit(FAIL);
   	    }
 	    break;
+#if OPT_LINTLIBRARY
 	case 'T':	/* emit typedefs */
 	    types_out = TRUE;
 	    break;
@@ -463,8 +470,11 @@ char ***pargv;
 	    extern_out    = FALSE;
 	    types_out     = TRUE;
 	    variables_out = TRUE;
-	    (void)strcat(cpp_opt, " -C");
+#ifdef unix
+	    (void)strcat(cpp_opt, " -C");	/* pass-through comments */
+#endif
 	    break;
+#endif
 	case 'x':
 	    extern_in = MAX_INC_DEPTH;
 	    break;
@@ -487,8 +497,10 @@ char **argv;
 
     process_options(&argc, &argv);
 
+#if OPT_LINTLIBRARY
     if (LintLibrary())
     	put_string(stdout, "/* LINTLIBRARY */\n");
+#endif
 
     if (proto_macro && define_macro) {
 	printf("#if __STDC__ || defined(__cplusplus)\n");

@@ -1,12 +1,19 @@
 Version 3
 
-Patchlevel 9
+Patchlevel 9 (dickey, July 1994)
 
 - use 'autoconf' to make a UNIX configure-script.
 
 - recognize GCC extensions '__inline' and '__attribute__'
 
-Patchlevel 8 (internal)
+- added ifdef OPT_LINTLIBRARY to allow compiling without the lint library
+  code (saves about 4kb).
+
+- tested on Linux 0.99.15 with lex/yacc and flex 2.4.6 / bison 1.22
+
+- tested on MS-DOS with flex 2.37 / bison 1.22 (built with turboc.mak).
+
+Patchlevel 8 (internal: dickey/cthuang, June 1993)
 
 - added files 'lintlibs.c' and 'strkey.c'
 

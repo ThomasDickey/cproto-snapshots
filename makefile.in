@@ -1,22 +1,57 @@
-# $Id: makefile.in,v 3.3 1994/07/26 22:43:53 tom Exp $
+# $Id: makefile.in,v 3.8 1994/07/30 23:27:47 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 CC		= @CC@
 CPP		= @CPP@
+LEX		= @LEX@
+YACC		= @YACC@
+LINT		= @LINT@
+
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
-CFLAGS		= @CC_OPTS@ -DHAVE_CONFIG_H
-LIBS		= @LIBS@
 
-LEX = lex		# "lex" or "flex"
-YACC = yacc		# "yacc" or "bison -y"
+DEFINES		=
+CPP_OPTS	= $(DEFINES) -DHAVE_CONFIG_H
+CFLAGS		= @CC_OPTS@ $(CPP_OPTS)
+LIBS		= @LIBS@ @LEXLIB@
 
-DIST1 = README CHANGES cproto.man
-DIST2 = cproto.1 borland.mak micrsoft.mak makefile.in lex.l grammar.y
-DIST3 = system.h cproto.h patchlev.h semantic.h symbol.h
-DIST4 = cproto.c popen.c lintlibs.c semantic.c strkey.c strstr.c symbol.c
+DOC_FILES = \
+	README \
+	CHANGES \
+	cproto.man \
+	cproto.1
+
+MAK_FILES = \
+	makefile.in configure.in \
+	turboc.mak \
+	borland.mak \
+	micrsoft.mak
+
+H_FILES = \
+	system.h \
+	cproto.h \
+	patchlev.h \
+	semantic.h \
+	symbol.h
+
+C_FILES = \
+	cproto.c \
+	popen.c \
+	lintlibs.c \
+	semantic.c \
+	strkey.c \
+	strstr.c \
+	symbol.c
+
+AUX_FILES = \
+	lex.l \
+	grammar.y
+
+JUNK =	\
+	lex.yy.c \
+	y.tab.c
 
 OBJECTS = cproto.o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o
 
@@ -35,13 +70,13 @@ cproto.man : cproto.1
 	nroff -man cproto.1 >$@
 
 clean :
-	rm -f *.o *.bak *.log *.man *.out y.tab.c lex.yy.c tags
+	rm -f *.o *.bak *.log *.man *.out $(JUNK) tags
 
 clobber : clean
 	rm -f cproto
 
 distclean : clobber
-	rm -f stamp_h config.status config.h makefile
+	rm -f stamp-h config.status config.h makefile
 
 # configure might not change config.h
 config.h : stamp-h
@@ -58,22 +93,23 @@ config.status : configure
 configure : configure.in
 	autoconf
 
-shar:
-	shar $(DIST1) $(DIST2) >cproto.sh1
-	shar $(DIST3) $(DIST4) >cproto.sh2
+shar: $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
+	shar -opart -l50 $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
-default.h: $(DIST4)
-	./cproto -e -v -m $(DEFINES) -UNEEDED cproto.c lintlibs.c semantic.c strkey.c symbol.c grammar.y >$@
+default.h: $(C_FILES)
+	./cproto -e -v -m -M ARGS $(DEFINES) $(C_FILES) grammar.y >$@
 
-lint: $(DIST4)
-	tdlint $(DEFINES) -lyacc cproto.c lintlibs.c semantic.c strkey.c symbol.c y.tab.c >lint.out
-llib:
-	./cproto -l $(DEFINES) cproto.c lintlibs.c semantic.c strkey.c symbol.c y.tab.c >$@.out
+lint: $(C_FILES)
+	$(LINT) $(CPP_OPTS) -lyacc $(C_FILES) y.tab.c >$@.out
 
-tags: $(DIST3) $(DIST4)
-	ctags -t $(DIST3) $(DIST4)
+llib: $(C_FILES)
+	./cproto -l $(CPP_OPTS) $(C_FILES) y.tab.c >$@.out
+
+tags: $(H_FILES) $(C_FILES) $(JUNK)
+	ctags -t $(C_FILES) $(H_FILES)
+
 depend:
-	makedepend $(DIST4) y.tab.c
+	makedepend -- $(CFLAGS) -- $(C_FILES) y.tab.c
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

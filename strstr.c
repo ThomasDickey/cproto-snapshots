@@ -1,9 +1,10 @@
-/* $Id: strstr.c,v 3.5 1994/07/25 23:32:17 tom Exp $
+/* $Id: strstr.c,v 3.6 1994/07/30 14:21:56 tom Exp $
  *
  * Simple implementation of the ANSI strstr() function
  */
 #include <stdio.h>
-#include "config.h"
+
+#include "cproto.h"
 
 /* Search for a substring within the given string.
  * Return a pointer to the first occurence within the string,

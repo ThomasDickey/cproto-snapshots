@@ -1,4 +1,4 @@
-$! $Id: run_test.com,v 3.0 1991/09/12 09:17:49 ste_cm Rel $
+$! $Id: run_test.com,v 3.1 1994/07/30 22:03:45 tom Exp $
 $! Perform all regression-tests for CPROTO on VAX/VMS
 $
 $	verify	= F$VERIFY(0)
@@ -20,7 +20,7 @@ $	case_num = F$PARSE(ref_name,,, "NAME", "SYNTAX_ONLY")
 $	case_num = F$EXTRACT(4, F$LENGTH(case_num), case_num)
 $	write sys$output "** ",ref_name
 $
-$	if F$SEARCH("''com_name'.com;", 2) .eqs. ""
+$	if F$SEARCH("''com_name'.dcl;", 2) .eqs. ""
 $	then
 $		write sys$output "?? no script for ", ref_name
 $	else
@@ -28,7 +28,7 @@ $		if F$SEARCH("''com_name'.out") .nes. ""
 $		then
 $			delete 'com_name.out;*
 $		endif
-$		@'com_name
+$		@'com_name.dcl
 $		if F$SEARCH("''com_name'.out") .eqs. ""
 $		then
 $			write sys$output "?? no output from test"

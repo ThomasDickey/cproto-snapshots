@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.11 1994/07/26 00:22:56 tom Exp $
+/* $Id: grammar.y,v 3.13 1994/07/30 19:06:05 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -116,12 +116,14 @@ static IncludeStack *cur_file;	/* current input file */
 
 extern void yyerror ARGS((char *));
 
-static	char *	dft_decl_spec ARGS((void));
 
 /* Flags to enable us to find if a procedure returns a value.
  */
 static	int	return_val,	/* nonzero on BRACES iff return-expression found */
 		returned_at;	/* marker for token-number to set 'return_val' */
+
+#if OPT_LINTLIBRARY
+static	char *	dft_decl_spec ARGS((void));
 
 static char *
 dft_decl_spec()
@@ -130,6 +132,9 @@ dft_decl_spec()
 			? ""
 			: "int";
 }
+#else
+#define dft_decl_spec() ""
+#endif
 
 %}
 %%
@@ -177,8 +182,10 @@ linkage_specification
 declaration
 	: decl_specifiers ';'
 	{
+#if OPT_LINTLIBRARY
 	    if (types_out)
 		gen_declarations(&$1, (DeclaratorList *)0);
+#endif
 	    free_decl_spec(&$1);
 	    end_typedef();
 	}
@@ -406,15 +413,15 @@ type_qualifier
 struct_or_union_specifier
 	: struct_or_union any_id braces
 	{
-	    char *s = implied_typedef();
-	    if (s == 0)
+	    char *s;
+	    if ((s = implied_typedef()) == 0)
 	        (void)sprintf(s = buf, "%s %s", $1.text, $2.text);
 	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
 	| struct_or_union braces
 	{
-	    char *s = implied_typedef();
-	    if (s == 0)
+	    char *s;
+	    if ((s = implied_typedef()) == 0)
 		(void)sprintf(s = buf, "%s {}", $1.text);
 	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
@@ -471,15 +478,15 @@ init_declarator
 enum_specifier
 	: enumeration any_id braces
 	{
-	    char *s = implied_typedef();
-	    if (s == 0)
+	    char *s;
+	    if ((s = implied_typedef()) == 0)
 		(void)sprintf(s = buf, "enum %s", $2.text);
 	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
 	| enumeration braces
 	{
-	    char *s = implied_typedef();
-	    if (s == 0)
+	    char *s;
+	    if ((s = implied_typedef()) == 0)
 		(void)sprintf(s = buf, "%s {}", $1.text);
 	    new_decl_spec(&$$, s, $1.begin, DS_NONE);
 	}
@@ -725,9 +732,13 @@ direct_abs_declarator
 %%
 
 #if defined(MSDOS) || defined(OS2)
-#include "lex_yy.c"
+# ifdef USE_flex
+#  include "lexyy.c"
+# else
+#  include "lex_yy.c"
+# endif
 #else
-#include "lex.yy.c"
+# include "lex.yy.c"
 #endif
 
 void
@@ -808,10 +819,12 @@ char *name;
     yyin = infile;
     include_file(strcpy(base_file, name), func_style != FUNC_NONE);
     if (file_comments) {
+#if OPT_LINTLIBRARY
     	if (LintLibrary()) {
 	    put_blankline(stdout);
 	    begin_tracking();
 	}
+#endif
 	put_string(stdout, "/* ");
 	put_string(stdout, cur_file_name());
 	put_string(stdout, " */\n");

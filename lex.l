@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.14 1994/07/26 23:40:09 tom Exp $
+/* $Id: lex.l,v 3.15 1994/07/30 18:58:38 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -88,10 +88,13 @@ static void get_quoted        ARGS((void));
 static void get_comment       ARGS((void));
 static void get_cpp_directive ARGS((char *dest, unsigned n));
 static void do_include        ARGS((char *f));
-static int decipher_comment   ARGS((char *keyword, int len));
 static void include_file      ARGS((char *name, boolean convert));
 static void put_file          ARGS((FILE *outf));
 static void put_quoted        ARGS((int c));
+
+#if OPT_LINTLIBRARY
+static int decipher_comment   ARGS((char *keyword, int len));
+#endif
 
 extern void yyerror ARGS((char *s));
 #ifdef yywrap
@@ -386,8 +389,10 @@ update_line_num ()
 static void
 save_text ()
 {
+#if OPT_LINTLIBRARY
     if (!in_cpp)
     	copy_typedef(yytext);
+#endif	
     if (cur_file->convert) {
 	fputs(yytext, cur_file->tmp_file);
     }
@@ -399,7 +404,9 @@ save_text ()
 static void
 save_text_offset ()
 {
+#if OPT_LINTLIBRARY
     copy_typedef(strcpy(yylval.text.text, yytext));
+#endif
     if (cur_file->convert) {
 	yylval.text.begin = ftell(cur_file->tmp_file);
 	fputs(yytext, cur_file->tmp_file);
@@ -407,6 +414,7 @@ save_text_offset ()
     	yylval.text.begin = 0;
 }
 
+#if OPT_LINTLIBRARY
 /* Decipher comments that are useful for lint (and making lint-libraries)
  */
 static	struct	{
@@ -438,6 +446,7 @@ int	len;
 	}
 	return 0;
 }
+#endif
 
 static
 void put_quoted (c)
@@ -491,29 +500,37 @@ get_quoted ()
 static void
 get_comment ()
 {
+    int c, lastc = '\0';
+
+#if OPT_LINTLIBRARY
+    int len = 0;
     char keyword[BUFSIZ];
-    int c, lastc = '\0', len = 0;
 
     keyword[len] = '\0';
     CmtVal.Varargs = 0;
     CmtVal.Externs = -1;
     CmtVal.Preproz = 0;
+#endif
 
     while ((c = input()) != 0) {
 	if (cur_file->convert)
 	    fputc(c, cur_file->tmp_file);
 
+#if OPT_LINTLIBRARY
 	if (CmtVal.Preproz > 0)
 	    fputc(c, stdout); 
 	if (isspace(c))
 	    len = decipher_comment(keyword, len);
 	else if (len+1 < sizeof(keyword))
 	    keyword[len++] = c;
+#endif
 
 	switch (c) {
 	case '\n':
 	    cur_file->line_num++;
+#if OPT_LINTLIBRARY
 	    CmtVal.Preproz -= 1;
+#endif
 	    break;
 	case '/':
 	    if (lastc == '*') {
@@ -527,11 +544,13 @@ get_comment ()
 			cur_file->end_comment = ftell(cur_file->tmp_file);
 		    }
 		}
+#if OPT_LINTLIBRARY
 		(void)decipher_comment(keyword, len);
 		if (CmtVal.Varargs != 0)
 		    varargs_num = CmtVal.Varargs;
 		if (CmtVal.Externs != -1)
 		    extern_in = CmtVal.Externs;
+#endif
 		return;
 	    }
 	}

@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 3.2 1994/07/26 00:03:52 tom Exp $
+/* $Id: lintlibs.c,v 3.4 1994/07/30 18:34:27 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -10,6 +10,7 @@
 #include "semantic.h"
 #include "symbol.h"
 
+#if OPT_LINTLIBRARY
 	int	in_include;
 
 static	char	*strip_name      ARGS((char *s));
@@ -353,7 +354,7 @@ void	copy_typedef(s)
 			implied_cnt--;
 		if ((implied_cnt == 2 || implied_cnt == 1)
 		&&  !strcmp(s, "{")) {
-			implied_cnt = 99999;
+			implied_cnt = 9999;
 		}
 	}
 }
@@ -470,3 +471,4 @@ void	put_body(outf, decl_spec, declarator)
 	put_string(outf, ";");
     put_newline(outf);
 }
+#endif	/* OPT_LINTLIBRARY */
