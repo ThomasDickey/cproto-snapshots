@@ -1,7 +1,7 @@
 /* case04.c */
 int dots_0(int /*p1*/);
-int dots_1(int /*p1*/, /*...*/);
-int dots_3(int /*p1*/, char /*p2*/, /*...*/);
+int dots_1(int /*p1*/, ...);
+int dots_3(int /*p1*/, char /*p2*/, ...);
 _FIRST *func1(void);
 _FIRST *func2(_FIRST */*p1*/, int /*p2*/[], float /*p*/);
 int *(func_func)(void);
