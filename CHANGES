@@ -2,6 +2,9 @@ Version 4
 
 Patchlevel 6
 
+- correct order of include-path to keep standard include (e.g., /usr/include)
+  at the end of the search list.
+
 - modified lint-library include-stack recovery to work on OSF/1.
 
 - supply default initializer for lint-library const data
