@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 3.4 1993/06/09 13:39:02 tom Exp $
+/* $Id: symbol.c,v 3.5 1994/02/08 16:24:20 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -37,12 +37,13 @@ SymbolTable *symtab;
 	sym = symtab->bucket[i];
 	while (sym != NULL) {
 	    next = sym->next;
-	    free(sym->name);
-	    free(sym->value);
+	    if (sym->name  != 0) free(sym->name);
+	    if (sym->value != 0) free(sym->value);
 	    free(sym);
 	    sym = next;
 	}
     }
+    free(symtab);
 }
 
 

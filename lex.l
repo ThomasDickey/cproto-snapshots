@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 3.11 1993/06/09 18:08:36 tom Exp $
+/* $Id: lex.l,v 3.12 1994/02/08 17:28:14 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -80,6 +80,7 @@ static void FinishCpp();
 static void update_line_num();
 static void save_text();
 static void save_text_offset();
+static void get_quoted();
 static void get_comment();
 static void get_cpp_directive();
 static void do_include();
@@ -94,8 +95,7 @@ WS		[ \t]
 LETTER		[A-Za-z$_]
 DIGIT		[0-9]
 ID		{LETTER}({LETTER}|{DIGIT})*
-STRING		\"(\\.|\\\n|[^"\\])*\"
-QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
+QUOTE		[\"\']
 
 %s CPP1 INIT1 INIT2 CURLY LEXYACC ASM CPP_INLINE
 %%
@@ -110,7 +110,7 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 
 <LEXYACC>^"%%"		{ save_text(); if (++ly_count >= 2) BEGIN INITIAL; }
 <LEXYACC>^"%{"		{ save_text(); BEGIN INITIAL; }
-<LEXYACC>{QUOTED}	{ save_text(); update_line_num(); }
+<LEXYACC>{QUOTE}	get_quoted();
 <LEXYACC>.		save_text();
 <INITIAL>^"%}"		{ save_text(); BEGIN LEXYACC; }
 
@@ -190,16 +190,15 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 			    return ';';
 			}
 <INITIAL>"..."		{ save_text(); return T_ELLIPSIS; }
-<INITIAL>{STRING}	{
-			    save_text();
-			    update_line_num();
+<INITIAL>\"		{
+			    get_quoted();
 			    return T_STRING_LITERAL;
 			}
 
 <INITIAL>asm		{ save_text(); BEGIN ASM; return T_ASM; }
 <ASM>"("		save_text();
 <ASM>")"		{ save_text(); BEGIN INITIAL; return T_ASMARG; }
-<ASM>{QUOTED} 		{ save_text(); update_line_num(); }
+<ASM>{QUOTE} 		get_quoted();
 <ASM>. 			save_text();
 
 <INITIAL>__?based[^(]*\([^)]*\)	{ save_text_offset(); return T_TYPE_QUALIFIER; }
@@ -254,7 +253,7 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 			    BEGIN INITIAL;
 			    return T_INITIALIZER;
 			}
-<INIT1>{QUOTED}		{ save_text(); update_line_num(); }
+<INIT1>{QUOTE}		get_quoted();
 <INIT1>.		save_text();
 
 <INIT2>"{"		{ save_text(); ++curly; }
@@ -265,7 +264,7 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 				return T_INITIALIZER;
 			    }
 			}
-<INIT2>{QUOTED}		{ save_text(); update_line_num(); }
+<INIT2>{QUOTE}		get_quoted();
 <INIT2>.		save_text();
 
 <INITIAL>"{"		{
@@ -284,7 +283,7 @@ QUOTED		({STRING}|\'(\\\'|[^'\n])*\'|\\.)
 				return T_MATCHRBRACE;
 			    }
 			}
-<CURLY>{QUOTED}		{ save_text(); update_line_num(); }
+<CURLY>{QUOTE}		get_quoted();
 <CURLY>"return"		{ save_text(); returned_at = TRUE; }
 <CURLY>";"		{ save_text(); returned_at = FALSE; }
 <CURLY>#{WS}* 		{ save_text(); StartCpp(1); }
@@ -392,7 +391,8 @@ save_text_offset ()
     if (cur_file->convert) {
 	yylval.text.begin = ftell(cur_file->tmp_file);
 	fputs(yytext, cur_file->tmp_file);
-    }
+    } else
+    	yylval.text.begin = 0;
 }
 
 /* Decipher comments that are useful for lint (and making lint-libraries)
@@ -425,6 +425,50 @@ int	len;
 			;
 	}
 	return 0;
+}
+
+static
+put_quoted (c)
+int	c;
+{
+	if ((c == 0) || (yyleng+1 >= YYLMAX)) {
+		save_text();
+		update_line_num();
+		yyleng = 0;
+	}
+	if (c != 0) {
+		yytext[yyleng++] = c;
+		yytext[yyleng] = 0;
+	}
+}
+
+/* Scan past quoted string. Note that some strings may overflow 'yytext[]',
+ * so we don't try to eat them in the lexical rules.
+ */
+static void
+get_quoted ()
+{
+	int	delim = *yytext;
+	int	c;
+
+	while ((c = input()) != 0) {
+		if (c == '\\') {
+			put_quoted(c);
+			if ((c = input()) == 0)
+				break;
+			put_quoted(c);
+		} else {
+			put_quoted(c);
+			if (c == delim)
+				break;
+			if (c == '\n') {	/* recover from unbalanced */
+				put_error();
+				fprintf(stderr, "unbalanced quote character '%c'\n", delim);
+				break;
+			}
+		}
+	}
+	put_quoted(0);
 }
 
 /* Scan to end of comment.

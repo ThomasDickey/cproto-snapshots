@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19940207
+MANIFEST for cproto, version t19940208
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -23,6 +23,8 @@ strkey.c                        look for a keyword within a string
 strstr.c                        look for a substring of a string
 symbol.c                        symbol-table support for CPROTO
 symbol.h                        interface definitions for symbol.c
+system.h                        system-dependent definitions, coordinated with config.h
+trace.c                         debugging support for CPROTO
 porting                         subdirectory
 porting/getopt.h                header file for getopt
 testing                         subdirectory

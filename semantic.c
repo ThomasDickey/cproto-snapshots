@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 3.9 1993/06/09 14:42:00 tom Exp $
+/* $Id: semantic.c,v 3.10 1994/02/08 19:52:56 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -6,6 +6,29 @@
 #include <stdio.h>
 #include "cproto.h"
 #include "semantic.h"
+
+#define	COMMENT_BEGIN "/*"
+#define COMMENT_END   "*/"
+
+#ifdef	__STDC__
+#define P_(params) params
+#else
+#define P_
+#endif
+
+static	char *		concat_string		P_((char *a, char *b));
+static	boolean		is_void_parameter	P_((Parameter *p));
+static	Parameter *	search_parameter_list	P_((ParameterList *params, char *name));
+static	int		put_parameter		P_((FILE *outf, Parameter *p, int name_only, int count, int commented));
+static	void		put_param_list		P_((FILE *outf, Declarator *declarator, int commented));
+static	void		put_parameters		P_((FILE *outf, Declarator *declarator, int commented));
+static	void		put_func_declarator	P_((FILE *outf, Declarator *declarator, int commented));
+static	void		put_declarator		P_((FILE *outf, Declarator *declarator, int commented));
+static	void		put_decl_spec		P_((FILE *outf, DeclSpec *decl_spec));
+static	int		uses_varargs		P_((Declarator *declarator));
+static	void		check_void_param	P_((Declarator *declarator));
+static	void		set_param_decl_spec	P_((Declarator *declarator));
+static	void		put_param_decl		P_((Declarator *declarator, int commented));
 
 /* Head function declarator in a prototype or function definition */
 static Declarator *func_declarator;
@@ -353,16 +376,15 @@ DeclaratorList *declarators;
     }
 }
 
-static void put_declarator();
-
 /* Output a function parameter.
  */
 static int
-put_parameter (outf, p, name_only, count)
+put_parameter (outf, p, name_only, count, commented)
 FILE *outf;
 Parameter *p;
 int	name_only;	/* nonzero if we only show the parameter name */
 int	count;		/* index in parameter list if we haven't names */
+int	commented;	/* comment-delimiters already from higher level */
 {
     char	*s;
     char	gap = ' ';
@@ -411,7 +433,7 @@ int	count;		/* index in parameter list if we haven't names */
 	     strcmp(p->declarator->text, p->declarator->name) != 0)
 		put_char(outf, gap);
 	}
-	put_declarator(outf, p->declarator);
+	put_declarator(outf, p->declarator, commented);
     }
     return (TRUE);
 }
@@ -419,16 +441,21 @@ int	count;		/* index in parameter list if we haven't names */
 /* Output a parameter list.
  */
 static void
-put_param_list (outf, declarator)
+put_param_list (outf, declarator, commented)
 FILE *outf;
 Declarator *declarator;
+int commented;
 {
     Parameter *p;
     int f;
     int count = 0;
+    int hide_it = (where == FUNC_PROTO) && (proto_style == PROTO_TRADITIONAL);
+    int do_cmt = proto_comments && hide_it;
 
     p = declarator->params.first;
-    if (is_void_parameter(p)) {
+    if (hide_it && !do_cmt) {
+	;
+    } else if (is_void_parameter(p)) {
 	if (p != NULL && !LintLibrary())
 	    put_string(outf, "void");
     } else {
@@ -436,9 +463,11 @@ Declarator *declarator;
 
 	if (where == FUNC_DEF && declarator->params.comment != NULL)
 	    put_string(outf, declarator->params.comment);
+	else if (do_cmt && !commented)
+	    put_string(outf, COMMENT_BEGIN);
 		
 	put_string(outf, fmt[f].first_param_prefix);
-	(void)put_parameter(outf, p, LintLibrary(), ++count);
+	(void)put_parameter(outf, p, LintLibrary(), ++count, commented);
 
 	while (p->next != NULL) {
 	    if (lint_ellipsis(p->next))
@@ -449,10 +478,12 @@ Declarator *declarator;
 
 	    p = p->next;
 	    put_string(outf, fmt[f].middle_param_prefix);
-	    (void)put_parameter(outf, p, LintLibrary(), ++count);
+	    (void)put_parameter(outf, p, LintLibrary(), ++count, commented);
 	}
 	if (where == FUNC_DEF && p->comment != NULL)
 	    put_string(outf, p->comment);
+	else if (do_cmt && !commented)
+	    put_string(outf, COMMENT_END);
 
 	put_string(outf, fmt[f].last_param_suffix);
     }
@@ -461,9 +492,10 @@ Declarator *declarator;
 /* Output function parameters.
  */
 static void
-put_parameters (outf, declarator)
+put_parameters (outf, declarator, commented)
 FILE *outf;
 Declarator *declarator;
+int commented;
 {
     Parameter *p;
 
@@ -491,12 +523,12 @@ Declarator *declarator;
 	if (where == FUNC_PROTO && proto_style == PROTO_TRADITIONAL &&
 	 declarator == func_declarator) {
 	    if (proto_comments) {
-		put_string(outf, "/*");
-		put_param_list(outf, declarator);
-		put_string(outf, "*/");
+		put_string(outf, COMMENT_BEGIN);
+		put_param_list(outf, declarator, TRUE);
+		put_string(outf, COMMENT_END);
 	    }
-	} else {
-	    put_param_list(outf, declarator);
+	} else if (proto_style != PROTO_NONE) {
+	    put_param_list(outf, declarator, FALSE);
 	}
     }
 }
@@ -504,9 +536,10 @@ Declarator *declarator;
 /* Output a function declarator.
  */
 static void
-put_func_declarator (outf, declarator)
+put_func_declarator (outf, declarator, commented)
 FILE *outf;
 Declarator *declarator;
+int commented;
 {
     char *s, *t, *decl_text;
     int f;
@@ -541,9 +574,9 @@ Declarator *declarator;
 	    if (where == FUNC_PROTO && proto_style == PROTO_ABSTRACT &&
 	     declarator != func_declarator) {
 		if (proto_comments) {
-		    put_string(outf, "/*");
+		    put_string(outf, COMMENT_BEGIN);
 		    put_string(outf, declarator->name);
-		    put_string(outf, "*/");
+		    put_string(outf, COMMENT_END);
 		}
 	    } else {
 		put_string(outf, declarator->name);
@@ -556,7 +589,7 @@ Declarator *declarator;
 	    put_string(outf, fmt[f].declarator_suffix);
 	}
     } else {
-	put_func_declarator(outf, declarator->func_stack);
+	put_func_declarator(outf, declarator->func_stack, commented);
     }
     *s = '%';
     s += 2;
@@ -573,7 +606,7 @@ Declarator *declarator;
 
     /* Substitute place holder with function parameters. */
     put_char(outf, *t++ = '(');
-    put_parameters(outf, declarator);
+    put_parameters(outf, declarator, FALSE);
     put_string(outf, t);
 
     if (where == FUNC_PROTO && declarator == func_declarator && proto_macro) {
@@ -586,7 +619,7 @@ Declarator *declarator;
 	while (p != 0) {
 		if (lint_ellipsis(p))
 			break;
-		if (put_parameter(outf, p, FALSE, ++count))
+		if (put_parameter(outf, p, FALSE, ++count, commented))
 			putchar(';');
 		p = p->next;
 	}
@@ -596,9 +629,10 @@ Declarator *declarator;
 /* Output a declarator.
  */
 static void
-put_declarator (outf, declarator)
+put_declarator (outf, declarator, commented)
 FILE *outf;
 Declarator *declarator;
+int commented;
 {
     char *s;
 
@@ -609,7 +643,8 @@ Declarator *declarator;
 		return;
 	    *s = '\0';
 	    if (proto_comments) {
-		fprintf(outf, "%s/*%s*/%s", declarator->text, declarator->name,
+		fprintf(outf, "%s%s%s%s%s", declarator->text,
+		 COMMENT_BEGIN, declarator->name, COMMENT_END,
 		 s + strlen(declarator->name));
 	    } else {
 		fprintf(outf, "%s%s", declarator->text,
@@ -620,7 +655,7 @@ Declarator *declarator;
 	    put_string(outf, declarator->text);
 	}
     } else {
-	put_func_declarator(outf, declarator);
+	put_func_declarator(outf, declarator, commented);
     }
 }
 
@@ -646,6 +681,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 {
     Declarator *d;
     boolean	defines = (strchr(decl_spec->text, '{') != 0);
+    int	commented = FALSE;
 
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
@@ -679,7 +715,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    	fmt_library(2);
 	    put_string(stdout, fmt[FMT_PROTO].decl_spec_prefix);
 	    put_decl_spec(stdout, decl_spec);
-	    put_declarator(stdout, d);
+	    put_declarator(stdout, d, commented);
 	    put_body(stdout, decl_spec, d);
 	}
     }
@@ -740,6 +776,7 @@ DeclSpec *decl_spec;
 Declarator *declarator;
 {
     Parameter *p;
+    int	commented = FALSE;
 
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
@@ -777,7 +814,7 @@ Declarator *declarator;
     format = FMT_PROTO;
     put_string(stdout, fmt[format].decl_spec_prefix);
     put_decl_spec(stdout, decl_spec);
-    put_func_declarator(stdout, declarator);
+    put_func_declarator(stdout, declarator, commented);
     put_body(stdout, decl_spec, declarator);
 }
 
@@ -794,15 +831,16 @@ Declarator *declarator;
     func_declarator = NULL;
     where = FUNC_DEF;
     format = FMT_FUNC;
-    put_func_declarator(cur_tmp_file(), declarator);
+    put_func_declarator(cur_tmp_file(), declarator, FALSE);
     cur_file_changed();
 }
 
 /* Output parameter declarations for old style function definition.
  */
 static void
-put_param_decl (declarator)
+put_param_decl (declarator, commented)
 Declarator *declarator;
+int commented;
 {
     Parameter *p;
     int count = 0;
@@ -810,12 +848,12 @@ Declarator *declarator;
     p = declarator->params.first;
     if (!is_void_parameter(p)) {
 	fputc('\n', cur_tmp_file());
-	(void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count);
+	(void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, "...") != 0) {
 	    fputc('\n', cur_tmp_file());
-	    (void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count);
+	    (void)put_parameter(cur_tmp_file(), p, LintLibrary(), ++count, commented);
 	    fputc(';', cur_tmp_file());
 	    p = p->next;
 	}
@@ -907,7 +945,7 @@ Declarator *declarator;
 	    fputc(' ', cur_tmp_file());
 
 	    func_style = FUNC_ANSI;
-	    put_func_declarator(cur_tmp_file(), declarator);
+	    put_func_declarator(cur_tmp_file(), declarator, FALSE);
 	}
 	fputs("\n#else\n\n", cur_tmp_file());
 
@@ -921,8 +959,8 @@ Declarator *declarator;
 
  	    format = FMT_FUNC;
 	    func_style = FUNC_TRADITIONAL;
-	    put_func_declarator(cur_tmp_file(), declarator);
-	    put_param_decl(func_declarator);
+	    put_func_declarator(cur_tmp_file(), declarator, FALSE);
+	    put_param_decl(func_declarator, FALSE);
 	}
 
 	fputs("\n#endif", cur_tmp_file());
@@ -938,9 +976,9 @@ Declarator *declarator;
 	fputc(' ', cur_tmp_file());
 
 	/* Output function declarator. */
-	put_func_declarator(cur_tmp_file(), declarator);
+	put_func_declarator(cur_tmp_file(), declarator, FALSE);
 	if (func_style == FUNC_TRADITIONAL)
-	    put_param_decl(func_declarator);
+	    put_param_decl(func_declarator, FALSE);
     }
 
     /* Output text between function head and body. */
