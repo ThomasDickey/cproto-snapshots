@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 3.22 1994/08/29 11:16:30 tom Exp $
+/* $Id: grammar.y,v 3.23 1994/09/19 01:00:29 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -133,7 +133,7 @@ static char *
 dft_decl_spec()
 {
 	return	(LintLibrary() && !return_val)
-			? ""
+			? "void"
 			: "int";
 }
 

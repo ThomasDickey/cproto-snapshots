@@ -108,10 +108,10 @@ typedef	struct	bong	{
 
 typedef	char	*string;
 
-	main(argc, argv)
+void	main(argc, argv)
 		int	argc;
 		char	**argv;
-		{ }
+		{ /* void */ }
 
 	/* VARARGS */
 int	veryfunny(a, b, c)
@@ -130,14 +130,14 @@ int	program(argv, y, zz, z1, z2, z3)
 		int	z3;
 		{ return(*(int *)0); }
 
-	junk0()
-		{ }
+void	junk0()
+		{ /* void */ }
 
 int	junk1()
 		{ return(*(int *)0); }
 
-	junk2()
-		{ }
+void	junk2()
+		{ /* void */ }
 
 int	junk3()
 		{ return(*(int *)0); }
@@ -163,14 +163,14 @@ void_junk *foo_void(void_int)
 		{ return(*(void_junk **)0); }
 
 static void_junk *foo_void2()
-		{ return(*(static void_junk **)0); }
+		{ return(*(void_junk **)0); }
 
 void	(*Sigdisp(sig, func))(/*sig1*/)
 		int	sig;
 		void	(*func)(/*sig*/);
-		{ /* void */ }
+		{ return(*(void(*)())0); }
 
 void	(*sigdisp2(sig, func))(/*sig2*/)
 		int	sig;
 		void	(*func)(/*sig*/);
-		{ /* void */ }
+		{ return(*(void(*)())0); }

@@ -1,5 +1,17 @@
 Version 3
 
+Patchlevel 10 (dickey, September 1994)
+
+- corrected two malloc-defects in lint library generation (one place where
+  generated parameter name was copied rather than allocated, and another
+  memory leak).
+
+- corrected generation of lint library function body, to handle function
+  pointers.
+
+- changed the implicit lint library function type from "" to "void", to
+  avoid special-cases in the function-body generation.
+
 Patchlevel 9 (dickey, August 1994)
 
 - use 'autoconf' to make a UNIX configure-script.

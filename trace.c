@@ -1,15 +1,14 @@
-/* $Id: trace.c,v 3.3 1994/09/15 23:30:07 tom Exp $
+/* $Id: trace.c,v 3.4 1994/09/19 22:57:09 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  */
 #include <stdio.h>
 #include "cproto.h"
-#define P(params) params
+#include "trace.h"
 
 #if UNIX
 #include <sys/time.h>
 #endif
-void	show_alloc();
 
 #define	BEFORE	0
 #define AFTER   0
@@ -20,7 +19,7 @@ void	show_alloc();
 #endif
 
 #ifdef	apollo
-static	int	contains P((char *ref, char *tst));
+static	int	contains ARGS((char *ref, char *tst));
 #endif	/* apollo */
 
 #if	DOALLOC
@@ -28,21 +27,21 @@ static	int	contains P((char *ref, char *tst));
 #undef	realloc
 #undef	free
 
-static	int	FindArea P(( char * ));
-static	int	record_freed P(( char * ));
-static	int	record_alloc P(( char *, char *, unsigned));
+static	int	FindArea ARGS(( char * ));
+static	int	record_freed ARGS(( char * ));
+static	int	record_alloc ARGS(( char *, char *, unsigned));
 #endif	/* DOALLOC */
 
 void
 #if	ANSI_VARARGS
-Trace(char *fmt, ...)
+Trace(char *format, ...)
 #else
 Trace(va_alist)
 va_dcl
 #endif
 {
 #if	!ANSI_VARARGS
-	register char *fmt;
+	register char *format;
 #endif
 	static	FILE	*fp;
 	va_list ap;
@@ -53,13 +52,13 @@ va_dcl
 		abort();
 
 #if	ANSI_VARARGS
-	va_start(ap,fmt);
+	va_start(ap,format);
 #else
 	va_start(ap);
-	fmt = va_arg(ap, char *);
+	format = va_arg(ap, char *);
 #endif
-	if (fmt != 0) {
-		vfprintf(fp, fmt, ap);
+	if (format != 0) {
+		vfprintf(fp, format, ap);
 		va_end(ap);
 		(void)fflush(fp);
 	} else {
@@ -160,9 +159,9 @@ typedef	struct	{
 
 static	AREA	area[DOALLOC];
 
-static	int	FindArea P((char *));
-static	int	record_freed P((char *));
-static	int	record_alloc P((char *, char *, unsigned));
+static	int	FindArea ARGS((char *));
+static	int	record_freed ARGS((char *));
+static	int	record_alloc ARGS((char *, char *, unsigned));
 
 static	long	maxAllocated,	/* maximum # of bytes allocated */
 		nowAllocated,	/* current # of bytes allocated */
@@ -309,11 +308,11 @@ void	dofree(oldp)
 void	show_alloc()
 {
 #if	DOALLOC
-	static	char	*fmt = ".. %-24.24s %10ld\n";
+	static	char	*format = ".. %-24.24s %10ld\n";
 
 	Trace("** allocator metrics:\n");
-	Trace(fmt, "allocs:", count_alloc);
-	Trace(fmt, "frees:",  count_freed);
+	Trace(format, "allocs:", count_alloc);
+	Trace(format, "frees:",  count_freed);
 	{
 		register int	j, count = 0;
 		register long	total	= 0;
@@ -329,12 +328,12 @@ void	show_alloc()
 				total += area[j].size;
 			}
 		}
-		Trace(fmt, "total bytes allocated:",   total);
-		Trace(fmt, "current bytes allocated:", nowAllocated);
-		Trace(fmt, "maximum bytes allocated:", maxAllocated);
-		Trace(fmt, "segment-table length:",    nowPending);
-		Trace(fmt, "current # of segments:",   (long)count);
-		Trace(fmt, "maximum # of segments:",   maxPending);
+		Trace(format, "total bytes allocated:",   total);
+		Trace(format, "current bytes allocated:", nowAllocated);
+		Trace(format, "maximum bytes allocated:", maxAllocated);
+		Trace(format, "segment-table length:",    nowPending);
+		Trace(format, "current # of segments:",   (long)count);
+		Trace(format, "maximum # of segments:",   maxPending);
 	}
 #endif
 }
