@@ -167,10 +167,10 @@ static void_junk *foo_void2()
 
 void	(*Sigdisp(sig, func))(/*sig1*/)
 		int	sig;
-		void	(*func)(/*sig*/);
+		void	(*func)();
 		{ return(*(void(*)())0); }
 
 void	(*sigdisp2(sig, func))(/*sig2*/)
 		int	sig;
-		void	(*func)(/*sig*/);
+		void	(*func)();
 		{ return(*(void(*)())0); }
