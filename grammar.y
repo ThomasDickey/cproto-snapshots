@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.4.1.1 1996/04/05 14:02:04 tom Exp $
+/* $Id: grammar.y,v 4.5 1996/04/15 04:12:37 cthuang Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -217,7 +217,9 @@ declaration
 		set_param_types(func_params, &$1, &$2);
 	    } else {
 		gen_declarations(&$1, &$2);
+#if OPT_LINTLIBRARY
 		flush_varargs();
+#endif
 		free_decl_list(&$2);
 	    }
 	    free_decl_spec(&$1);
@@ -300,7 +302,9 @@ function_definition
 	    if (cur_file->convert)
 		gen_func_definition(&$1, $2);
 	    gen_prototype(&$1, $2);
+#if OPT_LINTLIBRARY
 	    flush_varargs();
+#endif
 	    free_decl_spec(&$1);
 	    free_declarator($2);
 	}
@@ -325,7 +329,9 @@ function_definition
 	    if (cur_file->convert)
 		gen_func_definition(&decl_spec, $1);
 	    gen_prototype(&decl_spec, $1);
+#if OPT_LINTLIBRARY
 	    flush_varargs();
+#endif
 	    free_decl_spec(&decl_spec);
 	    free_declarator($1);
 	}
@@ -826,7 +832,7 @@ init_parser ()
 	"__far16",
 #endif
 #else
-	"__const", "__volatile", "__inline__",
+	"__const", "__inline__",
 #endif
     };
     int i;

@@ -19,6 +19,9 @@ Patchlevel 5
 
 - added keywords to work with gcc 2.7.0
 
+- corrected unresolved references to flush_varargs() when OPT_LINTLIBRARY
+  is not defined                                                         
+
 Patchlevel 4
 
 - Added -S option to only output static declarations.
