@@ -1,4 +1,4 @@
-# $Header: /users/source/archives/cproto.vcs/testing/RCS/descrip.mms,v 3.1 1991/06/07 17:32:06 tom Exp $
+# $Id: descrip.mms,v 3.2 1994/08/18 22:45:26 tom Exp $
 # VMS make-file for CPROTO test directory
 #
 
@@ -7,17 +7,22 @@
 ####### (Command-line Options) #################################################
 
 ####### (Standard Lists) #######################################################
-COM_FILES=\
-	case1.com	case2.com	case3.com	case4.com\
-	case5.com	case6.com	case7.com	case8.com\
-	case9.com	case10.com	case11.com	case12.com\
-	case13.com	case14.com
 
 REF_FILES=\
 	case1.ref	case2.ref	case3.ref	case4.ref\
 	case5.ref	case6.ref	case7.ref	case8.ref\
 	case9.ref	case10.ref	case11.ref	case12.ref\
-	case13.ref	case14.ref
+	case13.ref	case14.ref	case15.ref\
+	case17.ref	case18.ref	case19.ref	case20.ref\
+	case21.ref
+
+COM_FILES=\
+	case1.dcl	case2.dcl	case3.dcl	case4.dcl\
+	case5.dcl	case6.dcl	case7.dcl	case8.dcl\
+	case9.dcl	case10.dcl	case11.dcl	case12.dcl\
+	case13.dcl	case14.dcl	case15.dcl\
+	case17.dcl	case18.dcl	case19.dcl	case20.dcl\
+	case21.dcl
 
 TESTDATA=\
 	syntax.c\
@@ -25,10 +30,9 @@ TESTDATA=\
 	$(REF_FILES)
 
 SCRIPTS	=\
-	run\
 	run_tests.sh	run_tests.com
 
-SOURCES	= Makefile descrip.mms $(SCRIPTS) $(TESTDATA)
+SOURCES	= makefile descrip.mms $(SCRIPTS) $(TESTDATA)
 
 ALL	= $(SCRIPTS)
 
@@ -42,7 +46,7 @@ clobber :	clean
 	@- write sys$output "** made $@"
 destroy :
 	@- remove -vf *.*;*
-run_tests :	$(SCRIPTS)
+run_tests :	$(SCRIPTS) $(TESTDATA)
 	@run_tests
 
 ####### (Details of Productions) ###############################################

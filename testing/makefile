@@ -1,4 +1,4 @@
-# $Id: makefile,v 3.7 1994/08/13 00:17:34 tom Exp $
+# $Id: makefile,v 3.8 1994/08/18 22:43:07 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -24,7 +24,7 @@ SCRIPTS	=\
 	testunix.sh\
 	run_test.sh	run_test.com
 
-SOURCES	= Makefile descrip.mms $(SCRIPTS) $(TESTDATA)
+SOURCES	= makefile descrip.mms $(SCRIPTS) $(TESTDATA)
 
 ####### (Standard Productions) #################################################
 all:	$(SOURCES) $B/$(THIS)
