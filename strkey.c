@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.1.1.1 1996/05/30 15:27:42 tom Exp $
+/* $Id: strkey.c,v 4.2 1998/01/19 00:49:28 cthuang Exp $
  *
  * Some string handling routines
  */

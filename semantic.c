@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.4 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: semantic.c,v 4.5 1998/01/19 00:49:26 cthuang Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -150,7 +150,7 @@ long offset;
 {
     Declarator *d;
 
-    d = sALLOC(Declarator);
+    d = NEW(Declarator);
     d->text = xstrdup(text);
     d->name = xstrdup(name);
     d->begin = offset;
@@ -225,7 +225,7 @@ DeclSpec *decl_spec;
 Declarator *declarator;
 {
     Parameter *param;
-    param = sALLOC(Parameter);
+    param = NEW(Parameter);
 
     if (decl_spec == NULL) {
 	new_decl_spec(&param->decl_spec, "", 0L, DS_NONE);
