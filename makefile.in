@@ -1,5 +1,5 @@
 # @configure_input@
-# $Id: makefile.in,v 4.4 1995/08/24 01:03:48 cthuang Exp $
+# $Id: makefile.in,v 4.4.1.1 1995/12/02 22:37:43 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -128,7 +128,6 @@ check:	$(THIS)
 config.h : stamp-h
 stamp-h : config.status
 	./config.status
-	touch stamp-h
 
 makefile: makefile.in config.status
 	./config.status

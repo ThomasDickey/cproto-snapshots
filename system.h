@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.2 1994/10/13 17:26:04 cthuang Exp $
+/* $Id: system.h,v 4.2.1.1 1995/12/02 22:36:32 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -180,8 +180,12 @@ extern void dofree(char *);
 # define YYDEBUG 1
 #endif
 
+#if HAVE_LIBDMALLOC
+#include <dmalloc.h>	/* Gray Watson's library */
+#endif
+
 #if HAVE_LIBDBMALLOC
-#include <dbmalloc.h>
+#include <dbmalloc.h>	/* Conor Cahill's library */
 #endif
 
 #endif /* SYSTEM_H */
