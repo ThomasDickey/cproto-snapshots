@@ -1,6 +1,15 @@
 Version 4
 
-Patchlevel 5
+Patchlevel 6
+
+- added '__volatile' keyword to grammar to accommodate gcc on Linux.
+
+- modified configure script to add several development/debugging options (i.e.,
+  --with-trace, --with-dbmalloc, --with-dmalloc).
+
+- modified ifdefs to avoid using predefined 'unix' (not defined on AIX or CLIX)
+
+Patchlevel 5 (April 1996)
 
 - corrected instance of fclose on a file pointer after pclose was done (found
   with Electric Fence).
@@ -22,7 +31,7 @@ Patchlevel 5
 - corrected unresolved references to flush_varargs() when OPT_LINTLIBRARY
   is not defined                                                         
 
-Patchlevel 4
+Patchlevel 4 (August 1995)
 
 - Added -S option to only output static declarations.
 
@@ -47,7 +56,7 @@ Patchlevel 4
   the lint-library option) so that it recognizes the conventional include
   directory created by a GCC install.
 
-Patchlevel 3
+Patchlevel 3 (January 1995)
 
 - check for a special case in lint-library generation, i.e., prototype
   arguments of the form "*()", which need more parentheses for SunOS's lint.
@@ -64,7 +73,7 @@ Patchlevel 3
 
 - use 'sed' rather than 'flip' to apply trailing CR's to MS-DOS scripts.
 
-Patchlevel 2
+Patchlevel 2 (October 1994)
 
 - modified grammar to recognize C++ ref-variables (i.e., '&' as a prefix to
   identifiers at the top lexical level).  Lint libraries are formatted without
@@ -83,7 +92,7 @@ Patchlevel 2
 
 - don't use "#elif" preprocessor control; not all systems support it.
 
-Patchlevel 1
+Patchlevel 1 (October 1994)
 
 - Added testing scripts for MS-DOS and VMS.
 

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.5 1996/04/15 04:12:37 cthuang Exp $
+/* $Id: grammar.y,v 4.5.1.1 1996/04/27 11:59:10 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -832,7 +832,7 @@ init_parser ()
 	"__far16",
 #endif
 #else
-	"__const", "__inline__",
+	"__const", "__volatile", "__inline__",
 #endif
     };
     int i;

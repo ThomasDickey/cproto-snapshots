@@ -1,10 +1,10 @@
-/* $Id: trace.h,v 4.1 1994/09/23 23:09:59 tom Exp $ */
+/* $Id: trace.h,v 4.1.1.1 1996/04/27 12:54:16 tom Exp $ */
 
 #ifndef TRACE_H
 #define TRACE_H
 
-#ifndef __attribute__
-#define __attribute(p)
+#if !defined(__GNUC__) && !defined(__attribute__)
+#define __attribute__(p)
 #endif
 
 extern void Trace(char *f, ...) __attribute__((format (printf,1,2)));
@@ -13,9 +13,13 @@ extern void Elapsed(char *msg);
 extern void WalkBack(void);
 extern void fail_alloc(char *msg, char *ptr);
 
-extern void dump_parameter(Parameter *p, int level);
-extern void dump_param_list(ParameterList *p, int level);
-extern void dump_declarator(Declarator *d, int level);
-extern void dump_decl_spec(DeclSpec *d, int level);
+#ifdef DOALLOC
+extern void *doalloc(void *,unsigned);
+extern void dofree(void *);
+
+#define malloc(n)    doalloc(0,n)
+#define realloc(p,n) doalloc(p,n)
+#define free(n)      dofree(n)
+#endif
 
 #endif /* TRACE_H */

@@ -1,48 +1,45 @@
-/* $Id: trace.c,v 4.1 1994/09/24 20:46:17 tom Exp $
+/* $Id: trace.c,v 4.1.1.1 1996/04/27 12:54:38 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
+ *
+ * This is a cut-down version of a module I wrote originally for 'vile', it
+ * requires an ANSI compiler.  Its main purpose is to allow tracing problems in
+ * a repeatable test, including malloc/free bugs -- dickey@clark.net
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <trace.h>	/* interface of this module */
+
+#include <stdlib.h>
 #include <stdio.h>
-#include "cproto.h"
-#include "trace.h"
 
-#if UNIX
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
 #endif
 
-#define	BEFORE	0
-#define AFTER   0
+#define	BEFORE	0	/* padding "before" allocated area */
+#define AFTER   0	/* padding "after" allocated area */
 
-#define	ANSI_VARARGS 1
-#if	ANSI_VARARGS
 #include <stdarg.h>
-#endif
-
-#ifdef	apollo
-static	int	contains ARGS((char *ref, char *tst));
-#endif	/* apollo */
 
 #if	DOALLOC
 #undef	malloc
 #undef	realloc
 #undef	free
-
-static	int	FindArea ARGS(( char * ));
-static	int	record_freed ARGS(( char * ));
-static	int	record_alloc ARGS(( char *, char *, unsigned));
 #endif	/* DOALLOC */
 
 void
-#if	ANSI_VARARGS
 Trace(char *format, ...)
-#else
-Trace(va_alist)
-va_dcl
-#endif
 {
-#if	!ANSI_VARARGS
-	register char *format;
-#endif
 	static	FILE	*fp;
 	va_list ap;
 
@@ -51,12 +48,7 @@ va_dcl
 	if (!fp)
 		abort();
 
-#if	ANSI_VARARGS
 	va_start(ap,format);
-#else
-	va_start(ap);
-	format = va_arg(ap, char *);
-#endif
 	if (format != 0) {
 		vfprintf(fp, format, ap);
 		va_end(ap);
@@ -71,10 +63,9 @@ va_dcl
 #define	SECS(tv)	(tv.tv_sec + (tv.tv_usec / 1.0e6))
 
 void
-Elapsed(msg)
-	char	*msg;
+Elapsed(char *msg)
 {
-#if UNIX
+#if HAVE_GETTIMEOFDAY
 	static	struct	timeval		tv0, tv1;
 	static	struct	timezone	tz0, tz1;
 	static	int	init;
@@ -88,9 +79,7 @@ Elapsed(msg)
 
 #ifdef	apollo
 static
-int	contains(ref, tst)
-	char	*ref;
-	char	*tst;
+int contains(char *ref, char *tst)
 {
 	size_t	len	= strlen(ref);
 	while (*tst) {
@@ -102,7 +91,7 @@ int	contains(ref, tst)
 #endif	/* apollo */
 
 void
-WalkBack()
+WalkBack(void)
 {
 #ifdef	apollo
 	static	char	*first	= "\"WalkBack\"",
@@ -132,9 +121,8 @@ WalkBack()
 static	long	count_alloc,
 		count_freed;
 
-void	fail_alloc(msg, ptr)
-	char	*msg;
-	char	*ptr;
+void
+fail_alloc(char *msg, char *ptr)
 {
 	Trace("%s: %p\n", msg, ptr);
 	Trace("allocs %ld, frees %ld\n", count_alloc, count_freed);
@@ -159,18 +147,13 @@ typedef	struct	{
 
 static	AREA	area[DOALLOC];
 
-static	int	FindArea ARGS((char *));
-static	int	record_freed ARGS((char *));
-static	int	record_alloc ARGS((char *, char *, unsigned));
-
 static	long	maxAllocated,	/* maximum # of bytes allocated */
 		nowAllocated,	/* current # of bytes allocated */
 		nowPending,	/* current end of 'area[]' table */
 		maxPending;	/* maximum # of segments allocated */
 
 static
-int	FindArea(ptr)
-	char	*ptr;
+int FindArea(char *ptr)
 {
 	register int j;
 	for (j = 0; j < DOALLOC; j++)
@@ -186,8 +169,7 @@ int	FindArea(ptr)
 }
 
 static
-int	record_freed(ptr)
-	char	*ptr;
+int record_freed(char *ptr)
 {
 	register int j;
 	if ((j = FindArea(ptr)) >= 0) {
@@ -206,10 +188,7 @@ int	record_freed(ptr)
 }
 
 static
-int	record_alloc(newp, oldp, len)
-	char	*newp;
-	char	*oldp;
-	unsigned len;
+int record_alloc(char *newp, char *oldp, unsigned len)
 {
 	register int	j;
 
@@ -256,11 +235,10 @@ int	record_alloc(newp, oldp, len)
  *	public entrypoints						*
  ************************************************************************/
 #if DOALLOC
-char *	doalloc (oldp, amount)
-	char	*oldp;
-	unsigned amount;
+void *
+doalloc (void *oldp, unsigned amount)
 {
-	register char	*newp;
+	register void	*newp;
 
 	if (oldp != 0)
 		oldp -= BEFORE;
@@ -289,8 +267,8 @@ char *	doalloc (oldp, amount)
 /*
  * Entrypoint so we can validate pointers
  */
-void	dofree(oldp)
-	char	*oldp;
+void
+dofree(void *oldp)
 {
 	oldp -= BEFORE;
 	count_freed++;
@@ -305,7 +283,8 @@ void	dofree(oldp)
 }
 #endif
 
-void	show_alloc()
+void
+show_alloc(void)
 {
 #if	DOALLOC
 	static	char	*format = ".. %-24.24s %10ld\n";

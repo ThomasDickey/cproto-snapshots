@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t19960415
+MANIFEST for cproto, version t19960427
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -14,6 +14,7 @@ cproto.1                        man-page for CPROTO
 cproto.c                        main program of CPROTO
 cproto.h                        common datatypes and definitions for CPROTO
 dump.c                          debug/trace
+dump.h                          interface of dump.c
 getopt.c                        GNU getopt.c
 getopt.h                        GNU getopt.h
 grammar.y                       yacc grammar for CPROTO

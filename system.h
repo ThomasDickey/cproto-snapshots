@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.3 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: system.h,v 4.3.1.2 1996/04/27 21:49:48 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -157,12 +157,7 @@ extern char *strstr  ARGS((const char *s, const char *p));
  * in 'trace.c' (use dbmalloc for more rigorous testing).
  */
 #ifdef DOALLOC
-extern char *doalloc(char *,unsigned);
-extern void dofree(char *);
-
-#define malloc(n)    doalloc(0,n)
-#define realloc(p,n) doalloc(p,n)
-#define free(n) dofree(n)
+#include <trace.h>
 #endif /* DOALLOC */
 
 /*
@@ -171,7 +166,7 @@ extern void dofree(char *);
  * support.
  */
 #ifndef OPT_LINTLIBRARY
-# ifdef unix
+# if HAVE_PROG_LINT || defined(unix)
 #  define OPT_LINTLIBRARY 1
 # endif
 #endif
