@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.5 1996/04/13 04:29:18 cthuang Exp $
+/* $Id: lex.l,v 4.5.1.1 1999/01/03 13:38:09 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -37,7 +37,7 @@
  *
  * GCC extensions:
  *	The keywords '__attribute__', '__inline', '__inline__', '__signed',
- *	'__signed__'.
+ *	'__signed__'. and '__extension__'
  */
 
 #define	result(nn)	count(); if (!brackets && unnested()) return(nn)
@@ -249,6 +249,7 @@ QUOTE		[\"\']
 <INITIAL>__signed__ 	{ save_text_offset(); return T_SIGNED; }
 <INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
 <INITIAL>__inline__ 	{ save_text_offset(); return T_INLINE; }
+<INITIAL>__extension__ 	{ save_text_offset(); return T_EXTENSION; }
 <INITIAL>__attribute__	{ gcc_attribute(); }
 
 <INITIAL>globalvalue	{ vms_extern; }
