@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.2 1995/01/01 19:34:59 cthuang Exp $
+dnl $Id: aclocal.m4,v 4.2.1.1 1995/02/24 11:19:33 tom Exp $
 dnl
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -38,15 +38,16 @@ td_incl='#include "y.tab.c"'
 for COND in BISON_HAS_YYTNAME YACC_HAS_YYTOKS YACC_HAS_YYTOKS_2 YACC_HAS_YYNAME
 do
 AC_MSG_CHECKING(for error-reporting with $COND)
-AC_CACHE_VAL(ac_cv_td_yyerror,
+AC_CACHE_VAL(ac_cv_$COND,
 AC_TRY_LINK([
 #define $COND 1
 #define YYDEBUG 1
 $td_incl],,
-ac_cv_td_yyerror=yes,
-ac_cv_td_yyerror=no))
-AC_MSG_RESULT($ac_cv_td_yyerror)
-if test $ac_cv_td_yyerror = yes; then
+eval 'ac_cv_'$COND'=yes',
+eval 'ac_cv_'$COND'=no'))
+eval 'td_result=$ac_cv_'$COND
+AC_MSG_RESULT($td_result)
+if test $td_result = yes; then
 	AC_DEFINE_UNQUOTED($COND)
 	break
 fi

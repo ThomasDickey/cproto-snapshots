@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.2 1995/01/01 19:34:59 cthuang Exp $
+/* $Id: semantic.c,v 4.2.1.1 1995/02/24 11:19:46 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -866,8 +866,10 @@ DeclaratorList *decl_list;	/* list of declared variables */
 #endif
 	   ) {
 #if OPT_LINTLIBRARY
-	    if (already_declared(d->name))
+	    if (already_declared(d->name)) {
+		flush_varargs();
 		continue;
+	    }
 
 	    /*
 	     * Try to distinguish function declarations from function pointer
@@ -896,6 +898,7 @@ DeclaratorList *decl_list;	/* list of declared variables */
 	    put_body(stdout, decl_spec, d);
 	    nestedParams = saveNest;
 	}
+	flush_varargs();
     }
     exitlike_func = FALSE;
 }

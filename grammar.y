@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.3 1994/10/22 21:53:14 cthuang Exp $
+/* $Id: grammar.y,v 4.3.1.1 1995/02/24 11:19:46 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -203,8 +203,10 @@ declaration
 	: decl_specifiers ';'
 	{
 #if OPT_LINTLIBRARY
-	    if (types_out && want_typedef())
+	    if (types_out && want_typedef()) {
 		gen_declarations(&$1, (DeclaratorList *)0);
+		flush_varargs();
+	    }
 #endif
 	    free_decl_spec(&$1);
 	    end_typedef();
@@ -215,6 +217,7 @@ declaration
 		set_param_types(func_params, &$1, &$2);
 	    } else {
 		gen_declarations(&$1, &$2);
+		flush_varargs();
 		free_decl_list(&$2);
 	    }
 	    free_decl_spec(&$1);
@@ -297,6 +300,7 @@ function_definition
 	    if (cur_file->convert)
 		gen_func_definition(&$1, $2);
 	    gen_prototype(&$1, $2);
+	    flush_varargs();
 	    free_decl_spec(&$1);
 	    free_declarator($2);
 	}
@@ -321,6 +325,7 @@ function_definition
 	    if (cur_file->convert)
 		gen_func_definition(&decl_spec, $1);
 	    gen_prototype(&decl_spec, $1);
+	    flush_varargs();
 	    free_decl_spec(&decl_spec);
 	    free_declarator($1);
 	}

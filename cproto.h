@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.3 1995/01/01 19:34:59 cthuang Exp $
+/* $Id: cproto.h,v 4.3.1.1 1995/02/24 11:19:46 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -209,6 +209,11 @@ extern void imply_typedef   ARGS((char *s));
 extern char *implied_typedef ARGS((void));
 extern void indent          ARGS((FILE *outf));
 extern int lint_ellipsis    ARGS((Parameter *p));
+#if OPT_LINTLIBRARY
+extern void flush_varargs   ARGS((void));
+#else
+#define flush_varargs() /* nothing */
+#endif
 extern void ellipsis_varargs ARGS((Declarator *d));
 extern char *supply_parm    ARGS((int count));
 extern int is_actual_func   ARGS((Declarator *d));
