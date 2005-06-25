@@ -1,4 +1,7 @@
--- $Id: CHANGES,v 4.8.1.7 2004/03/26 00:20:24 tom Exp $
+-- $Id: CHANGES,v 4.8.1.8 2004/04/04 00:33:04 tom Exp $
+
+Version 4.7d
+- modify filename comparison for lint-library to ignore leading "./".
 
 Version 4.7c
 2004/3/25

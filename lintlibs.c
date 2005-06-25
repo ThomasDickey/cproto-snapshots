@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.5.1.3 2004/03/26 00:18:25 pronovic Exp $
+/* $Id: lintlibs.c,v 4.5.1.4 2004/04/04 00:32:12 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -17,21 +17,14 @@
 static	SymbolTable *include_list;
 static	SymbolTable *declared_list;
 
-static	char	*strip_name      (char *s);
-static	void	free_inc_stack   (int n);
-static	void	make_inc_stack   (int n, char *path);
-static	int	already_included (char *path);
-static	void	add2implied_buf  (char *s, int append);
-static	int	c_suffix         (char *path);
-
 static	int	in_typedef;
 static	int	blank_lines;	/* used to filter blank lines from typedefs */
 
 static	int	implied_cnt;	/* state-count associated with implied_buf */
 static	char	*implied_buf;
 
-static	char	quote_l	= '"',
-		quote_r = '"';
+static	char	quote_l	= '"';
+static	char	quote_r = '"';
 
 /*
  * Output a string to standard output, keeping track of the trailing newlines
@@ -172,7 +165,7 @@ static	int	base_level;
 static	char	*inc_stack[MAX_INC_DEPTH];
 
 #ifdef	DEBUG
-static void 
+static void
 dump_stack(char *tag)
 {
 	register int	j;
@@ -256,14 +249,29 @@ c_suffix(char *path)
 }
 
 /*
- * Keep track of "include files" that we always want to filter out (ignore) 
+ * Keep track of "include files" that we always want to filter out (ignore).
  */
 static int
 ignored (char *path)
 {
-	if (strcmp(path, "<built-in>") == 0)
+	if (strcmp(path, "<built-in>") == 0
+	 || strcmp(path, "<command line>") == 0)
 		return TRUE;
 	return FALSE;
+}
+
+static const char *
+skip_dot(const char *a)
+{
+	if (!strncmp(a, "./", 2))
+		a += 2;
+	return a;
+}
+
+static int
+same_file(const char *a, const char *b)
+{
+	return !strcmp(skip_dot(a), skip_dot(b));
 }
 
 /*
@@ -295,9 +303,9 @@ track_in(void)
 			InitTracking = TRUE;
 			/* yacc may omit first cpp-line! */
 			in_include =
-			base_level = (strcmp(cur_file_name(), base_file) != 0);
+			base_level = !same_file(cur_file_name(), base_file);
 			make_inc_stack(0, base_file);
-		} else if (!strcmp(cur_file_name(), base_file)) {
+		} else if (same_file(cur_file_name(), base_file)) {
 			flush_varargs();
 			in_include = 0;	/* reset level */
 		} else {
@@ -318,10 +326,10 @@ track_in(void)
 			make_inc_stack(in_include, cur_file_name());
 		}
 		(void)strcpy(old_file, cur_file_name());
-	} else if (!strcmp(cur_file_name(), base_file)) {
+	} else if (same_file(cur_file_name(), base_file)) {
 		in_include = 0;	/* kludgy bison! */
 		(void)strcpy(old_file, cur_file_name());
-	} else if (strcmp(old_file, cur_file_name())) { /* continue/unnest ? */
+	} else if (!same_file(old_file, cur_file_name())) { /* continue/unnest ? */
 		int n, found;
 		char *s = cur_file_name();
 #ifdef DEBUG
@@ -330,7 +338,7 @@ track_in(void)
 
 		flush_varargs();
 		for (n = in_include, found = FALSE; n >= 0; n--) {
-			if (!strcmp(inc_stack[n], s)) {
+			if (same_file(inc_stack[n], s)) {
 				found = TRUE;
 				in_include--;
 				break;

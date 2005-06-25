@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t20040403
+MANIFEST for cproto, version t20050625
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -9,7 +9,9 @@ Makefile.uni                    v3_7 base
 README                          overview of the CPROTO program
 README.OS2                      notes for Hobbes
 aclocal.m4                      autoconf macros
+config.guess                    configure utility script
 config.h                        v3_7 base
+config.sub                      configure utility script
 config_h.in                     template for config.h
 configure                       configure script
 configure.in                    script for generating 'configure' via autoconf
