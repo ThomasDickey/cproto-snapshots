@@ -72,6 +72,16 @@ volatile	x19;
 junk		x20;
 #endif	/* ERR_CHECK */
 
+extern int *asm (fopen, (__const char *__restrict __filename, __const char *__restrict __modes), fopen64);
+extern int __asm__ (mkstemp, (char *__template), mkstemp64);
+int __asm__ (mkstemp, (char *__template), mkstemp64);
+asm("something");
+asm("something", "else");
+asm("something", (this and that));
+int asm(first, "something");
+static int asm(first, "something");
+extern int asm(first, "something");
+
 typedef	struct	_first	{
 	int		a:5;
 	struct	{

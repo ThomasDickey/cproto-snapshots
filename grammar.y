@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.8.1.4 2004/03/24 21:29:23 tom Exp $
+/* $Id: grammar.y,v 4.8.1.5 2005/08/20 17:40:20 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -174,7 +174,7 @@ external_declaration
 	| function_definition
 	| ';'
 	| linkage_specification
-	| T_ASM T_ASMARG ';'
+	| asm_specifier
 	| error T_MATCHRBRACE
 	{
 	    yyerrok;
@@ -539,6 +539,11 @@ init_declarator
 	    }
 	}
 	  T_INITIALIZER
+	;
+
+asm_specifier
+	: T_ASM T_ASMARG
+	| parameter_declaration T_ASM T_ASMARG
 	;
 
 enum_specifier
