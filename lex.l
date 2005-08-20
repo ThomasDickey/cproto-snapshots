@@ -1,5 +1,5 @@
 %{
-/* $Id: lex.l,v 4.6.1.3 2004/03/25 00:39:45 tom Exp $
+/* $Id: lex.l,v 4.6.1.4 2005/08/20 16:00:27 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -70,6 +70,7 @@ int	varargs_num;		/* code to save "VARARGS" */
 int	debug_trace;		/* true if we trace token-level stuff */
 char	base_file[BUFSIZ];	/* top-level file name */
 
+static int asm_level;	/* parenthesis level for "asm" parsing */
 static int save_cpp;	/* true if cpp-text within curly braces */
 static int in_cpp;	/* true while we are within cpp-text */
 static int curly;	/* number of curly brace nesting levels */
@@ -231,9 +232,10 @@ QUOTE		[\"\']
 			    return T_STRING_LITERAL;
 			}
 
+<INITIAL>"__asm__"	{ save_text(); BEGIN ASM; return T_ASM; }
 <INITIAL>asm		{ save_text(); BEGIN ASM; return T_ASM; }
-<ASM>"("		save_text();
-<ASM>")"		{ save_text(); BEGIN INITIAL; return T_ASMARG; }
+<ASM>"("		{ ++asm_level; save_text(); }
+<ASM>")"		{ --asm_level; save_text(); if (asm_level <= 0) { asm_level = 0; BEGIN INITIAL; return T_ASMARG; } }
 <ASM>{QUOTE} 		get_quoted();
 <ASM>. 			save_text();
 

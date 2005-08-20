@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.8.1.4 2004/03/26 00:34:47 tom Exp $
+# $Id: Makefile.in,v 4.8.1.7 2005/08/20 17:56:18 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7c
+RELEASE = 4_7d
 
 #### Start of system configuration section. ####
 
@@ -157,8 +157,11 @@ lint: $(C_FILES) $(JUNK)
 llib: $(C_FILES) $(JUNK)
 	./$(THIS) -l $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
 
+self: $(C_FILES) $(JUNK)
+	./$(THIS) $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
+
 tags: $(H_FILES) $(C_FILES) $(AUX_FILES)
-	ctags -t $(C_FILES) $(AUX_FILES) $(H_FILES)
+	ctags $(C_FILES) $(AUX_FILES) $(H_FILES)
 
 depend:
 	makedepend -- $(CPPFLAGS) -- $(C_FILES) y.tab.c
