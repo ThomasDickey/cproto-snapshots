@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.5.1.4 2004/03/24 23:20:28 tom Exp $
+/* $Id: semantic.c,v 4.6 2005/08/21 14:44:05 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -94,6 +94,10 @@ join_decl_specs (DeclSpec *result, DeclSpec *a, DeclSpec *b)
     result->text = concat_string(a->text, b->text);
     result->flags = a->flags | b->flags;
     result->begin = a->begin;
+
+    /* don't free the old text value - this is only used in one case where
+     * the 'a' parameter holds the same data as 'result' did.
+     */
 }
 
 /* Output an error message if the declaration specifier is an untagged
@@ -446,9 +450,12 @@ int	commented)	/* comment-delimiters already from higher level */
 		} else {
 			s = xstrdup(supply_parm(count));
 		}
+
+		t = p->declarator->text;
 		p->declarator->text = glue_strings(s, u);
 		free(u);
 		free(s);
+		free(t);
 	    }
 	}
     }

@@ -1,17 +1,15 @@
-/* $Id: system.h,v 4.8.1.2 2004/03/24 21:46:51 tom Exp $
+/* $Id: system.h,v 4.9 2005/08/21 18:12:02 tom Exp $
  *
  * cproto configuration and system dependencies
  */
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
  
-#if !defined(TRUE) || (TRUE != 1)
-#undef  TRUE
+#ifndef TRUE
 #define	TRUE	(1)
 #endif
 
-#if !defined(FALSE) || (FALSE != 0)
-#undef  FALSE
+#ifndef FALSE
 #define	FALSE	(0)
 #endif
 
@@ -84,6 +82,7 @@
 #define HAVE_TMPFILE 1
 #define HAVE_GETOPT_H 1
 #define USE_flex 1
+#define CURRENT_DIR "[]"
 #endif
 
 /* Set configuration parameters for systems on which we cannot run autoconf.
@@ -117,9 +116,9 @@
 #define MAX_INC_DEPTH 15
 #endif
 
-/* maximum number of include directories */
-#ifndef MAX_INC_DIR
-#define MAX_INC_DIR 15
+/* string denoting current-directory, for includes */
+#ifndef CURRENT_DIR
+#define CURRENT_DIR "."
 #endif
 
 /* maximum text buffer size */

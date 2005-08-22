@@ -1,5 +1,7 @@
+%p 3000
+
 %{
-/* $Id: lex.l,v 4.6.1.4 2005/08/20 16:00:27 tom Exp $
+/* $Id: lex.l,v 4.7 2005/08/21 18:39:21 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -146,41 +148,46 @@ QUOTE		[\"\']
 <CPP_INLINE>[^;]*	finishCpp();
 
 <CPP1>define{WS}+{ID}	{
-			    char name[MAX_TEXT_SIZE], value[MAX_TEXT_SIZE];
+			    char name[MAX_TEXT_SIZE];
+			    char value[MAX_TEXT_SIZE];
 
 			    save_text();
 
 			    *name = 0;
 			    sscanf(yytext, "define %s", name);
 
-			    get_cpp_directive(buf, sizeof(buf));
+			    need_temp(MAX_TEXT_SIZE);
+			    get_cpp_directive(temp_buf, MAX_TEXT_SIZE);
 
 			    *value = 0;
-			    sscanf(buf, "%s", value);
+			    sscanf(temp_buf, "%s", value);
 
 			    new_symbol(define_names, name, value, DS_NONE);
 			}
 
 <CPP1>include{WS}*	{
 			    save_text();
-			    get_cpp_directive(buf, sizeof(buf));
-			    if (buf[0] != '"' && buf[0] != '<') {
-				Symbol *sym = find_symbol(define_names, buf);
+
+			    need_temp(MAX_TEXT_SIZE);
+			    get_cpp_directive(temp_buf, MAX_TEXT_SIZE);
+
+			    if (temp_buf[0] != '"' && temp_buf[0] != '<') {
+				Symbol *sym = find_symbol(define_names, temp_buf);
 				if (sym != NULL && sym->value != NULL) {
-				    strcpy(buf, sym->value);
+				    strcpy(temp_buf, sym->value);
 				} else {
-				    buf[0] = '\0';
+				    temp_buf[0] = '\0';
 				}
 			    }
-			    if (buf[0] != '\0')
-				do_include(buf);
+			    if (temp_buf[0] != '\0')
+				do_include(temp_buf);
 			}
 
 <CPP1>line{WS}+[0-9]+{WS}+\".*$  {
 			    save_text();
 
 			    cur_file->file_name[0] = 0;
-			    sscanf(yytext, "line %d \"%[^\"]\"",
+			    sscanf(yytext, "line %u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
 
@@ -192,7 +199,7 @@ QUOTE		[\"\']
 			    save_text();
 
 			    cur_file->file_name[0] = 0;
-			    sscanf(yytext, "%d \"%[^\"]\"",
+			    sscanf(yytext, "%u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
 
@@ -202,7 +209,7 @@ QUOTE		[\"\']
 			}
 <CPP1>[0-9]+.*$ 	{
 			    save_text();
-			    sscanf(yytext, "%d ", &cur_file->line_num);
+			    sscanf(yytext, "%u ", &cur_file->line_num);
 			    cur_file->line_num--;
 			    track_in();
 			    finishCpp();
@@ -965,7 +972,7 @@ do_include (char *file_spec) 	/* path surrounded by "" or <> */
     new_symbol(included_files, path, NULL, DS_NONE);
 
     for (i = stdinc != 0; i < num_inc_dir; ++i) {
-	if (strlen(inc_dir[i]) == 0) {
+	if (strlen(inc_dir[i]) == 0 || !strcmp(inc_dir[i], CURRENT_DIR)) {
 	    strcpy(path, file);
 	} else {
 	    sprintf(path, "%s/%s", inc_dir[i], file);

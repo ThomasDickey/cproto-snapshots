@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.5.1.4 2004/04/04 00:32:12 tom Exp $
+/* $Id: lintlibs.c,v 4.6 2005/08/21 17:41:56 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -450,7 +450,7 @@ copy_typedef(char *s)
 			put_string(stdout, s);
 	} else if (implied_cnt > 0) {	/* "KEY ID {" ? */
 		add2implied_buf(s,TRUE);
-		if (!isspace(*s))
+		if (!isspace(UCH(*s)))
 			implied_cnt--;
 		if ((implied_cnt == 2 || implied_cnt == 1)
 		&&  !strcmp(s, "{")) {
