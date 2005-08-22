@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.2.1.1 2004/03/24 20:05:44 tom Exp $
+/* $Id: strkey.c,v 4.3 2005/08/21 17:42:23 tom Exp $
  *
  * Some string handling routines
  */
@@ -7,7 +7,7 @@
 #include <string.h>
 #include "cproto.h"
 
-#define	LETTER(c) (isalnum(c) || (c == '_') || (c == '$'))
+#define	LETTER(c) (isalnum(UCH(c)) || (c == '_') || (c == '$'))
 
 /*
  * Return a pointer to the first occurence of the given keyword in the string

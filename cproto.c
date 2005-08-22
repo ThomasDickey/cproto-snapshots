@@ -1,4 +1,4 @@
-/* $Id: cproto.c,v 4.9.1.8 2005/08/20 12:34:19 tom Exp $
+/* $Id: cproto.c,v 4.10 2005/08/21 18:14:50 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
@@ -98,23 +98,8 @@ FuncFormat fmt[] = {
 boolean quiet = FALSE;
 
 /* Include file directories */
-#ifdef MSDOS
-# ifdef __TURBOC__
-int num_inc_dir = 2;
-char *inc_dir[MAX_INC_DIR] = { "" , "/tc/include" };
-# else
-int num_inc_dir = 1;
-char *inc_dir[MAX_INC_DIR] = { "" };
-# endif
-#else
-# ifdef vms
-int num_inc_dir = 2;
-char *inc_dir[MAX_INC_DIR] = { "[]", "sys$library:" };
-# else
-int num_inc_dir = 2;
-char *inc_dir[MAX_INC_DIR] = { "", "/usr/include" };
-# endif
-#endif
+int num_inc_dir = 0;
+char **inc_dir = 0;
 
 /* Run the C preprocessor */
 #ifdef CPP
@@ -130,9 +115,9 @@ static char *cpp = CPP, *cpp_opt, *cpp_cmd;
  */
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-char *xMalloc(unsigned n, char *f, int l)
+void *xMalloc(unsigned n, char *f, int l)
 #else
-char *xmalloc (unsigned n)
+void *xmalloc (unsigned n)
 #endif
 {
     char *p;
@@ -143,7 +128,7 @@ char *xmalloc (unsigned n)
 #endif
 
     if (p == NULL) {
-	fprintf(stderr, "%s: out of memory (cannot allocate %d bytes)\n",
+	fprintf(stderr, "%s: out of memory (cannot allocate %u bytes)\n",
 		progname, n);
 	exit(EXIT_FAILURE);
     }
@@ -157,9 +142,9 @@ char *xmalloc (unsigned n)
  */
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-char *xStrdup(char *src, char *f, int l)
+char *xStrdup(const char *src, char *f, int l)
 #else
-char *xstrdup (char *src)
+char *xstrdup (const char *src)
 #endif
 {
 #if defined(NO_LEAKS)
@@ -197,12 +182,12 @@ parse_options (char *src, int maxargc, int *pargc, char **argv)
 	argv[argc++] = g;
 
 	p = g;
-	while (1) {
+	for (;;) {
 	    if (c == ' ' || c == '\t' || c == '\0') {
 		*p = '\0';
 		break;
 	    } else if (c == '"') {
-		while (1) {
+		for (;;) {
 		    c = *++g;
 		    if (c == '"') {
 			c = *++g;
@@ -335,6 +320,40 @@ usage (void)
     fputs("  -E 0             Do not run any C preprocessor\n", stderr);
     fputs("  -V               Print version information\n", stderr);
     exit(EXIT_FAILURE);
+}
+
+#define CHUNK(n) (((n) | 7) + 1)
+
+/*
+ * CURRENT_DIR is the first element in the array, and the system includes
+ * are the last.  Other -I options are inserted in order between the two.
+ */
+static void
+add_inc_dir (char *src)
+{
+    unsigned have = CHUNK(num_inc_dir);
+    unsigned need = CHUNK(num_inc_dir + 1);
+    unsigned used = (need * sizeof(char *));
+    char *save;
+
+    if (inc_dir == 0) {
+	inc_dir = (char **)malloc(used);
+    } else if (have != need) {
+	inc_dir = (char **)realloc(inc_dir, used);
+    }
+
+    switch (num_inc_dir) {
+    case 0:
+	/* FALLTHRU */
+    case 1:
+	inc_dir[num_inc_dir++] = trim_path_sep(xstrdup(src));
+	break;
+    default:
+	save = inc_dir[--num_inc_dir];
+	inc_dir[num_inc_dir++] = trim_path_sep(xstrdup(src));
+	inc_dir[num_inc_dir++] = save;
+	break;
+    }
 }
 
 #ifdef	vms
@@ -513,14 +532,7 @@ process_options (int *pargc, char ***pargv)
 	    add2list(cpp_include, optarg);
 	    break;
 #else	/* unix */
-	    if (num_inc_dir < MAX_INC_DIR) {
-		char *save = inc_dir[--num_inc_dir];
-		inc_dir[num_inc_dir++] = trim_path_sep(xstrdup(optarg));
-		inc_dir[num_inc_dir++] = save;
-	    } else {
-		fprintf(stderr, "%s: too many include directories\n",
-		    progname);
-	    }
+	    add_inc_dir(optarg);
 #endif
 		/*FALLTHRU*/
 	case 'D':
@@ -576,17 +588,17 @@ process_options (int *pargc, char ***pargv)
 		((c == 'F') ? FMT_FUNC : FMT_PROTO);
 
 	    fmt[i].decl_spec_prefix = s;
-	    while (*s != '\0' && isascii(*s) && !isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && !isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 	    *s++ = '\0';
-	    while (*s != '\0' && isascii(*s) && isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 
 	    fmt[i].declarator_prefix = s;
-	    while (*s != '\0' && isascii(*s) && !isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && !isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 	    *s++ = '\0';
-	    while (*s != '\0' && isascii(*s) && isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 
 	    fmt[i].declarator_suffix = s;
@@ -595,17 +607,17 @@ process_options (int *pargc, char ***pargv)
 	    *s++ = '\0';
 
 	    fmt[i].first_param_prefix = s;
-	    while (*s != '\0' && isascii(*s) && !isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && !isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 	    *s++ = '\0';
 	    while (*s != '\0' && *s != ',') ++s;
 	    if (*s == '\0') usage();
 
 	    fmt[i].middle_param_prefix = ++s;
-	    while (*s != '\0' && isascii(*s) && !isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && !isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 	    *s++ = '\0';
-	    while (*s != '\0' && isascii(*s) && isalnum(*s)) ++s;
+	    while (*s != '\0' && isascii(UCH(*s)) && isalnum(UCH(*s))) ++s;
 	    if (*s == '\0') usage();
 
 	    fmt[i].last_param_suffix = s;
@@ -711,6 +723,15 @@ main (int argc, char *argv[])
     _wildcard(&argc, &argv);
 #endif
 
+    add_inc_dir(CURRENT_DIR);
+#if defined(MSDOS) && defined(__TURBOC__)
+    add_inc_dir("/tc/include");
+#elif defined(vms)
+    add_inc_dir("sys$library:");
+#else
+    add_inc_dir("/usr/include");
+#endif
+
     /* Get the program name from the 0th argument, stripping the pathname
      * for readability.
      */
@@ -778,7 +799,7 @@ main (int argc, char *argv[])
 	    optind++;
 	for (i = optind; i < argc; ++i) {
 #ifdef CPP
-# if CPP_DOES_ONLY_C_FILES
+# if defined(CPP_DOES_ONLY_C_FILES)
 	    /*
 	     * GCC (and possibly other compilers) don't pass-through the ".l"
 	     * and ".y" files to the C preprocessor stage.  Fix this by
@@ -853,7 +874,7 @@ main (int argc, char *argv[])
 #else
 		pclose(inf);
 #endif
-#if CPP_DOES_ONLY_C_FILES || defined(vms)
+#if defined(CPP_DOES_ONLY_C_FILES) || defined(vms)
 		if (strcmp(argv[i], temp)) {
 			(void)unlink(temp);
 		}
@@ -882,8 +903,12 @@ main (int argc, char *argv[])
     if (cpp_undefns != 0) free(cpp_undefns);
 #  endif
 # endif
-    while (--num_inc_dir > 1) {
-	free(inc_dir[num_inc_dir]);
+    if (inc_dir != 0) {
+	while (--num_inc_dir >= 0) {
+	    free(inc_dir[num_inc_dir]);
+	}
+	free(inc_dir);
+	inc_dir = 0;
     }
     free_parser();
 # if OPT_LINTLIBRARY

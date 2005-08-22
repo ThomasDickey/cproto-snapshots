@@ -1,14 +1,19 @@
-/* $Id: yyerror.c,v 4.4.1.2 2004/03/24 21:27:06 tom Exp $
+/* $Id: yyerror.c,v 4.5 2005/08/21 19:31:23 tom Exp $
  *
- * This file is included into grammar.y to provide the 'yyerror()' function. 
+ * This file is included into grammar.y to provide the 'yyerror()' function.
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
  * the "syntax error" message with information that shows what type of token we
  * expected.
  */
 
+#ifndef UCH
+#define UCH(c)		((unsigned char)(c))
+#endif
+
 /* 'yyerror()' has to be a macro, since it must be expanded inline to subvert
  * the internal state of 'yyparse()'.
  */
+
 #if BISON_HAS_YYTNAME	/* bison 1.22 */
 #if !defined(YYFLAG)
 #define YYFLAG YYPACT_NINF	/* yabb (yet-another-bison-bug) */
@@ -49,7 +54,7 @@
 	for (x = ((n > 0) ? n : 0); x < YYLAST; ++x) {\
 	    c1 = x - n;\
 	    if ((yychk[yyact[x]] == c1) && (c1 != YYERRCODE)) {\
-		if (isascii(c1)) {\
+		if (isascii(UCH(c1))) {\
 		    static char tmp[] = "'%'";\
 		    tmp[1] = c1;\
 		    yaccExpected(tmp, count++);\
@@ -84,7 +89,7 @@
 	}\
     }\
     yaccExpected("", -1);\
-} 
+}
 #endif
 #endif	/* YACC_HAS_YYNAME */
 
@@ -156,6 +161,8 @@ yaccExpected (const char *s, int count)
 	used = 0;
     } else {
 	int found = FALSE;
+
+	strcpy(tmp, t);
 	if (!strncmp(t, "T_", 2)) {
 	    for (j = 0; j < sizeof(tbl)/sizeof(tbl[0]); j++) {
 		if (!strcmp(t, tbl[j].name)) {
@@ -169,8 +176,8 @@ yaccExpected (const char *s, int count)
 		for (k = 0; tt[k] != '\0'; k++) {
 		    if (tt[k] == '_')
 			tt[k] = '-';
-		    else if (isalpha(tt[k]) && isupper(tt[k]))
-			tt[k] = tolower(tt[k]);
+		    else if (isalpha(UCH(tt[k])) && isupper(UCH(tt[k])))
+			tt[k] = (char) tolower(UCH(tt[k]));
 		}
 	    }
 	}

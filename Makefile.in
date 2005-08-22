@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 4.8.1.7 2005/08/20 17:56:18 tom Exp $
+# $Id: Makefile.in,v 4.9 2005/08/21 20:14:17 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -22,7 +22,7 @@ INSTALL_DATA	= @INSTALL_DATA@
 
 DEFINES		=
 EXTRA_CFLAGS	= @EXTRA_CFLAGS@
-CPPFLAGS	= -I$(srcdir) $(DEFINES) -DHAVE_CONFIG_H @CPPFLAGS@
+CPPFLAGS	= -I. -I$(srcdir) $(DEFINES) -DHAVE_CONFIG_H @CPPFLAGS@
 CFLAGS		= @CFLAGS@ $(CPPFLAGS) $(EXTRA_CFLAGS)
 LIBS		= @LIBS@ @LEXLIB@
 
@@ -33,10 +33,15 @@ bindir		= @bindir@
 mandir		= @mandir@/man1
 manext		= 1
 
+x		= @EXEEXT@
+o		= .@OBJEXT@
+
 #### End of system configuration section. ####
 
 SHELL		= /bin/sh
 @SET_MAKE@
+
+PROG		= $(THIS)$x
 
 LDFLAGS		= @LDFLAGS@
 
@@ -76,14 +81,14 @@ JUNK =	\
 	y.tab.c
 
 EXTRA_OBJS = @EXTRA_OBJS@
-OBJECTS = $(THIS).o lintlibs.o semantic.o strkey.o strstr.o symbol.o y.tab.o \
+OBJECTS = $(THIS)$o lintlibs$o semantic$o strkey$o strstr$o symbol$o y.tab$o \
 	$(EXTRA_OBJS)
 SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
-all : $(THIS) # $(THIS).man
+all : $(PROG) # $(THIS).man
 
 install: all installdirs
-	$(INSTALL_PROGRAM) $(THIS) $(bindir)/$(THIS)
+	$(INSTALL_PROGRAM) $(PROG) $(bindir)/$(PROG)
 	- $(INSTALL_DATA) $(srcdir)/$(THIS).1 $(mandir)/$(THIS).$(manext)
 
 installdirs:
@@ -91,13 +96,13 @@ installdirs:
 	- $(SHELL) ${srcdir}/mkdirs.sh $(mandir)
 
 uninstall:
-	- rm -f $(bindir)/$(THIS) $(mandir)/$(THIS).$(manext)
+	- rm -f $(bindir)/$(PROG) $(mandir)/$(THIS).$(manext)
 
-.c.o:
+.c$o:
 	@RULE_CC@
 	@ECHO_CC@$(CC) -c $(CFLAGS) $<
 
-$(THIS) : $(OBJECTS)
+$(PROG) : $(OBJECTS)
 	@ECHO_LD@$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 y.tab.c : grammar.y
@@ -110,30 +115,32 @@ $(THIS).man : $(THIS).1
 	- nroff -man $(srcdir)/$(THIS).1 >$@
 
 mostlyclean :
-	- rm -f core .nfs* *.o *.bak *.BAK *.log *.man *.out $(JUNK) default.h
+	- rm -f core .nfs* *$o *.bak *.BAK *.log *.man *.out $(JUNK) default.h
 
 clean : mostlyclean
-	- rm -f $(THIS)
-	cd testing; $(MAKE) $@
+	- rm -f $(PROG)
+	- cd $(srcdir)/testing && $(MAKE) $@
 
 distclean : clean
 	- rm -f config.log config.cache config.status config.h Makefile
 	- rm -f .version .fname
-	cd testing; $(MAKE) $@
+	- cd $(srcdir)/testing && $(MAKE) $@
 
 realclean: distclean
 	- rm -f tags
-	cd testing; $(MAKE) $@
+	- cd $(srcdir)/testing && $(MAKE) $@
 
-check:	$(THIS)
-	cd testing; $(MAKE) run_test
+check:	$(PROG)
+	cd $(srcdir)/testing && $(MAKE) run_test
 
 # I keep my sources in RCS, and assign a symbolic release to the current patch
 # level.  The 'manifest' script knows how to build a list of files for a given
 # revision -TD
 MANIFEST:
 	manifest -rv$(RELEASE) \
-		$(THIS).man testing/case*.dcl testing/case*.bat
+		$(THIS).man \
+		$(srcdir)/testing/case*.dcl \
+		$(srcdir)/testing/case*.bat
 
 dist: MANIFEST
 	- rm -f .fname .files
@@ -149,16 +156,16 @@ dist: MANIFEST
 	rm -rf `cat .fname` .fname .files
 
 default.h: $(C_FILES) lex.yy.c
-	./$(THIS) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
+	./$(PROG) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
 
 lint: $(C_FILES) $(JUNK)
 	$(LINT) $(CPPFLAGS) -lyacc $(C_FILES) y.tab.c >$@.out
 
 llib: $(C_FILES) $(JUNK)
-	./$(THIS) -l $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
+	./$(PROG) -l $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
 
 self: $(C_FILES) $(JUNK)
-	./$(THIS) $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
+	./$(PROG) $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
 
 tags: $(H_FILES) $(C_FILES) $(AUX_FILES)
 	ctags $(C_FILES) $(AUX_FILES) $(H_FILES)
@@ -168,10 +175,10 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-cproto.o: cproto.h config.h system.h
-lintlibs.o: cproto.h config.h system.h semantic.h symbol.h
-semantic.o: cproto.h config.h system.h semantic.h
-strkey.o: cproto.h config.h system.h 
-strstr.o: cproto.h config.h system.h
-symbol.o: cproto.h config.h system.h symbol.h
-y.tab.o: cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c
+cproto$o   : cproto.h config.h system.h
+lintlibs$o : cproto.h config.h system.h semantic.h symbol.h
+semantic$o : cproto.h config.h system.h semantic.h
+strkey$o   : cproto.h config.h system.h 
+strstr$o   : cproto.h config.h system.h
+symbol$o   : cproto.h config.h system.h symbol.h
+y.tab$o	   : cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c

@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.6.1.4 2004/03/24 21:08:29 tom Exp $
+/* $Id: cproto.h,v 4.7 2005/08/21 19:40:53 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -48,6 +48,10 @@
 #define	NEW(type)	(type *)0
 #else
 #define	NEW(type)	(type *)xmalloc(sizeof(type))
+#endif
+
+#ifndef UCH
+#define UCH(c)		((unsigned char)(c))
 #endif
 
 /* Useful constants (mainly to avoid problems balancing parentheses...) */
@@ -211,7 +215,7 @@ extern boolean file_comments;
 extern boolean quiet;
 extern char *func_directive;
 extern int num_inc_dir;
-extern char *inc_dir[];
+extern char **inc_dir;
 extern FuncFormat fmt[4];
 
 /* Global declarations */
@@ -232,13 +236,13 @@ extern void ExitProgram     (int code);
 #endif
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-extern char *xMalloc        (unsigned n, char *f, int l);
-extern char *xStrdup        (char *s,    char *f, int l);
+extern void *xMalloc        (unsigned n, char *f, int l);
+extern char *xStrdup        (const char *s, char *f, int l);
 #define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
 #define xstrdup(s)          xStrdup(s, __FILE__, __LINE__)
 #else
-extern char *xmalloc        (unsigned n);
-extern char *xstrdup        (char *src);
+extern void *xmalloc        (unsigned n);
+extern char *xstrdup        (const char *src);
 #endif
 #endif /* !HAVE_LIBDMALLOC */
 extern void put_error       (void);

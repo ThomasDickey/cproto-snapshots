@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.4.1.3 2005/08/20 12:32:28 tom Exp $
+dnl $Id: aclocal.m4,v 4.5 2005/08/21 19:54:31 tom Exp $
 dnl
 dnl Macros for cproto configure script (T.Dickey)
 dnl ---------------------------------------------------------------------------
@@ -183,6 +183,41 @@ ifelse($3,,[    :]dnl
   $4
 ])dnl
   ])])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_CACHE version: 10 updated: 2004/05/23 13:03:31
+dnl --------------
+dnl Check if we're accidentally using a cache from a different machine.
+dnl Derive the system name, as a check for reusing the autoconf cache.
+dnl
+dnl If we've packaged config.guess and config.sub, run that (since it does a
+dnl better job than uname).  Normally we'll use AC_CANONICAL_HOST, but allow
+dnl an extra parameter that we may override, e.g., for AC_CANONICAL_SYSTEM
+dnl which is useful in cross-compiles.
+dnl
+dnl Note: we would use $ac_config_sub, but that is one of the places where
+dnl autoconf 2.5x broke compatibility with autoconf 2.13
+AC_DEFUN([CF_CHECK_CACHE],
+[
+if test -f $srcdir/config.guess || test -f $ac_aux_dir/config.guess ; then
+	ifelse([$1],,[AC_CANONICAL_HOST],[$1])
+	system_name="$host_os"
+else
+	system_name="`(uname -s -r) 2>/dev/null`"
+	if test -z "$system_name" ; then
+		system_name="`(hostname) 2>/dev/null`"
+	fi
+fi
+test -n "$system_name" && AC_DEFINE_UNQUOTED(SYSTEM_NAME,"$system_name")
+AC_CACHE_VAL(cf_cv_system_name,[cf_cv_system_name="$system_name"])
+
+test -z "$system_name" && system_name="$cf_cv_system_name"
+test -n "$cf_cv_system_name" && AC_MSG_RESULT(Configuring for $cf_cv_system_name)
+
+if test ".$system_name" != ".$cf_cv_system_name" ; then
+	AC_MSG_RESULT(Cached system name ($system_name) does not agree with actual ($cf_cv_system_name))
+	AC_ERROR("Please remove config.cache and try again.")
+fi
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_DISABLE_ECHO version: 10 updated: 2003/04/17 22:27:11
 dnl ---------------
@@ -508,7 +543,7 @@ if test "$cf_cv_func_mkstemp" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_POPEN_TEST version: 2 updated: 1995/08/23 21:29:04
+dnl CF_POPEN_TEST version: 3 updated: 2005/08/21 13:46:00
 dnl -------------
 dnl	Check to ensure that our prototype for 'popen()' doesn't conflict
 dnl	with the system's (this is a problem on AIX and CLIX).
@@ -519,14 +554,39 @@ AC_CACHE_VAL(ac_cv_td_popen,
 AC_TRY_LINK([
 #include <stdio.h>
 #include "system.h"
-extern int pclose ARGS((FILE *p));
-extern FILE *popen ARGS((const char *c, const char *m));],,
+extern int pclose (FILE *p);
+extern FILE *popen (const char *c, const char *m);],,
 ac_cv_td_popen=no,
 ac_cv_td_popen=yes))
 AC_MSG_RESULT($ac_cv_td_popen)
 if test $ac_cv_td_popen = yes; then
 	AC_DEFINE(HAVE_POPEN_PROTOTYPE)
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PROG_EXT version: 10 updated: 2004/01/03 19:28:18
+dnl -----------
+dnl Compute $PROG_EXT, used for non-Unix ports, such as OS/2 EMX.
+AC_DEFUN([CF_PROG_EXT],
+[
+AC_REQUIRE([CF_CHECK_CACHE])
+case $cf_cv_system_name in
+os2*)
+    CFLAGS="$CFLAGS -Zmt"
+    CPPFLAGS="$CPPFLAGS -D__ST_MT_ERRNO__"
+    CXXFLAGS="$CXXFLAGS -Zmt"
+    # autoconf's macro sets -Zexe and suffix both, which conflict:w
+    LDFLAGS="$LDFLAGS -Zmt -Zcrtdll"
+    ac_cv_exeext=.exe
+    ;;
+esac
+
+AC_EXEEXT
+AC_OBJEXT
+
+PROG_EXT="$EXEEXT"
+AC_SUBST(PROG_EXT)
+test -n "$PROG_EXT" && AC_DEFINE_UNQUOTED(PROG_EXT,"$PROG_EXT")
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_SIZE_T version: 4 updated: 2000/01/22 00:19:54
@@ -624,7 +684,7 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_YACC_ERROR version: 3 updated: 2003/04/05 12:23:48
+dnl CF_YACC_ERROR version: 4 updated: 2005/08/21 13:46:00
 dnl -------------
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -643,7 +703,7 @@ cat >yacctest.y <<EOF
 #include <ctype.h>
 #include "yyerror.c"
 static void yaccError(s) char *s; { exit(0); }
-int yylex ARGS((void))
+int yylex (void)
 { return 1; }
 %}
 %%
