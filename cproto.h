@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.7 2005/08/21 19:40:53 tom Exp $
+/* $Id: cproto.h,v 4.11 2005/12/08 23:20:14 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -236,11 +236,14 @@ extern void ExitProgram     (int code);
 #endif
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
+extern void *xRealloc       (void *p, unsigned n, char *f, int l);
 extern void *xMalloc        (unsigned n, char *f, int l);
 extern char *xStrdup        (const char *s, char *f, int l);
+#define xrealloc(p,n)       xRealloc(p, n, __FILE__, __LINE__)
 #define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
 #define xstrdup(s)          xStrdup(s, __FILE__, __LINE__)
 #else
+extern void *xrealloc       (void *p, unsigned n);
 extern void *xmalloc        (unsigned n);
 extern char *xstrdup        (const char *src);
 #endif
@@ -309,6 +312,7 @@ extern void pop_file        (int closed);
 extern void init_parser     (void);
 extern void process_file    (FILE *infile, char *name);
 #ifdef NO_LEAKS
+extern void free_lexer      (void);
 extern void free_parser     (void);
 #endif
 
@@ -316,5 +320,16 @@ extern void free_parser     (void);
 #ifdef YYBISON
 #define YYSTYPE YYSTYPE
 #endif
+
+#ifdef HAVE_MKSTEMP
+#define call_mktemp(s) mkstemp(s)
+#else
+#define call_mktemp(s) mktemp(s)
+#endif
+
+#define type_realloc(type,ptr,size) \
+		(((ptr) != 0) \
+		 ? (type *) xrealloc(ptr, (size) * sizeof(type)) \
+		 : (type *) xmalloc((size) * sizeof(type)))
 
 #endif /* CPROTO_H */

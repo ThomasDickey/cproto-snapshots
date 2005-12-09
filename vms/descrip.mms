@@ -1,4 +1,4 @@
-# $Id: descrip.mms,v 4.1 1998/01/20 00:19:35 cthuang Exp $
+# $Id: descrip.mms,v 4.2 2005/12/08 20:34:07 tom Exp $
 # VAX/VMS "mms" script for CPROTO
 
 THIS = cproto
@@ -32,7 +32,6 @@ C_FILES = \
 	lintlibs.c \
 	semantic.c \
 	strkey.c \
-	strstr.c \
 	symbol.c \
 	getopt.c
 
@@ -53,7 +52,6 @@ OBJECTS = \
 	lintlibs.obj, \
 	semantic.obj, \
 	strkey.obj, \
-	strstr.obj, \
 	symbol.obj, \
 	$(Y_TAB).obj, \
 	getopt.obj

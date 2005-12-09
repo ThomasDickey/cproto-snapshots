@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.9 2005/08/21 20:14:17 tom Exp $
+# $Id: Makefile.in,v 4.11 2005/12/08 20:53:09 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7d
+RELEASE = 4_7e
 
 #### Start of system configuration section. ####
 
@@ -68,7 +68,6 @@ C_FILES = \
 	lintlibs.c \
 	semantic.c \
 	strkey.c \
-	strstr.c \
 	symbol.c
 
 AUX_FILES = \
@@ -81,7 +80,7 @@ JUNK =	\
 	y.tab.c
 
 EXTRA_OBJS = @EXTRA_OBJS@
-OBJECTS = $(THIS)$o lintlibs$o semantic$o strkey$o strstr$o symbol$o y.tab$o \
+OBJECTS = $(THIS)$o lintlibs$o semantic$o strkey$o symbol$o y.tab$o \
 	$(EXTRA_OBJS)
 SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
@@ -179,6 +178,5 @@ cproto$o   : cproto.h config.h system.h
 lintlibs$o : cproto.h config.h system.h semantic.h symbol.h
 semantic$o : cproto.h config.h system.h semantic.h
 strkey$o   : cproto.h config.h system.h 
-strstr$o   : cproto.h config.h system.h
 symbol$o   : cproto.h config.h system.h symbol.h
 y.tab$o	   : cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c

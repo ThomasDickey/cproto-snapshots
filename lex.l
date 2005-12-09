@@ -1,7 +1,7 @@
 %p 3000
 
 %{
-/* $Id: lex.l,v 4.7 2005/08/21 18:39:21 tom Exp $
+/* $Id: lex.l,v 4.14 2005/12/08 23:58:33 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -80,12 +80,13 @@ static int ly_count;	/* number of occurances of %% */
 
 #ifdef FLEX_SCANNER
 /* flex scanner state */
-static YY_BUFFER_STATE buffer_stack[MAX_INC_DEPTH];
+static YY_BUFFER_STATE *buffer_stack;
 #endif
 
-static int inc_depth;				/* include nesting level */
-static IncludeStack inc_stack[MAX_INC_DEPTH];	/* stack of included files */
-static SymbolTable *included_files;		/* files already included */
+static unsigned inc_limit;		/* stack size */
+static int inc_depth;			/* include nesting level */
+static IncludeStack *inc_stack;		/* stack of included files */
+static SymbolTable *included_files;	/* files already included */
 
 static int  type_of_name      (char *name);
 static void startCpp          (int level);
@@ -101,7 +102,7 @@ static void save_text         (void);
 static void save_text_offset  (void);
 static void get_quoted        (void);
 static void get_comment       (void);
-static void get_cpp_directive (char *dest, unsigned n);
+static void get_cpp_directive (int copy);
 static void do_include        (char *f);
 static void include_file      (char *name, int convert);
 static void put_file          (FILE *outf);
@@ -148,32 +149,34 @@ QUOTE		[\"\']
 <CPP_INLINE>[^;]*	finishCpp();
 
 <CPP1>define{WS}+{ID}	{
-			    char name[MAX_TEXT_SIZE];
-			    char value[MAX_TEXT_SIZE];
+			    char *name;
+			    char *value;
 
 			    save_text();
 
-			    *name = 0;
+			    *(name = xmalloc(yyleng + 1)) = '\0';
 			    sscanf(yytext, "define %s", name);
 
-			    need_temp(MAX_TEXT_SIZE);
-			    get_cpp_directive(temp_buf, MAX_TEXT_SIZE);
+			    get_cpp_directive(1);
 
-			    *value = 0;
+			    *(value = xmalloc(1 + strlen(temp_buf))) = '\0';
 			    sscanf(temp_buf, "%s", value);
 
 			    new_symbol(define_names, name, value, DS_NONE);
+
+			    free(name);
+			    free(value);
 			}
 
 <CPP1>include{WS}*	{
 			    save_text();
 
-			    need_temp(MAX_TEXT_SIZE);
-			    get_cpp_directive(temp_buf, MAX_TEXT_SIZE);
+			    get_cpp_directive(1);
 
 			    if (temp_buf[0] != '"' && temp_buf[0] != '<') {
 				Symbol *sym = find_symbol(define_names, temp_buf);
 				if (sym != NULL && sym->value != NULL) {
+				    need_temp(strlen(sym->value));
 				    strcpy(temp_buf, sym->value);
 				} else {
 				    temp_buf[0] = '\0';
@@ -215,7 +218,7 @@ QUOTE		[\"\']
 			    finishCpp();
 			}
 
-<CPP1>. 		{ save_text(); get_cpp_directive(NULL, 0); }
+<CPP1>. 		{ save_text(); get_cpp_directive(0); }
 
 <INITIAL>"("		{ save_text_offset(); return '('; }
 <INITIAL>")"		{
@@ -708,19 +711,19 @@ get_comment (void)
     }
 }
 
-/* Scan rest of preprocessor directive.  If <dest> is not NULL, then store
- * the text in the buffer pointed to by <dest> having size <n>.
+/* Scan rest of preprocessor directive.  If copy is true, then store the text
+ * in temp_buf.
  */
 static void
-get_cpp_directive (
-char *dest,		/* buffer to store directive text */
-unsigned n)		/* size of buffer to store directive text */
+get_cpp_directive (int copy)
 {
+    unsigned used = 0;
     char c, lastc[4];
 
     lastc[0] = lastc[1] = lastc[2] = lastc[3] = '\0';
-    if (dest != NULL)
-	*dest = '\0';
+    if (copy) {
+	*temp_buf = '\0';
+    }
 
     while ((c = input()) != 0) {
 	if (cur_file->convert)
@@ -743,10 +746,11 @@ unsigned n)		/* size of buffer to store directive text */
 	lastc[1] = lastc[2];
 	lastc[2] = c;
 
-	if (dest != NULL && n > 1) {
-	    *dest++ = c;
-	    *dest = '\0';
-	    --n;
+	if (copy) {
+	    if (used + 2 >= temp_len)
+		need_temp(temp_len + MAX_TEXT_SIZE);
+	    temp_buf[used++] = c;
+	    temp_buf[used] = '\0';
 	}
     }
 }
@@ -807,11 +811,13 @@ cur_text (void)
  * Not all systems have the ANSI tmpfile() function yet...
  *
  * David W. Sanderson (dws@cs.wisc.edu)
+ *
+ * note - this was in version 3.10 from 1993 - TD
  */
 FILE *
 tmpfile (void)
 {
-    char name[MAX_TEXT_SIZE];
+    char *name;
     char *tmpdir;
     FILE *f;
 
@@ -819,20 +825,19 @@ tmpfile (void)
     {
 	tmpdir = "/tmp";
     }
+    name = xmalloc(strlen(tmpdir) + 20);
     sprintf(name, "%s/TfXXXXXX", tmpdir);
-    mktemp(name);
+    call_mktemp(name);
 
-    if ((f = fopen(name, "w+")) == (FILE *)0)
+    if ((f = fopen(name, "w+")) != 0)
     {
-	return (FILE *)0;
+	if (unlink(name) == -1)
+	{
+	    fclose(f);
+	    f = 0;
+	}
     }
-
-    if (unlink(name) == -1)
-    {
-	fclose(f);
-	return (FILE *)0;
-    }
-
+    free(name);
     return f;
 }
 #endif /* !HAVE_TMPFILE */
@@ -844,7 +849,21 @@ static void
 include_file (char *name,	/* file name */
 	      int convert)	/* if TRUE, convert function definitions */
 {
-    ++inc_depth;
+    if (++inc_depth >= (int) inc_limit) {
+	unsigned need = (inc_limit | 31) + 1;
+#ifdef FLEX_SCANNER
+	buffer_stack = type_realloc(YY_BUFFER_STATE, buffer_stack, need);
+#endif
+	inc_stack = type_realloc(IncludeStack, inc_stack, need);
+	while (inc_limit < need) {
+#ifdef FLEX_SCANNER
+	    buffer_stack[inc_limit] = 0;
+#endif
+	    memset(inc_stack + inc_limit, 0, sizeof(*inc_stack));
+	    ++inc_limit;
+	}
+    }
+
     cur_file = inc_stack + inc_depth;
     cur_file->file = yyin;
     cur_file->base_name = xstrdup(name);
@@ -939,17 +958,12 @@ static void
 do_include (char *file_spec) 	/* path surrounded by "" or <> */
 {
     int stdinc; 	/* 1 = path surrounded by <> */
-    char file[MAX_TEXT_SIZE], path[MAX_TEXT_SIZE];
+    char *file;
+    char *path;
     char match, *s;
     int i;
     unsigned n;
     FILE *fp;
-
-    if (inc_depth >= MAX_INC_DEPTH-1) {
-	put_error();
-	fprintf(stderr, "includes too deeply nested\n");
-	return;
-    }
 
     if (file_spec[0] == '"') {
 	match = '"';
@@ -962,32 +976,38 @@ do_include (char *file_spec) 	/* path surrounded by "" or <> */
     }
     s = strchr(file_spec+1, match);
     n = (s != NULL) ? (unsigned)(s - file_spec - 1) : 0;
-    strncpy(file, file_spec+1, (size_t)n);
+    file = xstrdup(file_spec + 1);
     file[n] = '\0';
 
     /* Do nothing if the file was already included. */
+    path = xmalloc(strlen(file) + 3);
     sprintf(path, stdinc ? "<%s>" : "\"%s\"", file);
-    if (find_symbol(included_files, path) != NULL)
-	return;
-    new_symbol(included_files, path, NULL, DS_NONE);
+    if (find_symbol(included_files, path) == NULL) {
+	new_symbol(included_files, path, NULL, DS_NONE);
 
-    for (i = stdinc != 0; i < num_inc_dir; ++i) {
-	if (strlen(inc_dir[i]) == 0 || !strcmp(inc_dir[i], CURRENT_DIR)) {
-	    strcpy(path, file);
-	} else {
-	    sprintf(path, "%s/%s", inc_dir[i], file);
+	for (i = stdinc != 0; i < num_inc_dir; ++i) {
+	    if (strlen(inc_dir[i]) == 0 || !strcmp(inc_dir[i], CURRENT_DIR)) {
+		strcpy(path, file);
+	    } else {
+		path = xrealloc(path, strlen(file) + strlen(inc_dir[i]) + 2);
+		sprintf(path, "%s/%s", inc_dir[i], file);
+	    }
+	    if ((fp = fopen(path, "r")) != NULL) {
+		yyin = fp;
+		include_file(path, func_style != FUNC_NONE && !stdinc);
+		free(file);
+		free(path);
+		return;
+	    }
 	}
-	if ((fp = fopen(path, "r")) != NULL) {
-	    yyin = fp;
-	    include_file(path, func_style != FUNC_NONE && !stdinc);
-	    return;
+
+	if (!quiet) {
+	    put_error();
+	    fprintf(stderr, "cannot read file %s\n", file_spec);
 	}
     }
-
-    if (!quiet) {
-	put_error();
-	fprintf(stderr, "cannot read file %s\n", file_spec);
-    }
+    free(file);
+    free(path);
 }
 
 /* When the end of the current input file is reached, pop a
@@ -1003,3 +1023,16 @@ yywrap (void)
 	return 1;
     }
 }
+
+#ifdef NO_LEAKS
+void
+free_lexer(void)
+{
+    if (inc_limit != 0) {
+#ifdef FLEX_SCANNER
+	free (buffer_stack);
+#endif
+	free (inc_stack);
+    }
+}
+#endif

@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.9 2005/08/21 18:12:02 tom Exp $
+/* $Id: system.h,v 4.10 2005/12/08 22:33:49 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -111,9 +111,9 @@
 #endif
 #endif
 
-/* maximum include file nesting */
+/* maximum include file nesting (for parsing externs) */
 #ifndef MAX_INC_DEPTH
-#define MAX_INC_DEPTH 15
+#define MAX_INC_DEPTH 999999
 #endif
 
 /* string denoting current-directory, for includes */

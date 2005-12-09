@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.6 2005/08/21 17:41:56 tom Exp $
+/* $Id: lintlibs.c,v 4.10 2005/12/08 23:15:13 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -161,8 +161,15 @@ strip_name(char *s)
 }
 #define	CUR_FILE	strip_name(cur_file_name())
 
-static	int	base_level;
-static	char	*inc_stack[MAX_INC_DEPTH];
+static int base_level;
+static unsigned inc_depth = 0;
+static char **inc_stack = 0;
+
+static char *
+get_inc_stack(int n)
+{
+	return (n < 0 || n >= (int) inc_depth) ? 0 : inc_stack[n];
+}
 
 #ifdef	DEBUG
 static void
@@ -173,7 +180,7 @@ dump_stack(char *tag)
 	for (j = 0; j <= in_include; j++)
 		printf("\n\t%d%s:%s", j,
 			j == base_level ? "*" : "",
-			inc_stack[j] ? inc_stack[j] : "?");
+			get_inc_stack(j) ? get_inc_stack(j) : "?");
 	printf(" */\n");
 }
 #endif	/* DEBUG */
@@ -181,17 +188,27 @@ dump_stack(char *tag)
 static void
 free_inc_stack(int n)
 {
-	if (inc_stack[n] != 0) {
+	if (get_inc_stack(n) != 0) {
 		free(inc_stack[n]);
 		inc_stack[n] = 0;
 	}
 }
 
 static void
-make_inc_stack(int n, char *s)
+make_inc_stack(unsigned n, char *s)
 {
-	free_inc_stack(n);
-	inc_stack[n] = xstrdup(s);
+	if (n != 0) {
+		unsigned need = (n | 31) + 1;
+
+		free_inc_stack(n);
+		if (n > inc_depth) {
+			inc_stack = type_realloc(char *, inc_stack, need);
+			while (inc_depth < need)
+				inc_stack[inc_depth++] = 0;
+			inc_depth = need;
+		}
+		inc_stack[n] = xstrdup(s);
+	}
 }
 
 /*
@@ -338,7 +355,7 @@ track_in(void)
 
 		flush_varargs();
 		for (n = in_include, found = FALSE; n >= 0; n--) {
-			if (same_file(inc_stack[n], s)) {
+			if (same_file(get_inc_stack(n), s)) {
 				found = TRUE;
 				in_include--;
 				break;
@@ -376,7 +393,7 @@ track_in(void)
 #endif
 			}
 		}
-		(void)strcpy(old_file, inc_stack[in_include]);
+		(void)strcpy(old_file, get_inc_stack(in_include));
 	}
 #ifdef	DEBUG
 	dump_stack("-after");
@@ -647,11 +664,15 @@ put_body(
 void
 free_lintlibs(void)
 {
-    register int n;
+    unsigned n;
+
     if (implied_buf != 0)
     	free(implied_buf);
-    for (n = 0; n < MAX_INC_DEPTH; n++)
-    	free_inc_stack(n);
+    if (inc_stack != 0) {
+	for (n = 0; n < inc_depth; n++)
+	    free_inc_stack(n);
+	free(inc_stack);
+    }
     if (include_list != 0)
     	free_symbol_table(include_list);
     if (declared_list != 0)

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.9 2005/08/21 20:03:26 tom Exp $
+/* $Id: grammar.y,v 4.10 2005/12/08 23:13:28 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -165,9 +165,7 @@ static void need_temp(unsigned need)
 	    need = MAX_TEXT_SIZE;
 	if (need < temp_len * 2)
 	    need = temp_len * 2;
-	if (temp_buf != 0)
-	    free(temp_buf);
-	temp_buf = xmalloc(need);
+	temp_buf = type_realloc(char, temp_buf, need);
 	temp_len = need;
     }
 }
@@ -1024,5 +1022,9 @@ free_parser(void)
     if (yy_current_buffer != 0)
 	yy_delete_buffer(yy_current_buffer);
 #endif
+    if (temp_buf != 0) {
+	temp_buf = 0;
+	temp_len = 0;
+    }
 }
 #endif
