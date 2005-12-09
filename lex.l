@@ -1,7 +1,7 @@
 %p 3000
 
 %{
-/* $Id: lex.l,v 4.14 2005/12/08 23:58:33 tom Exp $
+/* $Id: lex.l,v 4.15 2005/12/09 00:12:48 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -103,6 +103,7 @@ static void save_text_offset  (void);
 static void get_quoted        (void);
 static void get_comment       (void);
 static void get_cpp_directive (int copy);
+static void parsing_file_name (unsigned need);
 static void do_include        (char *f);
 static void include_file      (char *name, int convert);
 static void put_file          (FILE *outf);
@@ -189,7 +190,7 @@ QUOTE		[\"\']
 <CPP1>line{WS}+[0-9]+{WS}+\".*$  {
 			    save_text();
 
-			    cur_file->file_name[0] = 0;
+			    parsing_file_name(yyleng);
 			    sscanf(yytext, "line %u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
@@ -201,7 +202,7 @@ QUOTE		[\"\']
 <CPP1>[0-9]+{WS}+\".*$  {
 			    save_text();
 
-			    cur_file->file_name[0] = 0;
+			    parsing_file_name(yyleng);
 			    sscanf(yytext, "%u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
@@ -755,6 +756,21 @@ get_cpp_directive (int copy)
     }
 }
 
+/*
+ * Ensure that the filename buffer is large enough to hold yytext, e.g., if
+ * the sscanf gave the whole buffer.
+ */
+static void
+parsing_file_name (unsigned need)
+{
+    need += 2;
+    if (cur_file->len_file_name < need) {
+	cur_file->len_file_name += need;
+	cur_file->file_name = xrealloc(cur_file->file_name, cur_file->len_file_name);
+    }
+    cur_file->file_name[0] = 0;
+}
+
 /* Return a pointer to the current file name.
  */
 char *
@@ -867,7 +883,8 @@ include_file (char *name,	/* file name */
     cur_file = inc_stack + inc_depth;
     cur_file->file = yyin;
     cur_file->base_name = xstrdup(name);
-    cur_file->file_name = strcpy(xmalloc(strlen(name) + MAX_TEXT_SIZE), name);
+    cur_file->len_file_name = strlen(name) + MAX_TEXT_SIZE;
+    cur_file->file_name = strcpy(xmalloc(cur_file->len_file_name), name);
     cur_file->line_num = 1;
     cur_file->convert = convert;
     cur_file->changed = FALSE;
