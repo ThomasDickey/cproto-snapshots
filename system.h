@@ -1,4 +1,4 @@
-/* $Id: system.h,v 4.10 2005/12/08 22:33:49 tom Exp $
+/* $Id: system.h,v 4.11 2005/12/09 00:51:10 tom Exp $
  *
  * cproto configuration and system dependencies
  */
@@ -121,9 +121,9 @@
 #define CURRENT_DIR "."
 #endif
 
-/* maximum text buffer size */
+/* maximum text buffer size (for tokens) */
 #ifndef MAX_TEXT_SIZE
-#define MAX_TEXT_SIZE 256
+#define MAX_TEXT_SIZE 4096
 #endif
 
 #if HAVE_STDLIB_H

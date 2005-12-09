@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.10 2005/12/08 23:13:28 tom Exp $
+/* $Id: grammar.y,v 4.11 2005/12/09 00:42:19 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -110,6 +110,7 @@ static SymbolTable *type_qualifiers;
 typedef struct {
     char *base_name;		/* base input file name */
     char *file_name;		/* current file name */
+    unsigned len_file_name;	/* ...its allocated size */
     FILE *file; 		/* input file */
     unsigned line_num;		/* current line number in input file */
     FILE *tmp_file;		/* temporary file */
