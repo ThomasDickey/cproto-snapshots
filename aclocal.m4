@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.5 2005/08/21 19:54:31 tom Exp $
+dnl $Id: aclocal.m4,v 4.6 2005/12/08 20:43:14 tom Exp $
 dnl
 dnl Macros for cproto configure script (T.Dickey)
 dnl ---------------------------------------------------------------------------
@@ -331,7 +331,7 @@ rm -rf conftest*
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_VERSION version: 3 updated: 2003/09/06 19:16:57
+dnl CF_GCC_VERSION version: 4 updated: 2005/08/27 09:53:42
 dnl --------------
 dnl Find version of gcc
 AC_DEFUN([CF_GCC_VERSION],[
@@ -339,7 +339,7 @@ AC_REQUIRE([AC_PROG_CC])
 GCC_VERSION=none
 if test "$GCC" = yes ; then
 	AC_MSG_CHECKING(version of $CC)
-	GCC_VERSION="`${CC} --version|sed -e '2,$d' -e 's/^[[^0-9.]]*//' -e 's/[[^0-9.]].*//'`"
+	GCC_VERSION="`${CC} --version| sed -e '2,$d' -e 's/^.*(GCC) //' -e 's/^[[^0-9.]]*//' -e 's/[[^0-9.]].*//'`"
 	test -z "$GCC_VERSION" && GCC_VERSION=unknown
 	AC_MSG_RESULT($GCC_VERSION)
 fi

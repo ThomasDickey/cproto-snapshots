@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.10 2005/08/21 18:14:50 tom Exp $
+/* $Id: cproto.c,v 4.16 2005/12/08 23:17:44 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7d"
+#define VERSION "4.7e"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -120,7 +120,7 @@ void *xMalloc(unsigned n, char *f, int l)
 void *xmalloc (unsigned n)
 #endif
 {
-    char *p;
+    void *p;
 #if HAVE_LIBDBMALLOC
     p = debug_malloc(f, l, n);
 #else
@@ -132,7 +132,31 @@ void *xmalloc (unsigned n)
 		progname, n);
 	exit(EXIT_FAILURE);
     }
-    *p = '\0';
+    return p;
+}
+#endif /* if !HAVE_LIBDMALLOC */
+
+/* Try to reallocate some memory.
+ * If unsuccessful, output an error message and exit.
+ */
+#if !HAVE_LIBDMALLOC
+#ifdef NO_LEAKS
+void *xRealloc(void *p, unsigned n, char *f, int l)
+#else
+void *xrealloc (void *p, unsigned n)
+#endif
+{
+#if HAVE_LIBDBMALLOC
+    p = debug_malloc(f, l, p, n);
+#else
+    p = realloc(p, n);
+#endif
+
+    if (p == NULL) {
+	fprintf(stderr, "%s: out of memory (cannot allocate %u bytes)\n",
+		progname, n);
+	exit(EXIT_FAILURE);
+    }
     return p;
 }
 #endif /* if !HAVE_LIBDMALLOC */
@@ -487,7 +511,7 @@ process_options (int *pargc, char ***pargv)
     unsigned n;
 #endif
 #if defined(CPP) && !defined(vms)
-    char tmp[MAX_TEXT_SIZE];
+    char *tmp;
 #endif
 
     argc = *pargc;
@@ -547,8 +571,10 @@ process_options (int *pargc, char ***pargv)
 	    break;
 #else	/* UNIX, etc. */
 #ifdef CPP
+	    tmp = xmalloc(quote_length(optarg) + 10);
 	    sprintf(tmp, " -%c%s", c, optarg);
 	    strcat(cpp_opt, quote_string(tmp));
+	    free(tmp);
 #endif
 #endif
 	    break;
@@ -689,7 +715,7 @@ process_options (int *pargc, char ***pargv)
 	case 'X':
 	    extern_in = atoi(optarg);
 	    do_tracking = TRUE;
-	    if (extern_in < 0 || extern_in > MAX_INC_DEPTH)
+	    if (extern_in < 0)
 		usage();
 	    break;
 #endif	/* OPT_LINTLIBRARY */
@@ -820,7 +846,7 @@ main (int argc, char *argv[])
 		while (s != temp && s[-1] != '/')
 		    s--;
 		(void)strcpy(s, "XXXXXX.c");
-	    	mktemp(temp);
+	    	call_mktemp(temp);
 	    	if (link(argv[i], temp) < 0)
 		    (void)strcpy(temp, argv[i]);
 	    }
@@ -840,7 +866,7 @@ main (int argc, char *argv[])
 		 * the file that we're writing to.
 		 */
 		sprintf(cpp_cmd, cpp,
-			mktemp(strcpy(temp, "sys$scratch:XXXXXX.i")));
+			call_mktemp(strcpy(temp, "sys$scratch:XXXXXX.i")));
 		sprintf(cpp_cmd + strlen(cpp_cmd), "%s %s", cpp_opt, FileName);
 		system(cpp_cmd);
 		inf = fopen(temp, "r");
@@ -910,6 +936,7 @@ main (int argc, char *argv[])
 	free(inc_dir);
 	inc_dir = 0;
     }
+    free_lexer();
     free_parser();
 # if OPT_LINTLIBRARY
     free_lintlibs();

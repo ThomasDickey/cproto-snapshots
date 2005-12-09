@@ -1,4 +1,14 @@
--- $Id: CHANGES,v 4.10 2005/08/21 19:59:38 tom Exp $
+-- $Id: CHANGES,v 4.12 2005/12/08 22:51:29 tom Exp $
+
+Version 4.7e
+2005/12/8
+- eliminate some fixed limits on buffer sizes.
+- eliminate fixed limit on include nesting.
+- use configure check for mkstemp(), use that function in preference to
+  mktemp() if a working version is found.
+- move strstr.c into strkey.c to avoid zero-length object
+- improve configure check for gcc version, from ncurses.
+- update config.guess, config.sub
 
 Version 4.7d
 2005/8/21
