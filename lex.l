@@ -1,7 +1,7 @@
 %p 3000
 
 %{
-/* $Id: lex.l,v 4.16 2008/01/01 21:45:24 tom Exp $
+/* $Id: lex.l,v 4.17 2008/08/25 20:37:35 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -155,7 +155,7 @@ QUOTE		[\"\']
 
 			    save_text();
 
-			    *(name = xmalloc(yyleng + 1)) = '\0';
+			    *(name = xmalloc((unsigned) (yyleng + 1))) = '\0';
 			    sscanf(yytext, "define %s", name);
 
 			    get_cpp_directive(1);
@@ -190,7 +190,7 @@ QUOTE		[\"\']
 <CPP1>line{WS}+[0-9]+{WS}+\".*$  {
 			    save_text();
 
-			    parsing_file_name(yyleng);
+			    parsing_file_name((unsigned) yyleng);
 			    sscanf(yytext, "line %u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
@@ -202,7 +202,7 @@ QUOTE		[\"\']
 <CPP1>[0-9]+{WS}+\".*$  {
 			    save_text();
 
-			    parsing_file_name(yyleng);
+			    parsing_file_name((unsigned) yyleng);
 			    sscanf(yytext, "%u \"%[^\"]\"",
 					   &cur_file->line_num,
 					   cur_file->file_name);
@@ -418,7 +418,7 @@ gcc_attribute (void)
 
     while ((c = input()) > 0) {
 	if (len < sizeof(bfr)-1 && !isspace(c))
-	    bfr[len++] = c;
+	    bfr[len++] = (char) c;
 	if (c == '(')
 	    nest++;
 	else if (c == ')') {
@@ -457,7 +457,7 @@ type_of_name (char *name)
 boolean
 is_typedef_name (char *name)
 {
-    return (find_symbol(typedef_names, name) != NULL);
+    return (boolean) (find_symbol(typedef_names, name) != NULL);
 }
 
 /* If the matched text contains any new line characters, then update the
@@ -565,7 +565,7 @@ put_quoted (int c)
 #if defined(FLEX_SCANNER) || !defined(YYLMAX)
     if (c != 0) {
 	static char	temp[2];
-	temp[0] = c;
+	temp[0] = (char) c;
 	/* save_text */
 # if OPT_LINTLIBRARY
 	if (!in_cpp)
@@ -653,11 +653,11 @@ get_comment (void)
 #if OPT_LINTLIBRARY
 	if (!(isalnum(c) || c == '_' || c == '$')) {
 	    int flag = cmtVal.preproz;
-	    len = decipher_comment(keyword, len);
+	    len = (unsigned) decipher_comment(keyword, (int) len);
 	    if (flag != cmtVal.preproz)
 	    	lastc = '\0';
 	} else if (len+1 < sizeof(keyword)) {
-	    keyword[len++] = c;
+	    keyword[len++] = (char) c;
 	}
 #endif
 
@@ -684,7 +684,7 @@ get_comment (void)
 		    }
 		}
 #if OPT_LINTLIBRARY
-		(void)decipher_comment(keyword, len);
+		(void)decipher_comment(keyword, (int) len);
 		if (cmtVal.varargs != 0) {
 		    if ((varargs_num = cmtVal.varargs) != 0
 		     && cmtVal.varText != 0) {
@@ -727,7 +727,7 @@ get_cpp_directive (int copy)
 	*temp_buf = '\0';
     }
 
-    while ((c = input()) != 0) {
+    while ((c = (char) input()) != 0) {
 	if (cur_file->convert)
 	    fputc(c, cur_file->tmp_file);
 
@@ -887,7 +887,7 @@ include_file (char *name,	/* file name */
     cur_file->len_file_name = strlen(name) + MAX_TEXT_SIZE;
     cur_file->file_name = strcpy(xmalloc(cur_file->len_file_name), name);
     cur_file->line_num = 1;
-    cur_file->convert = convert;
+    cur_file->convert = (boolean) convert;
     cur_file->changed = FALSE;
 
 #ifdef FLEX_SCANNER
@@ -924,7 +924,7 @@ put_file (FILE *outf)
 	if (nread == 0)
 	    break;
 	fwrite(block, sizeof(char), nread, outf);
-	filesize -= nread;
+	filesize -= (long) nread;
     }
 }
 
