@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.6 2005/08/21 14:44:05 tom Exp $
+/* $Id: semantic.c,v 4.7 2008/08/27 21:03:42 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -121,7 +121,7 @@ check_untagged (DeclSpec *decl_spec)
 /* Allocate and initialize a declarator.
  */
 Declarator *
-new_declarator (char *text, char *name, long offset)
+new_declarator (const char *text, const char *name, long offset)
 {
     Declarator *d;
 

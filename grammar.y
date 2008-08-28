@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.13 2008/01/01 22:53:01 tom Exp $
+/* $Id: grammar.y,v 4.14 2008/08/27 21:02:45 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -897,7 +897,7 @@ yaccError (char *msg)
 void
 init_parser (void)
 {
-    static char *keywords[] = {
+    static const char *keywords[] = {
 	"const",
 	"restrict",
 	"volatile",

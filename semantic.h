@@ -1,4 +1,4 @@
-/* $Id: semantic.h,v 4.2 2004/03/24 19:55:19 tom Exp $
+/* $Id: semantic.h,v 4.3 2008/08/27 21:03:42 tom Exp $
  *
  * Declarations of semantic action routines
  */
@@ -12,7 +12,7 @@ extern void join_decl_specs (
 extern void check_untagged (
     DeclSpec *decl_spec);
 extern Declarator *new_declarator (
-    char *text, char *name, long offset);
+    const char *text, const char *name, long offset);
 extern void free_declarator (
     Declarator *d);
 extern void new_decl_list (
