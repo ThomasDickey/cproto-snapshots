@@ -1,10 +1,14 @@
-/* $Id: semantic.h,v 4.3 2008/08/27 21:03:42 tom Exp $
+/* $Id: semantic.h,v 4.4 2008/11/20 01:04:36 tom Exp $
  *
  * Declarations of semantic action routines
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void new_decl_spec (
-    DeclSpec *decl_spec, char *text, long offset, int flags);
+    DeclSpec *decl_spec, const char *text, long offset, int flags);
 extern void free_decl_spec (
     DeclSpec *decl_spec);
 extern void join_decl_specs (
@@ -45,3 +49,7 @@ extern void gen_func_declarator (
     Declarator *declarator);
 extern void gen_func_definition (
     DeclSpec *decl_spec, Declarator *declarator);
+
+#ifdef __cplusplus
+}
+#endif

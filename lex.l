@@ -1,7 +1,7 @@
 %p 3000
 
 %{
-/* $Id: lex.l,v 4.17 2008/08/25 20:37:35 tom Exp $
+/* $Id: lex.l,v 4.19 2008/11/20 01:08:20 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -81,6 +81,15 @@ static int ly_count;	/* number of occurances of %% */
 #ifdef FLEX_SCANNER
 /* flex scanner state */
 static YY_BUFFER_STATE *buffer_stack;
+
+#ifdef __cplusplus
+#define LexInput() yyinput()
+#endif
+
+#endif /* FLEX_SCANNER */
+
+#ifndef LexInput
+#define LexInput() input()
 #endif
 
 static unsigned inc_limit;		/* stack size */
@@ -112,11 +121,6 @@ static void put_quoted        (int c);
 #if OPT_LINTLIBRARY
 static int decipher_comment   (char *keyword, int len);
 #endif
-
-#ifdef yywrap
-#undef yywrap
-#endif
-int yywrap (void);
 %}
 
 WS		[ \t]
@@ -155,12 +159,12 @@ QUOTE		[\"\']
 
 			    save_text();
 
-			    *(name = xmalloc((unsigned) (yyleng + 1))) = '\0';
+			    *(name = (char *) xmalloc((unsigned) (yyleng + 1))) = '\0';
 			    sscanf(yytext, "define %s", name);
 
 			    get_cpp_directive(1);
 
-			    *(value = xmalloc(1 + strlen(temp_buf))) = '\0';
+			    *(value = (char *) xmalloc(1 + strlen(temp_buf))) = '\0';
 			    sscanf(temp_buf, "%s", value);
 
 			    new_symbol(define_names, name, value, DS_NONE);
@@ -416,7 +420,7 @@ gcc_attribute (void)
     unsigned len = 0;
     char bfr[BUFSIZ];
 
-    while ((c = input()) > 0) {
+    while ((c = LexInput()) > 0) {
 	if (len < sizeof(bfr)-1 && !isspace(c))
 	    bfr[len++] = (char) c;
 	if (c == '(')
@@ -608,10 +612,10 @@ get_quoted (void)
 #if defined(FLEX_SCANNER) || !defined(YYLMAX)
     put_quoted(delim);
 #endif
-    while ((c = input()) != 0) {
+    while ((c = LexInput()) != 0) {
 	if (c == '\\') {
 	    put_quoted(c);
-	    if ((c = input()) == 0)
+	    if ((c = LexInput()) == 0)
 		break;
 	    put_quoted(c);
 	} else {
@@ -646,7 +650,7 @@ get_comment (void)
     cmtVal.preproz = 0;
 #endif
 
-    while ((c = input()) != 0) {
+    while ((c = LexInput()) != 0) {
 	if (cur_file->convert)
 	    fputc(c, cur_file->tmp_file);
 
@@ -693,8 +697,8 @@ get_comment (void)
 			varargs_str = xstrdup(keyword);
 		    }
 		}
-		if (cmtVal.externs != -1)
-		    extern_in = cmtVal.externs;
+		if (cmtVal.externs >= 0)
+		    extern_in = (unsigned) cmtVal.externs;
 		if (cmtVal.preproz != 0)
 		    fputc('\n', stdout);
 #endif
@@ -727,7 +731,7 @@ get_cpp_directive (int copy)
 	*temp_buf = '\0';
     }
 
-    while ((c = (char) input()) != 0) {
+    while ((c = (char) LexInput()) != 0) {
 	if (cur_file->convert)
 	    fputc(c, cur_file->tmp_file);
 
@@ -767,7 +771,7 @@ parsing_file_name (unsigned need)
     need += 2;
     if (cur_file->len_file_name < need) {
 	cur_file->len_file_name += need;
-	cur_file->file_name = xrealloc(cur_file->file_name, cur_file->len_file_name);
+	cur_file->file_name = (char *) xrealloc(cur_file->file_name, cur_file->len_file_name);
     }
     cur_file->file_name[0] = 0;
 }
@@ -885,7 +889,7 @@ include_file (char *name,	/* file name */
     cur_file->file = yyin;
     cur_file->base_name = xstrdup(name);
     cur_file->len_file_name = strlen(name) + MAX_TEXT_SIZE;
-    cur_file->file_name = strcpy(xmalloc(cur_file->len_file_name), name);
+    cur_file->file_name = strcpy((char *) xmalloc(cur_file->len_file_name), name);
     cur_file->line_num = 1;
     cur_file->convert = (boolean) convert;
     cur_file->changed = FALSE;
@@ -975,11 +979,11 @@ pop_file (int closed)
 static void
 do_include (char *file_spec) 	/* path surrounded by "" or <> */
 {
-    int stdinc; 	/* 1 = path surrounded by <> */
+    unsigned stdinc; 	/* 1 = path surrounded by <> */
     char *file;
     char *path;
     char match, *s;
-    int i;
+    unsigned i;
     unsigned n;
     FILE *fp;
 
@@ -998,16 +1002,16 @@ do_include (char *file_spec) 	/* path surrounded by "" or <> */
     file[n] = '\0';
 
     /* Do nothing if the file was already included. */
-    path = xmalloc(strlen(file) + 3);
+    path = (char *) xmalloc(strlen(file) + 3);
     sprintf(path, stdinc ? "<%s>" : "\"%s\"", file);
     if (find_symbol(included_files, path) == NULL) {
 	new_symbol(included_files, path, NULL, DS_NONE);
 
-	for (i = stdinc != 0; i < num_inc_dir; ++i) {
+	for (i = (unsigned) (stdinc != 0); i < num_inc_dir; ++i) {
 	    if (strlen(inc_dir[i]) == 0 || !strcmp(inc_dir[i], CURRENT_DIR)) {
 		strcpy(path, file);
 	    } else {
-		path = xrealloc(path, strlen(file) + strlen(inc_dir[i]) + 2);
+		path = (char *) xrealloc(path, strlen(file) + strlen(inc_dir[i]) + 2);
 		sprintf(path, "%s/%s", inc_dir[i], file);
 	    }
 	    if ((fp = fopen(path, "r")) != NULL) {
