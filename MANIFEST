@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t20100101
+MANIFEST for cproto, version t20100420
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 CHANGES                         summary of changes made to CPROTO
@@ -57,6 +57,8 @@ os2                             subdirectory
 os2/README                      description of files in os2 directory
 os2/run_test.cmd                run test-cases on OS/2
 os2/watcom.mak                  makefile for watcom (OS/2)
+package/debian                  subdirectory
+package/debian/compat           debian build script
 package/debian/source           subdirectory
 package/debian/source/format    debian build script
 porting                         subdirectory
