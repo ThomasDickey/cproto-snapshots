@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.25 2009/09/04 00:47:21 tom Exp $
+/* $Id: cproto.c,v 4.27 2010/07/11 17:29:25 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7h"
+#define VERSION "4.7i"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -68,7 +68,7 @@ FuncDefStyle func_style = FUNC_UNKNOWN;
 boolean proto_macro = FALSE;
 
 /* Name of macro to guard prototypes */
-char *macro_name = "P_";
+const char *macro_name = "P_";
 
 /* If TRUE, output prototype macro definition */
 boolean define_macro = TRUE;
@@ -80,7 +80,7 @@ boolean proto_comments = FALSE;
 boolean file_comments = TRUE;
 
 /* Conditional compilation directive output in front of function definitions */
-char *func_directive = "#ifdef ANSI_FUNC";
+const char *func_directive = "#ifdef ANSI_FUNC";
 
 /* Output formats for function declarators */
 FuncFormat fmt[] = {
@@ -108,7 +108,9 @@ extern FILE *popen (const char *c, const char *m);
 # endif
 extern int pclose (FILE *p);
 static unsigned cpp_len;
-static char *cpp = CPP, *cpp_opt, *cpp_cmd;
+static const char *cpp = CPP;
+static char *cpp_opt;
+static char *cpp_cmd;
 #endif
 
 /* Try to allocate some memory.
@@ -353,7 +355,7 @@ usage (void)
  * are the last.  Other -I options are inserted in order between the two.
  */
 static void
-add_inc_dir (char *src)
+add_inc_dir (const char *src)
 {
     unsigned have = CHUNK(num_inc_dir);
     unsigned need = CHUNK(num_inc_dir + 1);

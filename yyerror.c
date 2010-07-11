@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.7 2008/11/20 01:01:11 tom Exp $
+/* $Id: yyerror.c,v 4.8 2010/07/11 17:17:05 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function.
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -98,7 +98,7 @@
  * Any way we define it, 'yyerror()' is a real function (that we provide,
  * rather than use the one from a library).
  */
-static void yaccError    (char *);
+static void yaccError    (const char *);
 
 #ifdef yyerror
 static int

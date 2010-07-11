@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.9 2008/11/20 00:58:04 tom Exp $
+/* $Id: semantic.c,v 4.10 2010/07/11 17:20:52 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -286,7 +286,7 @@ new_ident_list (ParameterList *param_list)
  * the parameter name field.
  */
 void
-add_ident_list (ParameterList *to, ParameterList *from, char *name)
+add_ident_list (ParameterList *to, ParameterList *from, const char *name)
 {
     Parameter *p;
     Declarator *declarator;
@@ -330,7 +330,7 @@ set_param_types (ParameterList *params, DeclSpec *decl_spec, DeclaratorList *dec
 {
     Declarator *d;
     Parameter *p;
-    char *decl_spec_text;
+    const char *decl_spec_text;
 
     for (d = declarators->first; d != NULL; d = d->next) {
 	/* Search the parameter list for a matching name. */
@@ -366,6 +366,7 @@ int	count,		/* index in parameter list if we haven't names */
 #endif
 int	commented)	/* comment-delimiters already from higher level */
 {
+    const char *s2;
     char	*s;
     char	gap = ' ';
 
@@ -383,20 +384,20 @@ int	commented)	/* comment-delimiters already from higher level */
     }
 #endif
 
-    s = p->decl_spec.text;
+    s2 = p->decl_spec.text;
 #if OPT_LINTLIBRARY
     if (lintLibrary()) {
 	if (is_void_parameter(p))
 	    return (FALSE);
 	indent(outf);
-	if (knrLintLibrary() && !*s)
-	    s = "int";
-	if (strlen(s) < 8)
+	if (knrLintLibrary() && !*s2)
+	    s2 = "int";
+	if (strlen(s2) < 8)
 	    gap = '\t';
     }
 #endif
 
-    put_string(outf, s);
+    put_string(outf, s2);
 
 #if OPT_LINTLIBRARY
     if (lintLibrary()) {

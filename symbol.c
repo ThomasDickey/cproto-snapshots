@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 4.5 2008/08/28 00:38:36 tom Exp $
+/* $Id: symbol.c,v 4.6 2010/07/11 17:19:31 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -56,7 +56,7 @@ hash (const char *name)
     h = 0;
     s = name;
     while (*s != '\0')
-	h = (h << 1) ^ *s++;
+	h = (h << 1) ^ (unsigned char) (*s++);
     return h % SYM_MAX_HASH;
 }
 

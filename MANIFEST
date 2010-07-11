@@ -1,6 +1,7 @@
-MANIFEST for cproto, version t20100420
+MANIFEST for cproto, version t20100711
 --------------------------------------------------------------------------------
 MANIFEST                        this file
+AUTHORS                         authors
 CHANGES                         summary of changes made to CPROTO
 Makefile.bc                     v3_7 base
 Makefile.in                     top-level makefile template
