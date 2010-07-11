@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.15 2008/11/20 01:00:19 tom Exp $
+/* $Id: grammar.y,v 4.16 2010/07/11 17:18:16 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -882,7 +882,7 @@ direct_abs_declarator
 #endif
 
 static void
-yaccError (char *msg)
+yaccError (const char *msg)
 {
     func_params = NULL;
     put_error();		/* tell what line we're on, and what file */
@@ -975,9 +975,9 @@ init_parser (void)
  * code to a temporary file.
  */
 void
-process_file (FILE *infile, char *name)
+process_file (FILE *infile, const char *name)
 {
-    char *s;
+    const char *s;
 
     if (strlen(name) > 2) {
 	s = name + strlen(name) - 2;

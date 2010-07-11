@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.13 2008/11/20 00:56:00 tom Exp $
+/* $Id: lintlibs.c,v 4.14 2010/07/11 17:17:39 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -31,7 +31,7 @@ static	char	quote_r = '"';
  * to make it simple to format with blank lines.
  */
 void
-put_string(FILE *outf, char *s)
+put_string(FILE *outf, const char *s)
 {
 	if (*s != '\0') {
 		fputs(s, outf);
@@ -81,7 +81,7 @@ put_blankline(FILE *outf)
  * Put a token, padded by a tab if it is short enough
  */
 void
-put_padded(FILE *outf, char *s)
+put_padded(FILE *outf, const char *s)
 {
 	put_string(outf, s);
 	put_char(outf, (lintLibrary() && strlen(s) < 8) ? '\t' : ' ');
@@ -405,7 +405,7 @@ track_in(void)
  * Copy/append to 'implied_buf[]'
  */
 static
-void add2implied_buf(char *s, int append)
+void add2implied_buf(const char *s, int append)
 {
 	static	unsigned
 			implied_len,	/* current strlen(implied_buf) */
@@ -456,7 +456,7 @@ begin_typedef(void)
 }
 
 void
-copy_typedef(char *s)
+copy_typedef(const char *s)
 {
 	if (!strcmp(s, "/*")
 	 || *s == '#')
@@ -486,7 +486,7 @@ end_typedef(void)
 }
 
 void
-imply_typedef(char *s)
+imply_typedef(const char *s)
 {
 	if (!in_typedef && want_typedef()) {
 		add2implied_buf(s,FALSE);
@@ -611,7 +611,7 @@ put_body(
 	DeclSpec	*decl_spec,	/* declaration specifier */
 	Declarator	*declarator)
 {
-    register char	*spec_text;
+    const char	*spec_text;
 
     if (is_actual_func(declarator)) {
 	strcut(decl_spec->text, "static");

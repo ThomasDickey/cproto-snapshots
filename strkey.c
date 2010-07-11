@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.4 2005/12/08 20:31:14 tom Exp $
+/* $Id: strkey.c,v 4.5 2010/07/11 17:13:17 tom Exp $
  *
  * Some string handling routines
  */
@@ -15,7 +15,7 @@
  * against an identifier-token.
  */
 char *
-strkey (char *src, char *key)
+strkey (char *src, const char *key)
 {
     if (src != 0 && key != 0) {
 	register char *s  = src, *d;
@@ -40,7 +40,7 @@ strkey (char *src, char *key)
  * Delete a specified keyword from a string if it appears there
  */
 void
-strcut (char *src, char *key)
+strcut (char *src, const char *key)
 {
     register char *s, *d;
 
