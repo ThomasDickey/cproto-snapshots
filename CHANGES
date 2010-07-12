@@ -1,6 +1,7 @@
--- $Id: CHANGES,v 4.28 2010/07/11 17:31:44 tom Exp $
+-- $Id: CHANGES,v 4.29 2010/07/12 00:44:38 tom Exp $
 
 2010/07/11 (4.7i)
+- add configure checks for ctags and lint program.
 - fix strict compiler warnings, e.g., using const.
 - support DESTDIR variable in makefile.
 - drop mkdirs.sh, use "mkdir -p"
