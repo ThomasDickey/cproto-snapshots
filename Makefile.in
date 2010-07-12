@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 4.15 2010/07/11 17:06:12 tom Exp $
+# $Id: Makefile.in,v 4.16 2010/07/12 00:43:24 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
@@ -15,6 +15,7 @@ CPP		= @CPP@
 LEX		= @LEX@
 YACC		= @YACC@
 LINT		= @LINT@
+CTAGS		= @CTAGS@
 
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
@@ -160,7 +161,7 @@ default.h: $(C_FILES) lex.yy.c
 	./$(PROG) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@
 
 lint: $(C_FILES) $(JUNK)
-	$(LINT) $(CPPFLAGS) -lyacc $(C_FILES) y.tab.c >$@.out
+	$(LINT) $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
 
 llib: $(C_FILES) $(JUNK)
 	./$(PROG) -l $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
@@ -169,7 +170,7 @@ self: $(C_FILES) $(JUNK)
 	./$(PROG) $(CPPFLAGS) $(C_FILES) y.tab.c >$@.out
 
 tags: $(H_FILES) $(C_FILES) $(AUX_FILES)
-	ctags $(C_FILES) $(AUX_FILES) $(H_FILES)
+	$(CTAGS) $(C_FILES) $(AUX_FILES) $(H_FILES)
 
 depend:
 	makedepend -- $(CPPFLAGS) -- $(C_FILES) y.tab.c
