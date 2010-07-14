@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.14 2010/07/11 17:17:27 tom Exp $
+/* $Id: cproto.h,v 4.15 2010/07/14 09:17:42 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -243,8 +243,8 @@ extern char *xStrdup        (const char *s, char *f, int l);
 #define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
 #define xstrdup(s)          xStrdup(s, __FILE__, __LINE__)
 #else
-extern void *xrealloc       (void *p, unsigned n);
-extern void *xmalloc        (unsigned n);
+extern void *xrealloc       (void *p, size_t n);
+extern void *xmalloc        (size_t n);
 extern char *xstrdup        (const char *src);
 #endif
 #endif /* !HAVE_LIBDMALLOC */
