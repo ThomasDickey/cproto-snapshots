@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.21 2014/01/01 15:57:41 tom Exp $
+# $Id: Makefile.in,v 4.23 2015/07/06 00:51:13 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7l
+RELEASE = 4_7m
 
 #### Start of system configuration section. ####
 
@@ -122,7 +122,7 @@ clean :: mostlyclean
 	- cd $(srcdir)/testing && $(MAKE) $@
 
 distclean :: clean
-	- rm -f config.log config.cache config.status config.h Makefile
+	- rm -f config.log config.cache config.status config.h Makefile man2html.tmp
 	- rm -f .version .fname
 	- cd $(srcdir)/testing && $(MAKE) $@
 

@@ -1,4 +1,8 @@
--- $Id: CHANGES,v 4.41 2014/01/01 15:46:55 tom Exp $
+-- $Id: CHANGES,v 4.42 2015/07/06 00:38:30 tom Exp $
+
+2015/07/05 (4.7m)
+- add --with-man2html option to configure script
+- update config.guess, config.sub
 
 2014/01/01 (4.7l)
 - add "docs" rule to makefile.
