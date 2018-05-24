@@ -5207,12 +5207,12 @@ EOF
 rm -f yacctest.y
 cat >yacctest.y <<EOF
 %{
-#define xstrdup(s) s
+#define xstrdup(s) strcpy(malloc(strlen(s)+1), (s))
 #include "system.h"
 #include <stdio.h>
 #include <ctype.h>
 #include "yyerror.c"
-static void yaccError(const char *s) { ${cf_cv_main_return:-return}(0); }
+static void yaccError(const char *s) { (void)*s; return; }
 int yylex (void)
 { return 1; }
 %}

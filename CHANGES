@@ -1,4 +1,7 @@
--- $Id: CHANGES,v 4.48 2018/05/24 09:09:13 tom Exp $
+-- $Id: CHANGES,v 4.49 2018/05/24 23:38:39 tom Exp $
+
+2018/05/25 (4.7o)
+- correct logic in CF_YACC_ERROR macro for clang.
 
 2018/05/24 (4.7n)
 - add check_errors rule to show error messages from test-cases

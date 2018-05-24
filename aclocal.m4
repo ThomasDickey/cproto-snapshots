@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.25 2018/05/23 23:03:27 tom Exp $
+dnl $Id: aclocal.m4,v 4.26 2018/05/24 23:35:05 tom Exp $
 dnl
 dnl Macros for cproto configure script
 dnl ---------------------------------------------------------------------------
@@ -1532,7 +1532,7 @@ make an error
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_YACC_ERROR version: 7 updated: 2014/01/01 10:38:58
+dnl CF_YACC_ERROR version: 8 updated: 2018/05/24 19:33:52
 dnl -------------
 dnl	Test the supplied version of yacc to see which (if any) of the
 dnl	error-reporting enhancements will work.
@@ -1545,12 +1545,12 @@ AC_DEFUN([CF_YACC_ERROR],
 rm -f yacctest.y
 cat >yacctest.y <<EOF
 %{
-#define xstrdup(s) s
+#define xstrdup(s) strcpy(malloc(strlen(s)+1), (s))
 #include "system.h"
 #include <stdio.h>
 #include <ctype.h>
 #include "yyerror.c"
-static void yaccError(const char *s) { ${cf_cv_main_return:-return}(0); }
+static void yaccError(const char *s) { (void)*s; return; }
 int yylex (void)
 { return 1; }
 %}
