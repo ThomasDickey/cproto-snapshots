@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.38 2018/05/23 00:35:01 tom Exp $
+/* $Id: cproto.c,v 4.39 2018/05/24 23:36:34 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7n"
+#define VERSION "4.7o"
 
 #include <cproto.h>
 
