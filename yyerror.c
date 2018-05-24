@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.9 2010/07/14 09:57:46 tom Exp $
+/* $Id: yyerror.c,v 4.10 2018/05/23 22:18:44 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function.
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -54,7 +54,7 @@
 	for (x = ((n > 0) ? n : 0); x < YYLAST; ++x) {\
 	    c1 = x - n;\
 	    if ((yychk[yyact[x]] == c1) && (c1 != YYERRCODE)) {\
-		if (isascii(UCH(c1))) {\
+		if ((c1 >= 32) && (c1 < 127)) {\
 		    static char tmp[] = "'%'";\
 		    tmp[1] = c1;\
 		    yaccExpected(tmp, count++);\

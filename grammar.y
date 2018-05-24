@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.21 2011/01/02 19:31:22 tom Exp $
+/* $Id: grammar.y,v 4.22 2018/05/24 00:08:14 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -669,13 +669,15 @@ pointer
 	: '*' opt_type_qualifiers
 	{
 	    need_temp(2 + strlen($2.text));
-	    (void)sprintf($$.text, "*%s", $2.text);
+	    (void)sprintf($$.text, "*%.*s", MAX_TEXT_SIZE - 2, $2.text);
 	    $$.begin = $1.begin;
 	}
 	| '*' opt_type_qualifiers pointer
 	{
 	    need_temp(2 + strlen($2.text) + strlen($3.text));
-	    (void)sprintf($$.text, "*%s%s", $2.text, $3.text);
+	    (void)sprintf($$.text, "*%.*s%.*s",
+			  (MAX_TEXT_SIZE / 2) - 2, $2.text,
+			  (MAX_TEXT_SIZE / 2) - 2, $3.text);
 	    $$.begin = $1.begin;
 	}
 	;
@@ -700,7 +702,9 @@ type_qualifier_list
 	| type_qualifier_list type_qualifier
 	{
 	    need_temp(1 + strlen($1.text) + strlen($2.text));
-	    (void)sprintf($$.text, "%s%s ", $1.text, $2.text);
+	    (void)sprintf($$.text, "%.*s%.*s ",
+			  (MAX_TEXT_SIZE / 2) - 2, $1.text,
+			  (MAX_TEXT_SIZE / 2) - 2, $2.text);
 	    $$.begin = $1.begin;
 	    free($2.text);
 	}
@@ -776,7 +780,7 @@ identifier_or_ref
 		$$ = $2;
 	    } else
 #endif
-		(void)sprintf($$.text, "&%s", $2.text);
+		(void)sprintf($$.text, "&%.*s", MAX_TEXT_SIZE - 2, $2.text);
 	    $$.begin = $1.begin;
 	}
 	;

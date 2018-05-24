@@ -1,3 +1,9 @@
+cproto (4.7n) unstable; urgency=low
+
+  * maintenance updates
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Tue, 22 May 2018 20:35:01 -0400
+
 cproto (4.7m) unstable; urgency=low
 
   * configure script updates

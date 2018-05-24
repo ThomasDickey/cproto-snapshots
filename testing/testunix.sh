@@ -1,12 +1,23 @@
 #!/bin/sh
-# $Id: testunix.sh,v 4.1 1998/01/20 00:59:47 cthuang Exp $
+# $Id: testunix.sh,v 4.2 2018/05/23 01:08:59 tom Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
 #
 CPROTO=../cproto
-for i in $*
+errors=
+
+for i in "$@"
 do
+	case $i in
+	check)
+		continue
+		;;
+	check_errors)
+		errors=yes
+		continue
+		;;
+	esac
 	echo '** Case '$i
 	I="case$i"
 	./make_dcl.sh $i
@@ -42,6 +53,7 @@ do
 				cat $I.tmp
 			else
 				echo '... ok'
+				[ -n "$errors" ] && cat $I.err
 				rm -f $I.out $I.tmp $I.err
 			fi
 		else

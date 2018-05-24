@@ -1,7 +1,7 @@
 Summary:  cproto - generate C function prototypes and convert function definitions
 %define AppProgram cproto
-%define AppVersion 4.7m
-# $XTermId: cproto.spec,v 1.6 2015/07/06 00:51:34 tom Exp $
+%define AppVersion 4.7n
+# $XTermId: cproto.spec,v 1.8 2018/05/24 00:20:50 tom Exp $
 Name: %{AppProgram}
 Version: %{AppVersion}
 Release: 1
@@ -19,17 +19,20 @@ variables defined in the files.
 
 %prep
 
+%define debug_package %{nil}
+
 %setup -q -n %{AppProgram}-%{AppVersion}
 
 %build
 
 INSTALL_PROGRAM='${INSTALL}' \
-	./configure \
-		--target %{_target_platform} \
-		--prefix=%{_prefix} \
-		--bindir=%{_bindir} \
-		--libdir=%{_libdir} \
-		--mandir=%{_mandir}
+%configure \
+  --target %{_target_platform} \
+  --prefix=%{_prefix} \
+  --bindir=%{_bindir} \
+  --libdir=%{_libdir} \
+  --mandir=%{_mandir} \
+  --enable-llib           
 
 make
 
@@ -50,6 +53,9 @@ strip $RPM_BUILD_ROOT%{_bindir}/%{AppProgram}
 
 %changelog
 # each patch should add its ChangeLog entries here
+
+* Wed May 23 2018 Thomas Dickey
+- turn off debug package; add llib feature
 
 * Sun Jan 02 2011 Thomas Dickey
 - cproto 4.7j
