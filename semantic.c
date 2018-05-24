@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.15 2011/01/02 19:17:15 tom Exp $
+/* $Id: semantic.c,v 4.17 2018/05/24 00:46:19 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -365,12 +365,11 @@ put_parameter(FILE *outf,
 	      int commented)	/* comment-delimiters already from higher level */
 {
     const char *s2;
-    char *s;
     char gap = ' ';
 
 #if OPT_LINTLIBRARY
     if (name_only) {
-	s = p->declarator->name;
+	char *s = p->declarator->name;
 	if (lintLibrary()) {
 	    while (*s == '*')
 		s++;
@@ -400,7 +399,7 @@ put_parameter(FILE *outf,
 #if OPT_LINTLIBRARY
     if (lintLibrary()) {
 	char *t, *u;
-	s = p->declarator->text;
+	char *s = p->declarator->text;
 	while (*s == '*')
 	    s++;
 	if (*s == '\0') {

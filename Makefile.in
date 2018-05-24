@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.23 2015/07/06 00:51:13 tom Exp $
+# $Id: Makefile.in,v 4.25 2018/05/23 01:10:17 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7m
+RELEASE = 4_7n
 
 #### Start of system configuration section. ####
 
@@ -130,8 +130,9 @@ realclean :: distclean
 	- rm -f tags
 	- cd $(srcdir)/testing && $(MAKE) $@
 
-check:	$(PROG)
-	cd $(srcdir)/testing && $(MAKE) run_test
+check \
+check_errors:	$(PROG)
+	cd $(srcdir)/testing && $(MAKE) $@
 
 # I keep my sources in RCS, and assign a symbolic release to the current patch
 # level.  The 'manifest' script knows how to build a list of files for a given

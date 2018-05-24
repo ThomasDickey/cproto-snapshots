@@ -1,4 +1,4 @@
-# $Id: makefile,v 4.4 2004/03/09 01:31:56 tom Exp $
+# $Id: makefile,v 4.5 2018/05/23 01:05:35 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -42,6 +42,7 @@ distclean: clean
 realclean: distclean
 	- rm -f *.dcl case*.bat
 
-run_test:	$(SOURCES)
+check \
+check_errors:	$(SOURCES)
 	date >>$@.out
-	sh -c '(./run_test.sh 2>&1)' |tee -a $@.out
+	sh -c '(./run_test.sh $@ 2>&1)' |tee -a $@.out

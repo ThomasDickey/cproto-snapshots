@@ -1,4 +1,11 @@
--- $Id: CHANGES,v 4.42 2015/07/06 00:38:30 tom Exp $
+-- $Id: CHANGES,v 4.48 2018/05/24 09:09:13 tom Exp $
+
+2018/05/24 (4.7n)
+- add check_errors rule to show error messages from test-cases
+- correct logic in YACC_HAS_YYTOKS case for isascii().
+- updated/improved test-packages.
+- updated configure macros
+- update config.guess
 
 2015/07/05 (4.7m)
 - add --with-man2html option to configure script
