@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.23 2014/01/01 16:01:46 tom Exp $
+/* $Id: lex.l,v 4.25 2020/07/16 19:34:05 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -77,7 +77,7 @@ static int asm_level;		/* parenthesis level for "asm" parsing */
 static int save_cpp;		/* true if cpp-text within curly braces */
 static int in_cpp;		/* true while we are within cpp-text */
 static int curly;		/* number of curly brace nesting levels */
-static int ly_count;		/* number of occurances of %% */
+static int ly_count;		/* number of occurrences of %% */
 
 #ifdef FLEX_SCANNER
 /* flex scanner state */
@@ -291,6 +291,10 @@ QUOTE		[\"\']
 <INITIAL>__extension__ 	{ save_text_offset(); return T_EXTENSION; }
 <INITIAL>__attribute__	{ gcc_attribute(); }
 
+<INITIAL>__ibm128 	|
+<INITIAL>__float128 	|
+<INITIAL>_Float128 	{ save_text_offset(); return T_LONG_DOUBLE; }
+
 <INITIAL>globalvalue	{ vms_extern; }
 <INITIAL>globalref	{ vms_extern; }
 <INITIAL>globaldef	{ vms_extern; }
@@ -450,14 +454,14 @@ gcc_attribute(void)
 static int
 type_of_name(char *name)
 {
+    int result = T_IDENTIFIER;
     if (find_symbol(type_qualifiers, name) != NULL)
-	return T_TYPE_QUALIFIER;
+	result = T_TYPE_QUALIFIER;
     else if (find_symbol(typedef_names, name) != NULL)
-	return T_TYPEDEF_NAME;
+	result = T_TYPEDEF_NAME;
     else if (find_symbol(define_names, name) != NULL)
-	return T_DEFINE_NAME;
-    else
-	return T_IDENTIFIER;
+	result = T_DEFINE_NAME;
+    return result;
 }
 
 boolean

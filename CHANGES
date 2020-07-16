@@ -1,4 +1,15 @@
--- $Id: CHANGES,v 4.49 2018/05/24 23:38:39 tom Exp $
+-- $Id: CHANGES,v 4.54 2020/07/16 19:42:15 tom Exp $
+
+2020/07/16 (4.7p)
+- add keywords for gcc "additonal floating types" (report by Aaron Sosnick).
+- modify testing makefile/scripts to support an external script which collects
+  the warning messages from different implementations of yacc.
+- drop obsolete dist/MANIFEST rules from top-level makefile; the MANIFEST file
+  has long been generated from an external script.
+- comment-out unterminated string example in testing/syntax.c, since newer gcc
+  C preprocessor no longer ignores text which is ifdef'd out.
+- updated configure macros
+- update config.guess, config.sub
 
 2018/05/25 (4.7o)
 - correct logic in CF_YACC_ERROR macro for clang.

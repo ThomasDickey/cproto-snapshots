@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.10 2018/05/24 00:02:45 tom Exp $
+/* $Id: strkey.c,v 4.11 2020/07/16 13:00:27 tom Exp $
  *
  * Some string handling routines
  */
@@ -8,7 +8,7 @@
 #define	LETTER(c) (isalnum(UCH(c)) || (c == '_') || (c == '$'))
 
 /*
- * Return a pointer to the first occurence of the given keyword in the string
+ * Return a pointer to the first occurrence of the given keyword in the string
  * or NULL if not found.  Unlike 'strstr()', which verifies that the match is
  * against an identifier-token.
  */
@@ -50,7 +50,7 @@ strcut(char *src, const char *key)
 }
 
 /* Search for a substring within the given string.
- * Return a pointer to the first occurence within the string,
+ * Return a pointer to the first occurrence within the string,
  * or NULL if not found.
  */
 #if !HAVE_STRSTR

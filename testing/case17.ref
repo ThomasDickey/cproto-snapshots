@@ -245,9 +245,9 @@ typedef	struct	bong	{
 typedef	char	*string;
 
 #ifdef	ERR_LEX
-string	s = "aaa\0000\
-
-bbb";
+/* string	s = "aaa\0000\ */
+/*  */
+/* bbb"; */
 #endif	/* ERR_LEX */
 
 extern	int	junk;

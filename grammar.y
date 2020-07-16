@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.22 2018/05/24 00:08:14 tom Exp $
+/* $Id: grammar.y,v 4.23 2020/07/16 19:16:00 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -22,6 +22,8 @@
 	T_ENUM T_STRUCT T_UNION
 	/* C9X new types */
 	T_Bool T_Complex T_Imaginary
+	/* nonstandard "gcc" types */
+	T_LONG_DOUBLE
 
 	/* type qualifiers */
 	T_TYPE_QUALIFIER
@@ -416,6 +418,10 @@ type_specifier
 	    new_decl_spec(&$$, $1.text, $1.begin, DS_CHAR);
 	}
 	| T_DOUBLE
+	{
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	}
+	| T_LONG_DOUBLE
 	{
 	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
 	}

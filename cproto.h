@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.18 2013/10/25 20:28:26 tom Exp $
+/* $Id: cproto.h,v 4.19 2020/07/16 18:43:54 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -264,8 +264,8 @@ extern void ExitProgram(int code);
 #endif
 #if !HAVE_LIBDMALLOC
 #ifdef NO_LEAKS
-extern void *xRealloc(void *p, unsigned n, char *f, int l);
-extern void *xMalloc(unsigned n, char *f, int l);
+extern void *xRealloc(void *p, size_t n, char *f, int l);
+extern void *xMalloc(size_t n, char *f, int l);
 extern char *xStrdup(const char *s, char *f, int l);
 #define xrealloc(p,n)       xRealloc(p, n, __FILE__, __LINE__)
 #define xmalloc(n)          xMalloc(n, __FILE__, __LINE__)
