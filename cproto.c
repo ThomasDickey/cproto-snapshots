@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.39 2018/05/24 23:36:34 tom Exp $
+/* $Id: cproto.c,v 4.41 2020/07/16 19:33:51 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7o"
+#define VERSION "4.7p"
 
 #include <cproto.h>
 
@@ -792,7 +792,7 @@ main(int argc, char *argv[])
      */
     progname = xstrdup(argv[0]);
 #ifdef NO_LEAKS
-    argv0 = progname = argv0;
+    argv0 = progname;
 #endif
 #ifdef vms
     for (i = strlen(progname) - 1; i >= 0; i--) {

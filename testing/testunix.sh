@@ -1,11 +1,22 @@
 #!/bin/sh
-# $Id: testunix.sh,v 4.2 2018/05/23 01:08:59 tom Exp $
+# $Id: testunix.sh,v 4.4 2020/07/16 15:22:28 tom Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
 #
 CPROTO=../cproto
 errors=
+
+[ -z "$TEST_REF" ] && TEST_REF=.
+mkdir -p $TEST_REF
+
+save_errs() {
+	if [ "$TEST_REF" != . ]
+	then
+		cp "$ERR_FILE" "$TEST_REF/"
+	fi
+	rm -f "$ERR_FILE"
+}
 
 for i in "$@"
 do
@@ -18,50 +29,65 @@ do
 		continue
 		;;
 	esac
-	echo '** Case '$i
+	echo "** Case $i"
 	I="case$i"
-	./make_dcl.sh $i
+	./make_dcl.sh "$i"
 
-	rm -f $I.c $I.out $I.err $I.tmp
-	cp syntax.c $I.c
-	chmod +w $I.c
+	TST_FILE="$I.c"
+	OUT_FILE="$I.out"
+	ERR_FILE="$I.err"
+	REF_FILE="$TEST_REF/$I.ref"
+	TMP_FILE="$I.tmp"
 
-	. ./$I.dcl 2>$I.err
+	rm -f "$TST_FILE" "$OUT_FILE" "$ERR_FILE" "$TMP_FILE"
+	cp syntax.c "$TST_FILE"
+	chmod +w "$TST_FILE"
 
-	if [ -f $I.ref ]
+	. "./$I.dcl" 2>"$ERR_FILE"
+
+	# When we select either the -a or -t options, CPROTO will edit
+	# the input file.  It also writes to the standard output the
+	# prototypes that it is extracting.  Since there's only one
+	# reference for each test, I simply concatenate the edited file
+	# after the test output, for use as a combined reference.
+	if ! cmp -s "$TST_FILE" syntax.c
 	then
-		# When we select either the -a or -t options, CPROTO will edit
-		# the input file.  It also writes to the standard output the
-		# prototypes that it is extracting.  Since there's only one
-		# reference for each test, I simply concatenate the edited file
-		# after the test output, for use as a combined reference.
-		if ( cmp -s $I.c syntax.c )
-		then
-			rm -f $I.c
-		else
-			echo '... edited '$I.c' ...' >>$I.out
-			cat $I.c >>$I.out
-			rm -f $I.c
-		fi
+		echo "... edited $TST_FILE ..." >>"$OUT_FILE"
+		cat "$TST_FILE" >>"$OUT_FILE"
+	fi
+	rm -f "$TST_FILE"
 
-		if [ -f $I.out ]
+	if [ -f "$REF_FILE" ]
+	then
+		if [ -f "$OUT_FILE" ]
 		then
-			diff -b -c $I.ref $I.out |fgrep -v 'No diff' >$I.tmp
-			if [ -s $I.tmp ]
+			diff -b -c "$REF_FILE" "$OUT_FILE" |fgrep -v 'No diff' >"$TMP_FILE"
+			if [ -s "$TMP_FILE" ]
 			then
-				cat $I.err
-				cat $I.tmp
+				echo '... error'
+				cat "$ERR_FILE"
+				cat "$TMP_FILE"
 			else
 				echo '... ok'
-				[ -n "$errors" ] && cat $I.err
-				rm -f $I.out $I.tmp $I.err
+				if [ -n "$errors" ]
+				then
+					if [ "$TEST_REF" != "." ]
+					then
+						cmp -s "$ERR_FILE" "$TEST_REF/$ERR_FILE" || cat "$ERR_FILE"
+					else
+						cat "$ERR_FILE"
+					fi
+				fi
+				rm -f "$OUT_FILE" "$TMP_FILE" "$ERR_FILE"
 			fi
 		else
-			echo '? no output '$I
+			echo "? no output $I"
 		fi
 	else
-		echo '...saving reference for '$i
-		mv $I.out $I.ref
-		rm -f $I.err
+		echo "...saving reference for $i"
+		mv "$OUT_FILE" "$REF_FILE"
+		save_errs
+		rm -f "$OUT_FILE" "$TMP_FILE" "$ERR_FILE"
 	fi
 done
+# vile: ts=4 sw=4

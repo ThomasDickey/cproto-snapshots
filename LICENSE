@@ -1,0 +1,6 @@
+cproto is in the public domain; changes made to it by the current
+maintainer are likewise unrestricted.  That applies to most of the files.
+A few files (currently those related to autoconf scripting) have other
+licenses (MIT-X11).
+
+Current cproto maintainer: Thomas Dickey <dickey@invisible-island.net>

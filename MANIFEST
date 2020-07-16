@@ -1,8 +1,9 @@
-MANIFEST for cproto, version t20180525
+MANIFEST for cproto, version t20200716
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 AUTHORS                         authors
 CHANGES                         summary of changes made to CPROTO
+LICENSE                         license-PD
 Makefile.in                     top-level makefile template
 README                          overview of the CPROTO program
 aclocal.m4                      autoconf macros

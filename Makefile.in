@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.26 2018/05/24 23:36:34 tom Exp $
+# $Id: Makefile.in,v 4.32 2020/07/16 23:19:46 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7o
+RELEASE = 4_7p
 
 #### Start of system configuration section. ####
 
@@ -41,9 +41,11 @@ MANDIR		= $(DESTDIR)$(mandir)/man$(manext)
 x		= @EXEEXT@
 o		= .@OBJEXT@
 
+TEST_REF	= .
+
 #### End of system configuration section. ####
 
-SHELL		= /bin/sh
+SHELL		= @THIS_SHELL@
 @SET_MAKE@
 
 PROG		= $(THIS)$x
@@ -132,29 +134,7 @@ realclean :: distclean
 
 check \
 check_errors:	$(PROG)
-	cd $(srcdir)/testing && $(MAKE) $@
-
-# I keep my sources in RCS, and assign a symbolic release to the current patch
-# level.  The 'manifest' script knows how to build a list of files for a given
-# revision -TD
-MANIFEST:
-	manifest -rv$(RELEASE) \
-		$(THIS).man \
-		$(srcdir)/testing/case*.dcl \
-		$(srcdir)/testing/case*.bat
-
-dist: MANIFEST
-	- rm -f .fname .files
-	echo '$(THIS)-$(RELEASE)' >.fname
-	cat MANIFEST | grep ' ' | egrep -v ' subdirectory$$' | sed -e 's/\ .*//' | uniq >.files
-	rm -rf `cat .fname`
-	TOP=`cat .fname`; mkdir $$TOP `cat .files | grep / | sed -e 's@/.*@@' | sed -e s@\^@$$TOP/@ | uniq`
-	for file in `cat .files`; do \
-	  ln $(srcdir)/$$file `cat .fname`/$$file \
-	    || { echo copying $$file instead; cp $$file `cat .fname`/$$file; }; \
-	done
-	tar -cf - `cat .fname` | gzip >`cat .fname`.tgz
-	rm -rf `cat .fname` .fname .files
+	cd $(srcdir)/testing && $(MAKE) $@ TEST_REF="$(TEST_REF)" SHELL="$(SHELL)"
 
 default.h: $(C_FILES) lex.yy.c
 	./$(PROG) -e -v -m -M ARGS -d $(DEFINES) $(C_FILES) grammar.y >$@

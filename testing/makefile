@@ -1,10 +1,13 @@
-# $Id: makefile,v 4.5 2018/05/23 01:05:35 tom Exp $
+# $Id: makefile,v 4.9 2020/07/16 22:41:05 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
 B	= ..
+SHELL	= /bin/sh
 
 ####### (Standard Lists) #######################################################
+TEST_REF=.
+
 REF_FILES=\
 	case01.ref	case02.ref	case03.ref	case04.ref\
 	case05.ref	case06.ref	case07.ref	case08.ref\
@@ -45,4 +48,4 @@ realclean: distclean
 check \
 check_errors:	$(SOURCES)
 	date >>$@.out
-	sh -c '(./run_test.sh $@ 2>&1)' |tee -a $@.out
+	$(SHELL) -c '(SHELL="$(SHELL)" TEST_REF="$(TEST_REF)" $(SHELL) ./run_test.sh $@ 2>&1)' |tee -a $@.out
