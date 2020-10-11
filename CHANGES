@@ -1,7 +1,15 @@
--- $Id: CHANGES,v 4.54 2020/07/16 19:42:15 tom Exp $
+-- $Id: CHANGES,v 4.58 2020/10/11 19:58:21 tom Exp $
+
+2020/10/11 (4.7q)
+- align manpage formatting with ded.
+- add configure-check for preprocessor -C option, absent in some c89/c99.
+- change lexer's keyword-matching to a lookup table, avoiding ambiguity.
+- drop Apollo extensions from lexer.
+- updated configure macros
+- update config.guess, config.sub
 
 2020/07/16 (4.7p)
-- add keywords for gcc "additonal floating types" (report by Aaron Sosnick).
+- add keywords for gcc "additional floating types" (report by Aaron Sosnick).
 - modify testing makefile/scripts to support an external script which collects
   the warning messages from different implementations of yacc.
 - drop obsolete dist/MANIFEST rules from top-level makefile; the MANIFEST file

@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.23 2020/07/16 19:16:00 tom Exp $
+/* $Id: grammar.y,v 4.25 2020/10/11 17:57:51 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -13,8 +13,9 @@
 	T_AUTO T_EXTERN T_REGISTER T_STATIC T_TYPEDEF
 	/* This keyword included for compatibility with C++. */
 	T_INLINE
-	/* This keyword included for compatibility with GCC */
+	/* These keywords included for compatibility with GCC */
 	T_EXTENSION
+	T_ATTRIBUTE
 
 	/* type specifiers */
 	T_CHAR T_DOUBLE T_FLOAT T_INT T_VOID
@@ -970,6 +971,10 @@ init_parser(void)
 	"__restrict__",
 	"__volatile",
 	"__volatile__",
+#endif
+#ifdef __FreeBSD__
+	"_Noreturn",
+	"_Thread_local",
 #endif
     };
     unsigned i;
