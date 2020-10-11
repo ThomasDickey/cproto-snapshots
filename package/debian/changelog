@@ -1,3 +1,9 @@
+cproto (4.7q) unstable; urgency=low
+
+  * maintenance updates
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Sun, 11 Oct 2020 11:35:01 -0400
+
 cproto (4.7p) unstable; urgency=low
 
   * maintenance updates

@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.25 2020/07/16 19:34:05 tom Exp $
+/* $Id: lex.l,v 4.27 2020/10/11 19:40:57 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -17,21 +17,6 @@
  *
  *	The logic here recognizes tokens inside curly-braces, but does not
  *	pass them back to the grammar.
- *
- * Apollo extensions:
- *	"&" is ignored when creating lint-libraries, because we ignore
- *	expressions of all kinds.  Note that function-prototypes may use "&" to
- *	denote reference-parameters.  By ignoring that as well, we make the
- *	output compatible with lint (kludge).
- *
- *	Similarly, ignore "std_$call", since it is not compatible with lint.
- *
- *	CPP_INLINE handles a special case of the Apollo CC 6.7 compiler that
- *	uses inline attribute declarations, e.g.
- *
- *		int	foo #attribute[aligned(1)];
- *
- *	In CC 6.8 this behavior is hidden by a macro.
  *
  * VAX/VMS extensions:
  *	Treat the keywords 'globalref', etc., as 'extern'.
@@ -51,22 +36,6 @@
 #if !OPT_LINTLIBRARY
 #define gcc_attribute   absorb_special	/* otherwise, we don't care */
 #endif
-
-#ifdef	apollo
-#define	apollo_keyword
-#define	apollo_special	absorb_special()
-#else
-#define	apollo_keyword	is_IDENTIFIER
-#define	apollo_special	is_IDENTIFIER
-#endif
-
-#ifdef	vms
-#define	vms_extern	save_text_offset(); return(T_EXTERN);
-#define	vms_keyword	save_text_offset();
-#else /* unix */
-#define	vms_extern	is_IDENTIFIER
-#define	vms_keyword	is_IDENTIFIER
-#endif /* vms/unix */
 
 char *varargs_str;		/* save printflike/scanflike text */
 int varargs_num;		/* code to save "VARARGS" */
@@ -101,7 +70,7 @@ static SymbolTable *included_files;	/* files already included */
 static int type_of_name(char *name);
 static void startCpp(int level);
 static void finishCpp(void);
-#if defined(apollo) || !OPT_LINTLIBRARY
+#if !OPT_LINTLIBRARY
 static void absorb_special(void);
 #endif
 #if OPT_LINTLIBRARY
@@ -151,8 +120,6 @@ QUOTE		[\"\']
 <INITIAL>#{WS}* 	{ save_text(); startCpp(0); }
 <INITIAL>"??="{WS}* 	{ save_text(); startCpp(0); }
 
-<CPP1>attribute		{ BEGIN CPP_INLINE; /* apollo */}
-<CPP1>options		{ BEGIN CPP_INLINE; /* apollo */}
 <CPP_INLINE>[^;]*	finishCpp();
 
 <CPP1>define{WS}+{ID}	{
@@ -258,51 +225,17 @@ QUOTE		[\"\']
 
 <INITIAL>__?based[^(]*\([^)]*\)	{ save_text_offset(); return T_TYPE_QUALIFIER; }
 
-<INITIAL>auto		{ save_text_offset(); return T_AUTO; }
-<INITIAL>extern 	{ save_text_offset(); return T_EXTERN; }
-<INITIAL>register	{ save_text_offset(); return T_REGISTER; }
-<INITIAL>static 	{ save_text_offset(); return T_STATIC; }
-<INITIAL>typedef	{ save_text_offset(); return T_TYPEDEF; }
-<INITIAL>inline 	{ save_text_offset(); return T_INLINE; }
-
-<INITIAL>_Bool		{ save_text_offset(); return T_Bool; }
-<INITIAL>_Complex	{ save_text_offset(); return T_Complex; }
-<INITIAL>_Imaginary	{ save_text_offset(); return T_Imaginary; }
-
-<INITIAL>char		{ save_text_offset(); return T_CHAR; }
-<INITIAL>double 	{ save_text_offset(); return T_DOUBLE; }
-<INITIAL>float		{ save_text_offset(); return T_FLOAT; }
-<INITIAL>int		{ save_text_offset(); return T_INT; }
-<INITIAL>void		{ save_text_offset(); return T_VOID; }
-<INITIAL>long		{ save_text_offset(); return T_LONG; }
-<INITIAL>short		{ save_text_offset(); return T_SHORT; }
-<INITIAL>signed 	{ save_text_offset(); return T_SIGNED; }
-<INITIAL>unsigned	{ save_text_offset(); return T_UNSIGNED; }
-
-<INITIAL>enum		{ save_text_offset(); return T_ENUM; }
-<INITIAL>struct 	{ save_text_offset(); return T_STRUCT; }
-<INITIAL>union		{ save_text_offset(); return T_UNION; }
-<INITIAL>va_dcl		{ save_text_offset(); return T_VA_DCL; }
-
-<INITIAL>__signed 	{ save_text_offset(); return T_SIGNED; }
-<INITIAL>__signed__ 	{ save_text_offset(); return T_SIGNED; }
-<INITIAL>__inline 	{ save_text_offset(); return T_INLINE; }
-<INITIAL>__inline__ 	{ save_text_offset(); return T_INLINE; }
-<INITIAL>__extension__ 	{ save_text_offset(); return T_EXTENSION; }
-<INITIAL>__attribute__	{ gcc_attribute(); }
-
-<INITIAL>__ibm128 	|
-<INITIAL>__float128 	|
-<INITIAL>_Float128 	{ save_text_offset(); return T_LONG_DOUBLE; }
-
-<INITIAL>globalvalue	{ vms_extern; }
-<INITIAL>globalref	{ vms_extern; }
-<INITIAL>globaldef	{ vms_extern; }
-
-<INITIAL>"std_$call"	{ apollo_keyword; }
-<INITIAL>"__attribute"	{ apollo_special; }
-
-<INITIAL>{ID}		{ is_IDENTIFIER }
+<INITIAL>{ID}		{
+			    int code;
+			    save_text_offset();
+			    switch (code = type_of_name(yytext)) {
+			    case T_ATTRIBUTE:
+				gcc_attribute();
+				break;
+			    default:
+				return code;
+			    }
+			}
 
 <INITIAL>\[[^\]]*\]	{
 			    /* This can't handle the case where a comment
@@ -391,7 +324,7 @@ finishCpp(void)
 /*
  * Skip over embedded __attribute/__attribute_ syntax.
  */
-#if defined(apollo) || !OPT_LINTLIBRARY
+#if !OPT_LINTLIBRARY
 static void
 absorb_special(void)
 {
@@ -454,13 +387,72 @@ gcc_attribute(void)
 static int
 type_of_name(char *name)
 {
+    /* *INDENT-OFF* */
+    static const struct {
+	const char *name;
+	int code;
+    } table[] = {
+	{ "auto",		T_AUTO },
+	{ "extern", 		T_EXTERN },
+	{ "register",		T_REGISTER },
+	{ "static", 		T_STATIC },
+	{ "typedef",		T_TYPEDEF },
+	{ "inline", 		T_INLINE },
+
+	{ "_Bool",		T_Bool },
+	{ "_Complex",		T_Complex },
+	{ "_Imaginary",		T_Imaginary },
+
+	{ "char",		T_CHAR },
+	{ "double", 		T_DOUBLE },
+	{ "float",		T_FLOAT },
+	{ "int",		T_INT },
+	{ "void",		T_VOID },
+	{ "long",		T_LONG },
+	{ "short",		T_SHORT },
+	{ "signed", 		T_SIGNED },
+	{ "unsigned",		T_UNSIGNED },
+
+	{ "enum",		T_ENUM },
+	{ "struct", 		T_STRUCT },
+	{ "union",		T_UNION },
+	{ "va_dcl",		T_VA_DCL },
+
+	{ "__signed", 		T_SIGNED },
+	{ "__signed__", 	T_SIGNED },
+	{ "__inline", 		T_INLINE },
+	{ "__inline__", 	T_INLINE },
+	{ "__extension__", 	T_EXTENSION },
+	{ "__attribute__", 	T_ATTRIBUTE },
+
+	{ "__ibm128", 		T_LONG_DOUBLE },
+	{ "__float128", 	T_LONG_DOUBLE },
+	{ "_Float128", 		T_LONG_DOUBLE },
+#ifdef vms
+	{ "globalvalue",	T_EXTERN },
+	{ "globalref",		T_EXTERN },
+	{ "globaldef",		T_EXTERN },
+#endif
+    };
+    /* *INDENT-ON* */
     int result = T_IDENTIFIER;
-    if (find_symbol(type_qualifiers, name) != NULL)
-	result = T_TYPE_QUALIFIER;
-    else if (find_symbol(typedef_names, name) != NULL)
-	result = T_TYPEDEF_NAME;
-    else if (find_symbol(define_names, name) != NULL)
-	result = T_DEFINE_NAME;
+    unsigned n;
+    for (n = 0; n < sizeof(table) / sizeof(table[0]); ++n) {
+	if (!strcmp(table[n].name, name)) {
+	    result = table[n].code;
+	    break;
+	}
+    }
+    switch (result) {
+    case T_IDENTIFIER:
+	if (find_symbol(type_qualifiers, name) != NULL)
+	    result = T_TYPE_QUALIFIER;
+	else if (find_symbol(typedef_names, name) != NULL)
+	    result = T_TYPEDEF_NAME;
+	else if (find_symbol(define_names, name) != NULL)
+	    result = T_DEFINE_NAME;
+	break;
+    }
     return result;
 }
 
@@ -596,7 +588,7 @@ put_quoted(int c)
 	yyleng = 0;
     }
     if (c != 0) {
-	yytext[yyleng++] = c;
+	yytext[yyleng++] = (char) c;
 	yytext[yyleng] = 0;
     }
 #endif /* LEX/FLEX */

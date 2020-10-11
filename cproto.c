@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.41 2020/07/16 19:33:51 tom Exp $
+/* $Id: cproto.c,v 4.43 2020/10/11 19:00:46 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7p"
+#define VERSION "4.7q"
 
 #include <cproto.h>
 
@@ -735,7 +735,7 @@ process_options(int *pargc, char ***pargv)
 	    extern_out = FALSE;
 	    types_out = TRUE;
 	    variables_out = TRUE;
-# if !defined(vms) && !defined(MSDOS)
+# if defined(CPP_DOES_COMMENTS)
 	    (void) strcat(cpp_opt, " -C");	/* pass-through comments */
 # endif
 	    break;
