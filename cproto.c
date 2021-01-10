@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.43 2020/10/11 19:00:46 tom Exp $
+/* $Id: cproto.c,v 4.50 2021/01/10 16:28:12 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7q"
+#define VERSION "4.7r"
 
 #include <cproto.h>
 
@@ -67,6 +67,9 @@ boolean proto_macro = FALSE;
 
 /* Name of macro to guard prototypes */
 const char *macro_name = "P_";
+
+/* Type of parameter to use with no-parameter functions */
+const char *void_name = "void";
 
 /* If TRUE, output prototype macro definition */
 boolean define_macro = TRUE;
@@ -313,43 +316,53 @@ trim_path_sep(char *s)
 static void
 usage(void)
 {
+    static const char *table[] =
+    {
+	"Options:",
+	"  -a, -t           Convert function definitions to ANSI or traditional style",
+	"  -b               Rewrite function definitions in both styles",
+	"  -c               Enable comments in prototype parameters",
+	"  -C template      Set format for function definition with parameter comments",
+	"  -D name[=value]  Define C preprocessor symbol",
+	"  -d               Omit prototype macro definition",
+	"  -E 0             Do not run any C preprocessor",
+	"  -E command       Run specified C preprocessor command",
+	"  -e               Output \"extern\" keyword before global declarations",
+	"  -f n             Set function prototype style (0 to 3)",
+	"  -F template      Set function definition format template \" int f (a, b)\"",
+	"  -I directory     Add #include search directory",
+	"  -i               Output inline declarations also",
+#if OPT_LINTLIBRARY
+	"  -l               Generate output in lint-library style",
+#endif
+	"  -M name          Set name of prototype macro",
+	"  -m               Put macro around prototype parameters",
+	"  -N name          Set parameter type for no-parameter functions",
+	"  -n               Do not fill in \"void\" for no-parameter functions",
+	"  -O file          Redirect errors to file",
+	"  -o file          Redirect output to file",
+	"  -p               Disable formal parameter promotion",
+	"  -P template      Set prototype format template \" int f (a, b)\"",
+	"  -q               Disable include file read failure messages",
+	"  -s               Output static declarations also",
+	"  -S               Output static declarations only",
+#if OPT_LINTLIBRARY
+	"  -T               Output type definitions",
+#endif
+	"  -U name          Undefine C preprocessor symbol",
+	"  -v               Output variable declarations",
+	"  -V               Print version information",
+#if OPT_LINTLIBRARY
+	"  -X level         Limit externs to given include-level",
+#endif
+	"  -x               Output variables and functions declared \"extern\"",
+    };
+    size_t n;
+
     fprintf(stderr, "usage: %s [ option ... ] [ file ... ]\n", progname);
-    fputs("Options:\n", stderr);
-    fputs("  -a, -t           Convert function definitions to ANSI or traditional style\n", stderr);
-    fputs("  -b               Rewrite function definitions in both styles\n", stderr);
-    fputs("  -c               Enable comments in prototype parameters\n", stderr);
-    fputs("  -e               Output \"extern\" keyword before global declarations\n", stderr);
-    fputs("  -f n             Set function prototype style (0 to 3)\n", stderr);
-#if OPT_LINTLIBRARY
-    fputs("  -l               Generate output in lint-library style\n", stderr);
-#endif
-    fputs("  -o file          Redirect output to file\n", stderr);
-    fputs("  -O file          Redirect errors to file\n", stderr);
-    fputs("  -p               Disable formal parameter promotion\n", stderr);
-    fputs("  -q               Disable include file read failure messages\n", stderr);
-    fputs("  -s               Output static declarations also\n", stderr);
-    fputs("  -S               Output static declarations only\n", stderr);
-    fputs("  -i               Output inline declarations also\n", stderr);
-#if OPT_LINTLIBRARY
-    fputs("  -T               Output type definitions\n", stderr);
-#endif
-    fputs("  -v               Output variable declarations\n", stderr);
-    fputs("  -x               Output variables and functions declared \"extern\"\n", stderr);
-#if OPT_LINTLIBRARY
-    fputs("  -X level         Limit externs to given include-level\n", stderr);
-#endif
-    fputs("  -m               Put macro around prototype parameters\n", stderr);
-    fputs("  -M name          Set name of prototype macro\n", stderr);
-    fputs("  -d               Omit prototype macro definition\n", stderr);
-    fputs("  -P template      Set prototype format template \" int f (a, b)\"\n", stderr);
-    fputs("  -F template      Set function definition format template \" int f (a, b)\"\n", stderr);
-    fputs("  -C template      Set format for function definition with parameter comments\n", stderr);
-    fputs("  -D name[=value]  Define C preprocessor symbol\n", stderr);
-    fputs("  -U name          Undefine C preprocessor symbol\n", stderr);
-    fputs("  -I directory     Add #include search directory\n", stderr);
-    fputs("  -E command       Run specified C preprocessor command\n", stderr);
-    fputs("  -E 0             Do not run any C preprocessor\n", stderr);
-    fputs("  -V               Print version information\n", stderr);
+    for (n = 0; n < sizeof(table) / sizeof(table[0]); ++n) {
+	fprintf(stderr, "%s\n", table[n]);
+    }
     exit(EXIT_FAILURE);
 }
 
@@ -481,6 +494,7 @@ E:\
 F:\
 I:\
 M:\
+N:\
 O:\
 P:\
 S\
@@ -497,6 +511,7 @@ f:\
 i\
 l\
 m\
+n\
 o:\
 p\
 q\
@@ -505,6 +520,21 @@ t\
 v\
 x\
 "
+
+/* If optarg is a number, return its value.  Otherwise, return -1.
+ */
+static int
+numeric_param(void)
+{
+    int result = -1;
+    char *next = NULL;
+    long value = strtol(optarg, &next, 0);
+    if (value >= 0 && (next == NULL || *next == '\0')) {
+	result = (int) value;
+    }
+    return result;
+}
+
 /* Process the command line options.
  */
 static void
@@ -679,7 +709,7 @@ process_options(int *pargc, char ***pargv)
 
 	    break;
 	case 'f':
-	    proto_style = atoi(optarg);
+	    proto_style = numeric_param();
 	    if (proto_style < 0 || proto_style > PROTO_ANSI)
 		usage();
 	    break;
@@ -688,6 +718,12 @@ process_options(int *pargc, char ***pargv)
 	    break;
 	case 'M':
 	    macro_name = optarg;
+	    break;
+	case 'n':
+	    void_name = "/*empty*/";
+	    break;
+	case 'N':
+	    void_name = optarg;
 	    break;
 	case 'p':
 	    promote_param = FALSE;
@@ -721,7 +757,7 @@ process_options(int *pargc, char ***pargv)
 	    }
 	    break;
 	case 'O':
-	    if (freopen(optarg, "w", stderr) == 0) {
+	    if (numeric_param() < 0 && freopen(optarg, "w", stderr) == 0) {
 		perror(optarg);
 		exit(EXIT_FAILURE);
 	    }
@@ -740,10 +776,10 @@ process_options(int *pargc, char ***pargv)
 # endif
 	    break;
 	case 'X':
-	    extern_in = (unsigned) atoi(optarg);
 	    do_tracking = TRUE;
-	    if ((int) extern_in < 0)
+	    if ((i = numeric_param()) < 0)
 		usage();
+	    extern_in = (unsigned) i;
 	    break;
 #endif /* OPT_LINTLIBRARY */
 	case 'x':
@@ -878,9 +914,13 @@ main(int argc, char *argv[])
 		while (s != temp && s[-1] != '/')
 		    s--;
 		(void) strcpy(s, "XXXXXX.c");
-		call_mktemp(temp);
-		if (link(argv[i], temp) < 0)
+		if (call_mktemp(temp)
+		    && link(argv[i], temp) < 0) {
 		    (void) strcpy(temp, argv[i]);
+		} else {
+		    perror("mktemp/link");
+		    exit(EXIT_FAILURE);
+		}
 	    }
 #  endif
 #  define FileName temp

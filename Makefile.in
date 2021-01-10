@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.33 2020/10/11 15:35:01 tom Exp $
+# $Id: Makefile.in,v 4.34 2021/01/10 12:01:55 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7q
+RELEASE = 4_7r
 
 #### Start of system configuration section. ####
 

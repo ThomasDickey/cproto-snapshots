@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.17 2018/05/24 00:46:19 tom Exp $
+/* $Id: semantic.c,v 4.20 2021/01/10 16:45:01 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -474,6 +474,20 @@ put_parameter(FILE *outf,
     return (TRUE);
 }
 
+/* Check for the special case where -n option is used.
+ */
+static int
+void_is_comment(Declarator * declarator)
+{
+    int result = FALSE;
+    Parameter *p = declarator->params.first;
+    if (p->next == NULL) {
+	if (p->decl_spec.text != NULL && !strncmp(p->decl_spec.text, "/*", 2))
+	    result = TRUE;
+    }
+    return result;
+}
+
 /* Output a parameter list.
  */
 static void
@@ -574,9 +588,12 @@ put_parameters(FILE *outf, Declarator * declarator, int commented)
 	if (where == FUNC_PROTO && proto_style == PROTO_TRADITIONAL &&
 	    declarator == func_declarator) {
 	    if (proto_comments) {
-		put_string(outf, COMMENT_BEGIN);
+		int already = void_is_comment(declarator);
+		if (!already)
+		    put_string(outf, COMMENT_BEGIN);
 		put_param_list(outf, declarator, TRUE);
-		put_string(outf, COMMENT_END);
+		if (!already)
+		    put_string(outf, COMMENT_END);
 	    }
 	} else if (func_style != FUNC_NONE || proto_style != PROTO_NONE) {
 #if OPT_LINTLIBRARY
@@ -869,7 +886,7 @@ check_void_param(Declarator * declarator)
     Parameter *p;
 
     if (declarator->params.first == NULL) {
-	new_decl_spec(&decl_spec, "void", 0L, DS_NONE);
+	new_decl_spec(&decl_spec, void_name, 0L, DS_NONE);
 	p = new_parameter(&decl_spec, (Declarator *) 0);
 	new_param_list(&declarator->params, p);
     }
@@ -1012,6 +1029,12 @@ put_param_decl(Declarator * declarator, int commented)
     }
 }
 
+#define FileRead(buffer, length) \
+	if (fread(buffer, sizeof(char), length, cur_tmp_file()) != length) { \
+	    perror("fread"); \
+	    exit(EXIT_FAILURE); \
+	}
+
 /* Generate a function definition head.
  */
 void
@@ -1040,7 +1063,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	comment_len = (size_t) diff;
 	*(comment = (char *) xmalloc(comment_len)) = '\0';
 	fseek(cur_tmp_file(), cur_begin_comment(), 0);
-	fread(comment, sizeof(char), comment_len, cur_tmp_file());
+	FileRead(comment, comment_len);
     } else {
 	comment_len = 0;
     }
@@ -1056,7 +1079,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	if (n > 0) {
 	    *(params->comment = (char *) xmalloc((size_t) (n + 1))) = '\0';
 	    fseek(cur_tmp_file(), params->begin_comment, 0);
-	    fread(params->comment, sizeof(char), (size_t) n, cur_tmp_file());
+	    FileRead(params->comment, (size_t) n);
 	    params->comment[n] = '\0';
 	    format = FMT_FUNC_COMMENT;
 	}
@@ -1067,7 +1090,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	    if (n > 0) {
 		*(p->comment = (char *) xmalloc((size_t) n + 1)) = '\0';
 		fseek(cur_tmp_file(), p->declarator->begin_comment, 0);
-		fread(p->comment, sizeof(char), (size_t) n, cur_tmp_file());
+		FileRead(p->comment, (size_t) n);
 		p->comment[n] = '\0';
 		format = FMT_FUNC_COMMENT;
 	    }
@@ -1091,7 +1114,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	if ((diff = (cur_begin_comment() - decl_spec->begin)) > 0) {
 	    func_len = (size_t) diff;
 	    cur_func = (char *) xmalloc(func_len);
-	    fread(cur_func, sizeof(char), func_len, cur_tmp_file());
+	    FileRead(cur_func, func_len);
 	} else {
 	    cur_func = 0;
 	    func_len = 0;

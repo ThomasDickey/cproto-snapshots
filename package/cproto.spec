@@ -1,7 +1,7 @@
 Summary:  cproto - generate C function prototypes and convert function definitions
 %define AppProgram cproto
-%define AppVersion 4.7q
-# $Id: cproto.spec,v 1.11 2020/10/11 15:35:01 tom Exp $
+%define AppVersion 4.7r
+# $Id: cproto.spec,v 1.12 2021/01/10 12:01:55 tom Exp $
 Name: %{AppProgram}
 Version: %{AppVersion}
 Release: 1
