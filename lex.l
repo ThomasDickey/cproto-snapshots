@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.27 2020/10/11 19:40:57 tom Exp $
+/* $Id: lex.l,v 4.28 2021/01/10 15:50:35 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -844,15 +844,19 @@ tmpfile(void)
     }
     name = xmalloc(strlen(tmpdir) + 20);
     sprintf(name, "%s/TfXXXXXX", tmpdir);
-    call_mktemp(name);
+    if (call_mktemp(name)) {
 
-    if ((f = fopen(name, "w+")) != 0) {
-	if (unlink(name) == -1) {
-	    fclose(f);
-	    f = 0;
+	if ((f = fopen(name, "w+")) != 0) {
+	    if (unlink(name) == -1) {
+		fclose(f);
+		f = 0;
+	    }
 	}
+	free(name);
+    } else {
+	perror("tmpfile");
+	exit(EXIT_FAILURE);
     }
-    free(name);
     return f;
 }
 #endif /* !HAVE_TMPFILE */

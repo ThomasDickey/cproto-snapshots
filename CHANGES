@@ -1,4 +1,14 @@
--- $Id: CHANGES,v 4.58 2020/10/11 19:58:21 tom Exp $
+-- $Id: CHANGES,v 4.61 2021/01/10 16:46:10 tom Exp $
+
+2021/01/10 (4.7r)
+- add -n and -N options (prompted by discussion with "Radisson97").
+- ignore -f and -O options if their values are respectively non-numeric or
+  numeric, e.g., when a user confuses CFLAGS with CPPFLAGS.
+- sort usage-message.
+- modify configure script to error out if lex/yacc are not found (report by
+  "Radisson97").
+- updated configure macros
+- update config.guess, config.sub
 
 2020/10/11 (4.7q)
 - align manpage formatting with ded.

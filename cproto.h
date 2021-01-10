@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.19 2020/07/16 18:43:54 tom Exp $
+/* $Id: cproto.h,v 4.21 2021/01/10 16:18:30 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -238,6 +238,7 @@ extern FuncDefStyle func_style;
 extern boolean proto_macro;
 extern boolean define_macro;
 extern const char *macro_name;
+extern const char *void_name;
 extern boolean proto_comments;
 extern boolean file_comments;
 extern boolean quiet;
@@ -350,9 +351,9 @@ extern void free_parser(void);
 #endif
 
 #ifdef HAVE_MKSTEMP
-#define call_mktemp(s) mkstemp(s)
+#define call_mktemp(s) (mkstemp(s) >= 0)
 #else
-#define call_mktemp(s) mktemp(s)
+#define call_mktemp(s) (mktemp(s) != NULL)
 #endif
 
 #define type_realloc(type,ptr,size) \
