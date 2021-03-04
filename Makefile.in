@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.34 2021/01/10 12:01:55 tom Exp $
+# $Id: Makefile.in,v 4.36 2021/03/03 23:53:08 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7r
+RELEASE = 4_7s
 
 #### Start of system configuration section. ####
 
@@ -40,6 +40,8 @@ MANDIR		= $(DESTDIR)$(mandir)/man$(manext)
 
 x		= @EXEEXT@
 o		= .@OBJEXT@
+
+.SUFFIXES:	.c $o .i
 
 TEST_REF	= .
 
@@ -107,6 +109,10 @@ uninstall:
 	@RULE_CC@
 	@ECHO_CC@$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
 
+.c.i:
+	@RULE_CC@
+	@ECHO_CC@$(CPP) $(CPPFLAGS) $< >$*.i
+
 $(PROG) : $(OBJECTS)
 	@ECHO_LD@$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
@@ -117,7 +123,7 @@ lex.yy.c : lex.l
 	$(LEX) $(srcdir)/lex.l
 
 mostlyclean ::
-	- rm -f core .nfs* *$o *.bak *.BAK *.out $(JUNK) default.h
+	- rm -f core .nfs* *$o *.i *.bak *.BAK *.out $(JUNK) default.h
 
 clean :: mostlyclean
 	- rm -f $(PROG)

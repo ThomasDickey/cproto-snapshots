@@ -1,4 +1,11 @@
--- $Id: CHANGES,v 4.61 2021/01/10 16:46:10 tom Exp $
+-- $Id: CHANGES,v 4.63 2021/03/04 01:25:12 tom Exp $
+
+2021/03/03 (4.7s)
+- ignore preprocessor output with zero line-numbers.
+- add some null-pointer checks in lintlibs.c, to work with compilers emitting
+  unconventional proprocessor-lines.
+- add .c.i rule to makefile
+- updated configure macros
 
 2021/01/10 (4.7r)
 - add -n and -N options (prompted by discussion with "Radisson97").

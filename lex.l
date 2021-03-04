@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.28 2021/01/10 15:50:35 tom Exp $
+/* $Id: lex.l,v 4.29 2021/03/04 00:43:22 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -161,34 +161,46 @@ QUOTE		[\"\']
 			}
 
 <CPP1>line{WS}+[0-9]+{WS}+\".*$  {
+			    unsigned line_num;
+
 			    save_text();
 
 			    parsing_file_name((unsigned) yyleng);
 			    sscanf(yytext, "line %u \"%[^\"]\"",
-					   &cur_file->line_num,
+					   &line_num,
 					   cur_file->file_name);
 
-			    cur_file->line_num--;
-			    track_in();
+			    if (line_num > 0) {
+				cur_file->line_num = line_num - 1;
+				track_in();
+			    }
 			    finishCpp();
 			}
 <CPP1>[0-9]+{WS}+\".*$  {
+			    unsigned line_num;
+
 			    save_text();
 
 			    parsing_file_name((unsigned) yyleng);
 			    sscanf(yytext, "%u \"%[^\"]\"",
-					   &cur_file->line_num,
+					   &line_num,
 					   cur_file->file_name);
 
-			    cur_file->line_num--;
-			    track_in();
+			    if (line_num > 0) {
+				cur_file->line_num = line_num - 1;
+				track_in();
+			    }
 			    finishCpp();
 			}
 <CPP1>[0-9]+.*$ 	{
+			    unsigned line_num;
+
 			    save_text();
-			    sscanf(yytext, "%u ", &cur_file->line_num);
-			    cur_file->line_num--;
-			    track_in();
+			    sscanf(yytext, "%u ", &line_num);
+			    if (line_num > 0) {
+				cur_file->line_num = line_num - 1;
+				track_in();
+			    }
 			    finishCpp();
 			}
 
