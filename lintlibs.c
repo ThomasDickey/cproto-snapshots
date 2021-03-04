@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.21 2011/01/02 19:24:03 tom Exp $
+/* $Id: lintlibs.c,v 4.22 2021/03/03 23:44:49 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -277,7 +277,7 @@ ignored(char *path)
 static const char *
 skip_dot(const char *a)
 {
-    if (!strncmp(a, "./", (size_t) 2))
+    if (a != NULL && !strncmp(a, "./", (size_t) 2))
 	a += 2;
     return a;
 }
@@ -285,7 +285,7 @@ skip_dot(const char *a)
 static int
 same_file(const char *a, const char *b)
 {
-    return !strcmp(skip_dot(a), skip_dot(b));
+    return (a != NULL && b != NULL) ? !strcmp(skip_dot(a), skip_dot(b)) : 0;
 }
 
 /*
@@ -350,6 +350,7 @@ track_in(void)
 #ifdef DEBUG
 	char temp[80];
 #endif
+	char *inc_file;
 
 	flush_varargs();
 	for (n = in_include, found = FALSE; (int) n >= 0; n--) {
@@ -391,7 +392,8 @@ track_in(void)
 #endif
 	    }
 	}
-	(void) strcpy(old_file, get_inc_stack(in_include));
+	inc_file = get_inc_stack(in_include);
+	(void) strcpy(old_file, inc_file ? inc_file : "");
     }
 #ifdef	DEBUG
     dump_stack("-after");

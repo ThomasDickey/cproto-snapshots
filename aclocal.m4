@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.34 2021/01/10 21:05:39 tom Exp $
+dnl $Id: aclocal.m4,v 4.35 2021/01/13 21:51:52 tom Exp $
 dnl
 dnl Macros for cproto configure script
 dnl ---------------------------------------------------------------------------
@@ -1381,7 +1381,7 @@ $1=`echo "$2" | \
 		-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[$]//g'`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SIZE_T version: 5 updated: 2013/12/05 19:11:11
+dnl CF_SIZE_T version: 6 updated: 2021/01/10 18:23:00
 dnl ---------
 dnl	On both Ultrix and CLIX, I find size_t defined in <stdio.h>
 AC_DEFUN([CF_SIZE_T],
@@ -1400,7 +1400,7 @@ AC_CACHE_VAL(cf_cv_type_size_t,[
 		[cf_cv_type_size_t=no])
 	])
 AC_MSG_RESULT($cf_cv_type_size_t)
-test $cf_cv_type_size_t = no && AC_DEFINE(size_t, unsigned, [Define to type if size_t not declared])
+test "$cf_cv_type_size_t" = no && AC_DEFINE(size_t, unsigned, [Define to type if size_t not declared])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_TRY_XOPEN_SOURCE version: 2 updated: 2018/06/20 20:23:13
@@ -1459,7 +1459,7 @@ AC_DEFUN([CF_VERBOSE],
 CF_MSG_LOG([$1])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITHOUT_X version: 2 updated: 2020/10/04 10:05:20
+dnl CF_WITHOUT_X version: 3 updated: 2021/01/13 16:51:52
 dnl ------------
 dnl Use this to cancel the check for X headers/libraries which would be pulled
 dnl in via CF_GCC_WARNINGS.
@@ -1468,6 +1468,8 @@ AC_DEFUN([AC_PATH_XTRA],[])
 AC_DEFUN([CF_SAVE_XTRA_FLAGS],[])
 AC_DEFUN([CF_RESTORE_XTRA_FLAGS],[])
 AC_DEFUN([CF_CONST_X_STRING],[echo "skipping X-const check";])dnl
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_LIBS)
 [])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_DBMALLOC version: 7 updated: 2010/06/21 17:26:47

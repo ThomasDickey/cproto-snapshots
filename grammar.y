@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.25 2020/10/11 17:57:51 tom Exp $
+/* $Id: grammar.y,v 4.26 2021/03/04 00:43:45 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -986,6 +986,34 @@ init_parser(void)
     }
 }
 
+#ifdef DEBUG_YYIN
+static FILE *
+copyfile(FILE *input, const char *name)
+{
+    FILE *output;
+    char my_filename[1024];
+    int n;
+    int ch;
+    for (n = 0; n < 999; ++n) {
+	sprintf(my_filename, "%s.gen%03d", name, n);
+	if ((output = fopen(my_filename, "r")) != 0) {
+	    fclose(output);
+	} else {
+	    break;
+	}
+    }
+    if ((output = fopen(my_filename, "w")) != 0) {
+	while ((ch = fgetc(input)) != EOF) {
+	    if (ferror(input))
+		break;
+	    fputc(ch, output);
+	}
+	fclose(output);
+    }
+    return fopen(my_filename, "r");
+}
+#endif /* DEBUG_YYIN */
+
 /* Process the C source file.  Write function prototypes to the standard
  * output.  Convert function definitions and write the converted source
  * code to a temporary file.
@@ -1015,7 +1043,11 @@ process_file(FILE *infile, const char *name)
     curly = 0;
     ly_count = 0;
     func_params = NULL;
+#ifdef DEBUG_YYIN
+    yyin = copyfile(infile, name);
+#else
     yyin = infile;
+#endif
     include_file(strcpy(base_file, name), func_style != FUNC_NONE);
     if (file_comments) {
 #if OPT_LINTLIBRARY

@@ -1,4 +1,4 @@
-.\" $Id: cproto.1,v 4.11 2021/01/10 17:02:13 tom Exp $
+.\" $Id: cproto.1,v 4.13 2021/03/03 22:27:37 tom Exp $
 .\"
 .de Ex
 .RS +7
@@ -15,7 +15,7 @@
 .el       .ds `` ``
 .ie \n(.g .ds '' \(rq
 .el       .ds '' ''
-.TH CPROTO 1 "2021-01-10" "Version 4.7r" "USER COMMANDS"
+.TH CPROTO 1 "2021-03-03" "Version 4.7s" "USER COMMANDS"
 .
 .SH NAME
 cproto \- generate C function prototypes and convert function definitions
@@ -188,7 +188,7 @@ The default is \*(``P_\*(''.
 Rather than filling in \*(``void\*('' for functions without parameters,
 use a comment \*(``/*empty*/\*(''.
 .TP
-.BI \-m " name"
+.BI \-N " name"
 Rather than filling in \*(``void\*('' for functions without parameters,
 use the given \fIname\fP.
 .TP
