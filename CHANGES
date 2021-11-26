@@ -1,4 +1,10 @@
--- $Id: CHANGES,v 4.63 2021/03/04 01:25:12 tom Exp $
+-- $Id: CHANGES,v 4.65 2021/11/26 21:07:21 tom Exp $
+
+2021/11/26 (4.7t)
+- enable lint-library feature by default, rather than only if a lint program
+  was found (report by Michael Zucchi).
+- updated configure macros
+- update config.guess, config.sub
 
 2021/03/03 (4.7s)
 - ignore preprocessor output with zero line-numbers.
