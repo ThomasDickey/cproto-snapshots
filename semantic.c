@@ -1,9 +1,11 @@
-/* $Id: semantic.c,v 4.20 2021/01/10 16:45:01 tom Exp $
+/* $Id: semantic.c,v 4.21 2022/10/14 00:03:49 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
  */
 #include <semantic.h>
+#include <dump.h>
+#include <trace.h>
 
 #if OPT_LINTLIBRARY
 #define	putParameter(fp,p,f,n,c)		put_parameter(fp, p, f, n, c)
@@ -133,6 +135,7 @@ new_declarator(const char *text, const char *name, long offset)
     d->head = d;
     d->func_stack = NULL;
     d->pointer = FALSE;
+    d->next = NULL;
     return d;
 }
 
@@ -778,11 +781,16 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
     Declarator *d;
     int commented = FALSE;
     int saveNest = nestedParams;
-
 #if OPT_LINTLIBRARY
     boolean defines = (boolean) (strchr(decl_spec->text, CURL_L) != 0);
     int is_func;
+#endif
 
+    TRACE(("gen_declarations\n"));
+    dump_decl_spec(decl_spec, 0);
+    dump_declarator_list(decl_list, 0);
+
+#if OPT_LINTLIBRARY
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
 	strcut(decl_spec->text, "static");
@@ -918,6 +926,8 @@ gen_prototype(DeclSpec * decl_spec, Declarator * declarator)
     Parameter *p;
     int commented = FALSE;
 
+    dump_decl_spec(decl_spec, 0);
+    dump_declarator(declarator, 0);
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
     if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
@@ -1046,6 +1056,10 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
     int n;
     size_t comment_len;
     long diff;
+
+    TRACE(("gen_func_definition:\n"));
+    dump_decl_spec(decl_spec, 0);
+    dump_declarator(declarator, 0);
 
     /* Do nothing if the function is already defined in the desired style
      * or if the function uses varargs.

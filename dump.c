@@ -1,4 +1,4 @@
-/* $Id: dump.c,v 4.5 2011/01/02 19:17:15 tom Exp $
+/* $Id: dump.c,v 4.6 2022/10/13 23:59:49 tom Exp $
  *
  * useful dumps for cproto
  */
@@ -6,9 +6,14 @@
 #include <dump.h>
 
 static char *whatFuncDefStyle(FuncDefStyle func_def);
-static char *flagsDeclSpec(int flags);
 
-#define PAD char pad[80]; sprintf(pad, "%-*s", level * 3, ".")
+#define MAX_LEVEL	10
+#define PAD \
+	char pad[(MAX_LEVEL + 1) * 4]; \
+	sprintf(pad, "%-*s", \
+		(level < MAX_LEVEL) \
+		? (level * 3) \
+		: MAX_LEVEL, ".")
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -39,8 +44,10 @@ whatFuncDefStyle(FuncDefStyle func_def)		/* style of function definition */
 void
 dump_parameter(Parameter * p, int level)
 {
-    dump_declarator(p->declarator, level + 1);
-    dump_decl_spec(&(p->decl_spec), level + 1);
+    if (p != NULL) {
+	dump_declarator(p->declarator, level + 1);
+	dump_decl_spec(&(p->decl_spec), level + 1);
+    }
 }
 
 void
@@ -56,38 +63,38 @@ dump_param_list(ParameterList * p, int level)
 void
 dump_declarator(Declarator * d, int level)
 {
-    PAD;
-    Trace("%sdeclarator %p\n", pad, d);
-    Trace("%s   name /%s/\n", pad, d->name);
-    Trace("%s   text /%s/\n", pad, d->text);
-    SHOW_CMTS(("%s   begin %ld\n", pad, d->begin))
-	SHOW_CMTS(("%s   begin_comment %ld\n", pad, d->begin_comment))
-	SHOW_CMTS(("%s   end_comment %ld\n", pad, d->end_comment))
+    if (d != NULL) {
+	PAD;
+	Trace("%sdeclarator %p\n", pad, d);
+	Trace("%s   name /%s/\n", pad, NonNull(d->name));
+	Trace("%s   text /%s/\n", pad, NonNull(d->text));
+	SHOW_CMTS(("%s   begin %ld\n", pad, d->begin));
+	SHOW_CMTS(("%s   begin_comment %ld\n", pad, d->begin_comment));
+	SHOW_CMTS(("%s   end_comment %ld\n", pad, d->end_comment));
 	Trace("%s   func_def %s\n", pad, whatFuncDefStyle(d->func_def));
 
-#if DEBUG > 1
-    if (d->func_def != FUNC_NONE) {
-	Trace("%s >PARAMS of %p\n", pad, d);
-	dump_param_list(&(d->params), level + 1);
-    }
-#endif
-    Trace("%s   pointer %s\n", pad, d->pointer ? "YES" : "NO");
+	if (d->func_def != FUNC_NONE) {
+	    Trace("%s >PARAMS of %p\n", pad, d);
+	    dump_param_list(&(d->params), level + 1);
+	}
+	Trace("%s   pointer %s\n", pad, d->pointer ? "YES" : "NO");
 
-    if (d->head != 0 && d != d->head) {
-	Trace("%s >HEAD of %p\n", pad, d);
-	dump_declarator(d->head, level + 1);
-    }
-    if (d->func_stack != 0) {
-	Trace("%s >FUNC_STACK of %p\n", pad, d);
-	dump_declarator(d->func_stack, level + 1);
-    }
-    if (d->next != 0) {
-	Trace("%s >NEXT of %p\n", pad, d);
-	dump_declarator(d->next, level + 1);
+	if (d->head != 0 && d != d->head) {
+	    Trace("%s >HEAD of %p\n", pad, d);
+	    dump_declarator(d->head, level + 1);
+	}
+	if (d->func_stack != 0) {
+	    Trace("%s >FUNC_STACK of %p\n", pad, d);
+	    dump_declarator(d->func_stack, level + 1);
+	}
+	if (d->next != 0) {
+	    Trace("%s >NEXT of %p\n", pad, d);
+	    dump_declarator(d->next, level + 1);
+	}
     }
 }
 
-static char *
+char *
 flagsDeclSpec(int flags)
 {
     static char temp[100];
@@ -129,9 +136,27 @@ flagsDeclSpec(int flags)
 void
 dump_decl_spec(DeclSpec * d, int level)
 {
-    PAD;
-    Trace("%sdecl_spec %p\n", pad, d);
-    Trace("%s  flags %s\n", pad, flagsDeclSpec(d->flags));
-    Trace("%s  text /%s/\n", pad, d->text);
-    SHOW_CMTS(("%s  begin %ld\n", pad, d->begin))
+    if (d) {
+	PAD;
+	Trace("%sdecl_spec %p\n", pad, d);
+	Trace("%s  flags %s\n", pad, flagsDeclSpec(d->flags));
+	Trace("%s  text /%s/\n", pad, d->text);
+	SHOW_CMTS(("%s  begin %ld\n", pad, d->begin));
+    }
+}
+
+void
+dump_declarator_list(DeclaratorList * dl, int level)
+{
+    if (dl) {
+	Declarator *d;
+	PAD;
+	Trace("%sdeclarator_list %p, %d {{\n", pad, dl, level);
+	for (d = dl->first;; d = d->next) {
+	    dump_declarator(d, level + 1);
+	    if (d == dl->last)
+		break;
+	}
+	Trace("%s}}\n", pad);
+    }
 }

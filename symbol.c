@@ -1,8 +1,10 @@
-/* $Id: symbol.c,v 4.9 2011/01/02 19:17:15 tom Exp $
+/* $Id: symbol.c,v 4.10 2022/10/13 23:56:29 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
 #include <symbol.h>
+#include <dump.h>
+#include <trace.h>
 
 /* Create a symbol table.
  * Return a pointer to the symbol table or NULL if an error occurs.
@@ -95,6 +97,11 @@ new_symbol(
 {
     Symbol *sym;
     unsigned i;
+
+    TRACE(("new_symbol\n"));
+    TRACE(("  name:%s\n", name));
+    TRACE(("  value:%s\n", value ? value : "<null>"));
+    TRACE(("  flags:%s\n", flagsDeclSpec(flags)));
 
     if ((sym = find_symbol(symtab, name)) == NULL) {
 	sym = NEW(Symbol);
