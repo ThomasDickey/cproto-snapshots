@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.26 2021/03/04 00:43:45 tom Exp $
+/* $Id: grammar.y,v 4.28 2022/10/15 00:05:45 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -98,14 +98,10 @@ static Declarator *cur_declarator;
 static char *temp_buf = 0;
 static size_t temp_len = 0;
 
-/* table of typedef names */
-static SymbolTable *typedef_names;
-
-/* table of define names */
-static SymbolTable *define_names;
-
-/* table of type qualifiers */
-static SymbolTable *type_qualifiers;
+SymbolTable *function_names;	/* table of function names */
+SymbolTable *typedef_names;	/* table of typedef names */
+SymbolTable *define_names;	/* table of define names */
+SymbolTable *type_qualifiers;	/* table of type qualifiers */
 
 /* information about the current input file */
 typedef struct {
@@ -1036,13 +1032,16 @@ process_file(FILE *infile, const char *name)
 	}
     }
 
+    /* *INDENT-EQLS* */
+    define_names   = new_symbol_table();
+    function_names = new_symbol_table();
     included_files = new_symbol_table();
-    typedef_names = new_symbol_table();
-    define_names = new_symbol_table();
-    inc_depth = -1;
-    curly = 0;
-    ly_count = 0;
-    func_params = NULL;
+    typedef_names  = new_symbol_table();
+    inc_depth      = -1;
+    curly          = 0;
+    ly_count       = 0;
+    func_params    = NULL;
+
 #ifdef DEBUG_YYIN
     yyin = copyfile(infile, name);
 #else
@@ -1061,9 +1060,12 @@ process_file(FILE *infile, const char *name)
 	put_string(stdout, " */\n");
     }
     yyparse();
-    free_symbol_table(define_names);
-    free_symbol_table(typedef_names);
-    free_symbol_table(included_files);
+
+    /* *INDENT-EQLS* */
+    define_names   = free_symbol_table(define_names);
+    function_names = free_symbol_table(function_names);
+    included_files = free_symbol_table(included_files);
+    typedef_names  = free_symbol_table(typedef_names);
 }
 
 #ifdef NO_LEAKS

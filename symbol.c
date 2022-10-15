@@ -1,4 +1,4 @@
-/* $Id: symbol.c,v 4.10 2022/10/13 23:56:29 tom Exp $
+/* $Id: symbol.c,v 4.11 2022/10/15 00:02:56 tom Exp $
  *
  * Implements a symbol table abstract data type.
  */
@@ -24,7 +24,7 @@ new_symbol_table(void)
 
 /* Free the memory allocated to the symbol table.
  */
-void
+SymbolTable *
 free_symbol_table(SymbolTable * symtab)
 {
     int i;
@@ -43,6 +43,7 @@ free_symbol_table(SymbolTable * symtab)
 	}
     }
     free(symtab);
+    return NULL;
 }
 
 /* This is a simple hash function mapping a symbol name to a hash bucket. */

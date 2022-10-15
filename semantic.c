@@ -1,9 +1,10 @@
-/* $Id: semantic.c,v 4.21 2022/10/14 00:03:49 tom Exp $
+/* $Id: semantic.c,v 4.25 2022/10/14 23:47:27 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
  */
 #include <semantic.h>
+#include <symbol.h>
 #include <dump.h>
 #include <trace.h>
 
@@ -31,6 +32,18 @@ static int format;
  * function parameters in the output.
  */
 static int nestedParams;
+
+static void
+define_function_name(Declarator * declarator, DeclSpec * decl_spec)
+{
+    if (declarator != NULL && decl_spec != NULL) {
+	Symbol *existing = find_symbol(function_names, declarator->name);
+	if (existing != NULL)
+	    decl_spec->flags |= (existing->flags & DS_STATIC);
+	else
+	    new_symbol(function_names, declarator->name, NULL, decl_spec->flags);
+    }
+}
 
 /* Initialize a new declaration specifier part.
  */
@@ -790,6 +803,14 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
     dump_decl_spec(decl_spec, 0);
     dump_declarator_list(decl_list, 0);
 
+    if (decl_list != NULL) {
+	for (d = decl_list->first;; d = d->next) {
+	    if (d->func_def != FUNC_NONE)
+		new_symbol(function_names, d->name, NULL, decl_spec->flags);
+	    if (d == decl_list->last)
+		break;
+	}
+    }
 #if OPT_LINTLIBRARY
     /* special treatment for -l, -T options */
     if ((!variables_out && types_out && defines) || (decl_list == 0)) {
@@ -926,8 +947,12 @@ gen_prototype(DeclSpec * decl_spec, Declarator * declarator)
     Parameter *p;
     int commented = FALSE;
 
+    TRACE(("gen_prototype\n"));
     dump_decl_spec(decl_spec, 0);
     dump_declarator(declarator, 0);
+
+    define_function_name(declarator, decl_spec);
+
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
     if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))

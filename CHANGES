@@ -1,6 +1,8 @@
--- $Id: CHANGES,v 4.67 2022/10/14 00:19:43 tom Exp $
+-- $Id: CHANGES,v 4.68 2022/10/15 00:37:05 tom Exp $
 
-2022/10/12 (4.7u)
+2022/10/14 (4.7u)
+- if a function prototype uses static, but that is omitted from the actual
+  function, assume it is static (report by Rick Stanley).
 - use the functions in dump.c for debugging when --with-trace is configured. 
 - updated configure macros
 - update config.guess, config.sub
