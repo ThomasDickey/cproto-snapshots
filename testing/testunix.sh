@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: testunix.sh,v 4.4 2020/07/16 15:22:28 tom Exp $
+# $Id: testunix.sh,v 4.5 2022/10/16 22:01:32 tom Exp $
 #
 # Test one or more given cases by number, creating the VMS test script
 # as a side-effect.
@@ -61,7 +61,7 @@ do
 	then
 		if [ -f "$OUT_FILE" ]
 		then
-			diff -b -c "$REF_FILE" "$OUT_FILE" |fgrep -v 'No diff' >"$TMP_FILE"
+			diff -b -c "$REF_FILE" "$OUT_FILE" |grep -v 'No diff' >"$TMP_FILE"
 			if [ -s "$TMP_FILE" ]
 			then
 				echo '... error'

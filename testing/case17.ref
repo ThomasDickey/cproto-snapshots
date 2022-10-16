@@ -289,13 +289,15 @@ typedef	int	extern_junk;
 extern_junk	*foo() { }
 
 typedef	int	void_junk;
-extern void_junk	*foo2a() { }
+extern void_junk	*foo2a() { return 0; }
 extern void_junk	*foo2a();
 void_junk	*foo2() { }
 void_junk *
 foo_void (void_int)
-void_junk void_int; { }
-static	void_junk	*foo_void2() { }
+void_junk void_int; { return 0; }
+
+static void_junk *foo_void2();
+void_junk *foo_void2() { return 0; }
 
 extern void (*sigdisp())();
 

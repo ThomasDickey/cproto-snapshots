@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 4.6 2011/01/02 19:28:44 tom Exp $
+/* $Id: trace.c,v 4.7 2022/10/16 16:59:00 tom Exp $
  *
  * Simple malloc debugging (for finding leaks)
  *
@@ -44,7 +44,7 @@ Where(char *file, int line)
 }
 
 void
-Trace(char *format,...)
+Trace(char *format, ...)
 {
     static FILE *fp;
     va_list ap;
@@ -283,7 +283,9 @@ dofree(void *oldp)
 	return;
     }
 
-    fail_alloc("free (not found)", oldp);
+    if (oldp != NULL)
+	fail_alloc("free (not found)", oldp);
+    Trace("free (not found): %p\n", oldp);
 }
 #endif
 

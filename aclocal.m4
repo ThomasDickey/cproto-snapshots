@@ -1,4 +1,4 @@
-dnl $Id: aclocal.m4,v 4.37 2022/10/13 00:24:12 tom Exp $
+dnl $Id: aclocal.m4,v 4.39 2022/10/16 19:01:06 tom Exp $
 dnl
 dnl Macros for cproto configure script
 dnl ---------------------------------------------------------------------------
@@ -924,6 +924,32 @@ if test x$cf_cv_gnu_library = xyes; then
 		fi
 	fi
 
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_GETOPT_HEADER version: 8 updated: 2021/06/19 19:16:16
+dnl ----------------
+dnl Check for getopt's variables which are commonly defined in stdlib.h,
+dnl unistd.h or (nonstandard) in getopt.h
+AC_DEFUN([CF_GETOPT_HEADER],
+[
+AC_HAVE_HEADERS(unistd.h getopt.h)
+AC_CACHE_CHECK(for header declaring getopt variables,cf_cv_getopt_header,[
+cf_cv_getopt_header=none
+for cf_header in stdio.h stdlib.h unistd.h getopt.h
+do
+AC_TRY_COMPILE([
+#include <$cf_header>],
+[int x = optind; char *y = optarg; (void)x; (void)y],
+[cf_cv_getopt_header=$cf_header
+ break])
+done
+])
+if test "$cf_cv_getopt_header" != none ; then
+	AC_DEFINE(HAVE_GETOPT_HEADER,1,[Define to 1 if getopt variables are declared in header])
+fi
+if test "$cf_cv_getopt_header" = getopt.h ; then
+	AC_DEFINE(NEED_GETOPT_H,1,[Define to 1 if we must include getopt.h])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

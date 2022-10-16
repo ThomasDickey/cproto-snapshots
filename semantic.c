@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.25 2022/10/14 23:47:27 tom Exp $
+/* $Id: semantic.c,v 4.30 2022/10/16 21:16:34 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -33,15 +33,21 @@ static int format;
  */
 static int nestedParams;
 
+#define DsStatic(p) ((p)->flags & DS_STATIC)
+
 static void
 define_function_name(Declarator * declarator, DeclSpec * decl_spec)
 {
     if (declarator != NULL && decl_spec != NULL) {
 	Symbol *existing = find_symbol(function_names, declarator->name);
-	if (existing != NULL)
-	    decl_spec->flags |= (existing->flags & DS_STATIC);
-	else
+	if (existing != NULL) {
+	    if (!DsStatic(decl_spec) && DsStatic(existing)) {
+		decl_spec->flags |= DS_STATIC;
+		TRACE(("updated flags:%s\n", flagsDeclSpec(decl_spec->flags)));
+	    }
+	} else {
 	    new_symbol(function_names, declarator->name, NULL, decl_spec->flags);
+	}
     }
 }
 
@@ -754,7 +760,7 @@ put_decl_spec(FILE *outf, DeclSpec * decl_spec)
 	decl_spec->text = xstrdup("int");
     }
 #endif
-    if (extern_out && !(decl_spec->flags & DS_STATIC) &&
+    if (extern_out && !DsStatic(decl_spec) &&
 	strkey(decl_spec->text, "extern") == NULL)
 	put_padded(outf, "extern");
     put_padded(outf, decl_spec->text);
@@ -834,9 +840,9 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
 	strcut(decl_spec->text, "extern");
 #endif
     }
-    if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_EXTERN && DsStatic(decl_spec))
 	return;
-    if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_STATIC && !DsStatic(decl_spec))
 	return;
     if (!inline_out && (decl_spec->flags & DS_INLINE))
 	return;
@@ -955,9 +961,9 @@ gen_prototype(DeclSpec * decl_spec, Declarator * declarator)
 
     if (proto_style == PROTO_NONE || (decl_spec->flags & DS_JUNK))
 	return;
-    if (scope_out == SCOPE_EXTERN && (decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_EXTERN && DsStatic(decl_spec))
 	return;
-    if (scope_out == SCOPE_STATIC && !(decl_spec->flags & DS_STATIC))
+    if (scope_out == SCOPE_STATIC && !DsStatic(decl_spec))
 	return;
     if (!inline_out && (decl_spec->flags & DS_INLINE))
 	return;
@@ -1006,6 +1012,9 @@ gen_prototype(DeclSpec * decl_spec, Declarator * declarator)
 	printf("#undef %s\n", declarator->name);
 #endif
     put_string(stdout, fmt[format].decl_spec_prefix);
+    if (DsStatic(decl_spec)
+	&& strkey(decl_spec->text, "static") == NULL)
+	put_string(stdout, "static ");
     put_decl_spec(stdout, decl_spec);
     put_func_declarator(stdout, declarator, commented);
 #if OPT_LINTLIBRARY
@@ -1085,6 +1094,8 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
     TRACE(("gen_func_definition:\n"));
     dump_decl_spec(decl_spec, 0);
     dump_declarator(declarator, 0);
+
+    define_function_name(declarator, decl_spec);
 
     /* Do nothing if the function is already defined in the desired style
      * or if the function uses varargs.
@@ -1168,6 +1179,9 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
+	    if (DsStatic(decl_spec)
+		&& strkey(decl_spec->text, "static") == NULL)
+		fputs("static ", cur_tmp_file());
 	    fputs(decl_spec->text, cur_tmp_file());
 	    fputc(' ', cur_tmp_file());
 
@@ -1183,6 +1197,9 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
+	    if (DsStatic(decl_spec)
+		&& strkey(decl_spec->text, "static") == NULL)
+		fputs("static ", cur_tmp_file());
 	    fputs(decl_spec->text, cur_tmp_file());
 	    fputc(' ', cur_tmp_file());
 
@@ -1203,6 +1220,9 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
     } else {
 	/* Output declarator specifiers. */
 	fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
+	if (DsStatic(decl_spec)
+	    && strkey(decl_spec->text, "static") == NULL)
+	    fputs("static ", cur_tmp_file());
 	fputs(decl_spec->text, cur_tmp_file());
 	fputc(' ', cur_tmp_file());
 

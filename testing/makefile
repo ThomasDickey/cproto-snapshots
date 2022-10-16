@@ -1,4 +1,4 @@
-# $Id: makefile,v 4.9 2020/07/16 22:41:05 tom Exp $
+# $Id: makefile,v 4.10 2022/10/16 22:01:21 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -34,8 +34,8 @@ all:	$(SOURCES) $B/$(THIS)
 	@echo 'Type "make run_test"'
 
 scripts : $(SOURCES)
-	make_bat.sh `fgrep dos run_test.txt |sed -e 's/=.*//'`
-	make_dcl.sh `fgrep unix run_test.txt |sed -e 's/=.*//'`
+	make_bat.sh `grep dos  run_test.txt |sed -e 's/=.*//'`
+	make_dcl.sh `grep unix run_test.txt |sed -e 's/=.*//'`
 
 clean:
 	- rm -f *.log *.out *.err *.tmp case*.c *.dcl

@@ -1,6 +1,7 @@
--- $Id: CHANGES,v 4.68 2022/10/15 00:37:05 tom Exp $
+-- $Id: CHANGES,v 4.69 2022/10/16 16:29:38 tom Exp $
 
-2022/10/14 (4.7u)
+2022/10/16 (4.7u)
+- improve configure-check for getopt headers.
 - if a function prototype uses static, but that is omitted from the actual
   function, assume it is static (report by Rick Stanley).
 - use the functions in dump.c for debugging when --with-trace is configured. 

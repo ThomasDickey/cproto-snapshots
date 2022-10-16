@@ -1,4 +1,4 @@
-/* $Id: cproto.c,v 4.53 2022/10/13 00:19:23 tom Exp $
+/* $Id: cproto.c,v 4.56 2022/10/16 20:14:26 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
@@ -7,9 +7,9 @@
 #include <cproto.h>
 
 /* getopt declarations */
-#if HAVE_GETOPT_H
+#ifdef NEED_GETOPT_H
 #include <getopt.h>
-#else
+#elif !defined(HAVE_GETOPT_HEADER)
 extern int getopt(int argc, char *const *argv, const char *shortopts);
 extern char *optarg;
 extern int optind;
@@ -105,10 +105,6 @@ char **inc_dir = 0;
 
 /* Run the C preprocessor */
 #ifdef CPP
-# if !HAVE_POPEN_PROTOTYPE
-extern FILE *popen(const char *c, const char *m);
-extern int pclose(FILE *p);
-# endif
 static size_t cpp_len;
 static const char *cpp = CPP;
 static char *cpp_opt;
