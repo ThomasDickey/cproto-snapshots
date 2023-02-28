@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.29 2021/03/04 00:43:22 tom Exp $
+/* $Id: lex.l,v 4.33 2023/02/28 13:03:46 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -31,7 +31,7 @@
 #define	result(nn)	count(); if (!brackets && unnested()) return(nn)
 
 #define	is_IDENTIFIER	    save_text_offset();\
-			    return type_of_name(yytext);
+			    return type_of_name(yytext, yyleng);
 
 #if !OPT_LINTLIBRARY
 #define gcc_attribute   absorb_special	/* otherwise, we don't care */
@@ -67,7 +67,7 @@ static int inc_depth;		/* include nesting level */
 static IncludeStack *inc_stack;	/* stack of included files */
 static SymbolTable *included_files;	/* files already included */
 
-static int type_of_name(char *name);
+static int type_of_name(char *name, int length);
 static void startCpp(int level);
 static void finishCpp(void);
 #if !OPT_LINTLIBRARY
@@ -240,7 +240,7 @@ QUOTE		[\"\']
 <INITIAL>{ID}		{
 			    int code;
 			    save_text_offset();
-			    switch (code = type_of_name(yytext)) {
+			    switch (code = type_of_name(yytext, yyleng)) {
 			    case T_ATTRIBUTE:
 				gcc_attribute();
 				break;
@@ -394,68 +394,23 @@ gcc_attribute(void)
 }
 #endif
 
-/* Decode the current token according to the type-of-name
+/* Decode the current token according to the type-of-name.  Tokens which are
+ * not used in function prototypes (such as "goto") are not handled here.
  */
 static int
-type_of_name(char *name)
+type_of_name(char *name, int length)
 {
-    /* *INDENT-OFF* */
-    static const struct {
-	const char *name;
-	int code;
-    } table[] = {
-	{ "auto",		T_AUTO },
-	{ "extern", 		T_EXTERN },
-	{ "register",		T_REGISTER },
-	{ "static", 		T_STATIC },
-	{ "typedef",		T_TYPEDEF },
-	{ "inline", 		T_INLINE },
-
-	{ "_Bool",		T_Bool },
-	{ "_Complex",		T_Complex },
-	{ "_Imaginary",		T_Imaginary },
-
-	{ "char",		T_CHAR },
-	{ "double", 		T_DOUBLE },
-	{ "float",		T_FLOAT },
-	{ "int",		T_INT },
-	{ "void",		T_VOID },
-	{ "long",		T_LONG },
-	{ "short",		T_SHORT },
-	{ "signed", 		T_SIGNED },
-	{ "unsigned",		T_UNSIGNED },
-
-	{ "enum",		T_ENUM },
-	{ "struct", 		T_STRUCT },
-	{ "union",		T_UNION },
-	{ "va_dcl",		T_VA_DCL },
-
-	{ "__signed", 		T_SIGNED },
-	{ "__signed__", 	T_SIGNED },
-	{ "__inline", 		T_INLINE },
-	{ "__inline__", 	T_INLINE },
-	{ "__extension__", 	T_EXTENSION },
-	{ "__attribute__", 	T_ATTRIBUTE },
-
-	{ "__ibm128", 		T_LONG_DOUBLE },
-	{ "__float128", 	T_LONG_DOUBLE },
-	{ "_Float128", 		T_LONG_DOUBLE },
-#ifdef vms
-	{ "globalvalue",	T_EXTERN },
-	{ "globalref",		T_EXTERN },
-	{ "globaldef",		T_EXTERN },
-#endif
-    };
-    /* *INDENT-ON* */
     int result = T_IDENTIFIER;
-    unsigned n;
-    for (n = 0; n < sizeof(table) / sizeof(table[0]); ++n) {
-	if (!strcmp(table[n].name, name)) {
-	    result = table[n].code;
-	    break;
-	}
+    const struct KEYWORDS *found = find_keyword(name, (size_t) length);
+    if (found) {
+	result = found->value;
     }
     switch (result) {
+    case STD_TYPENAME:
+	if (find_symbol(typedef_names, name) == NULL)
+	    new_symbol(typedef_names, name, NULL, DS_NONE);
+	result = T_TYPEDEF_NAME;
+	break;
     case T_IDENTIFIER:
 	if (find_symbol(type_qualifiers, name) != NULL)
 	    result = T_TYPE_QUALIFIER;
@@ -463,6 +418,12 @@ type_of_name(char *name)
 	    result = T_TYPEDEF_NAME;
 	else if (find_symbol(define_names, name) != NULL)
 	    result = T_DEFINE_NAME;
+#ifdef vms
+	else if (!strcmp(name, "globalvalue") ||
+		 !strcmp(name, "globalref") ||
+		 !strcmp(name, "globaldef"))
+	    result = T_EXTERN;
+#endif
 	break;
     }
     return result;

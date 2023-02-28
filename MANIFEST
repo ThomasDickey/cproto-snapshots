@@ -1,4 +1,4 @@
-MANIFEST for cproto, version t20221016
+MANIFEST for cproto, version v4_7v
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 AUTHORS                         authors
@@ -19,6 +19,8 @@ dump.c                          debug/trace
 dump.h                          interface of dump.c
 grammar.y                       yacc grammar for CPROTO
 install-sh                      install-script
+keywords.c                      generated from keywords.gperf
+keywords.gperf                  gperf input for keywords.c
 lex.l                           lex rules for CPROTO
 lintlibs.c                      functions used for lint-library formatting
 semantic.c                      functions to support yacc grammar (formatting and translation)
@@ -63,6 +65,9 @@ porting/getopt.h                header file for getopt
 porting/popen.c                 fake popen/pclose
 testing                         subdirectory
 testing/README                  description of files in CPROTO/TESTING
+testing/alltypes.in             test-input for alltypes.sh
+testing/alltypes.ref            test-reference for alltypes.sh
+testing/alltypes.sh             test-script for keywords.gperf
 testing/apollo.c                template for apollo lint-library
 testing/case01.ref              test case reference: no options
 testing/case02.ref              test case reference: -f0

@@ -1,0 +1,572 @@
+#include <complex.h>
+#include <math.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <wchar.h>
+#include <wctype.h>
+
+_Bool fwd__Bool(
+_Bool a,
+_Bool b)
+{
+return bak__Bool(a, b);
+}
+
+_Bool bak__Bool(a, b)
+_Bool a;
+_Bool b;
+{
+return fwd__Bool(a, b);
+}
+
+float _Complex fwd__Complex(
+float _Complex a,
+float _Complex b)
+{
+return bak__Complex(a, b);
+}
+
+float _Complex bak__Complex(a, b)
+float _Complex a;
+float _Complex b;
+{
+return fwd__Complex(a, b);
+}
+
+_Float128 fwd__Float128(
+_Float128 a,
+_Float128 b)
+{
+return bak__Float128(a, b);
+}
+
+_Float128 bak__Float128(a, b)
+_Float128 a;
+_Float128 b;
+{
+return fwd__Float128(a, b);
+}
+
+__float128 fwd___float128(
+__float128 a,
+__float128 b)
+{
+return bak___float128(a, b);
+}
+
+__float128 bak___float128(a, b)
+__float128 a;
+__float128 b;
+{
+return fwd___float128(a, b);
+}
+
+__int32_t fwd___int32_t(
+__int32_t a,
+__int32_t b)
+{
+return bak___int32_t(a, b);
+}
+
+__int32_t bak___int32_t(a, b)
+__int32_t a;
+__int32_t b;
+{
+return fwd___int32_t(a, b);
+}
+
+__signed fwd___signed(
+__signed a,
+__signed b)
+{
+return bak___signed(a, b);
+}
+
+__signed bak___signed(a, b)
+__signed a;
+__signed b;
+{
+return fwd___signed(a, b);
+}
+
+__signed__ fwd___signed__(
+__signed__ a,
+__signed__ b)
+{
+return bak___signed__(a, b);
+}
+
+__signed__ bak___signed__(a, b)
+__signed__ a;
+__signed__ b;
+{
+return fwd___signed__(a, b);
+}
+
+char fwd_char(
+char a,
+char b)
+{
+return bak_char(a, b);
+}
+
+char bak_char(a, b)
+char a;
+char b;
+{
+return fwd_char(a, b);
+}
+
+clock_t fwd_clock_t(
+clock_t a,
+clock_t b)
+{
+return bak_clock_t(a, b);
+}
+
+clock_t bak_clock_t(a, b)
+clock_t a;
+clock_t b;
+{
+return fwd_clock_t(a, b);
+}
+
+double fwd_double(
+double a,
+double b)
+{
+return bak_double(a, b);
+}
+
+double bak_double(a, b)
+double a;
+double b;
+{
+return fwd_double(a, b);
+}
+
+double_t fwd_double_t(
+double_t a,
+double_t b)
+{
+return bak_double_t(a, b);
+}
+
+double_t bak_double_t(a, b)
+double_t a;
+double_t b;
+{
+return fwd_double_t(a, b);
+}
+
+float fwd_float(
+float a,
+float b)
+{
+return bak_float(a, b);
+}
+
+float bak_float(a, b)
+float a;
+float b;
+{
+return fwd_float(a, b);
+}
+
+float_t fwd_float_t(
+float_t a,
+float_t b)
+{
+return bak_float_t(a, b);
+}
+
+float_t bak_float_t(a, b)
+float_t a;
+float_t b;
+{
+return fwd_float_t(a, b);
+}
+
+fpos_t fwd_fpos_t(
+fpos_t a,
+fpos_t b)
+{
+return bak_fpos_t(a, b);
+}
+
+fpos_t bak_fpos_t(a, b)
+fpos_t a;
+fpos_t b;
+{
+return fwd_fpos_t(a, b);
+}
+
+int fwd_int(
+int a,
+int b)
+{
+return bak_int(a, b);
+}
+
+int bak_int(a, b)
+int a;
+int b;
+{
+return fwd_int(a, b);
+}
+
+int16_t fwd_int16_t(
+int16_t a,
+int16_t b)
+{
+return bak_int16_t(a, b);
+}
+
+int16_t bak_int16_t(a, b)
+int16_t a;
+int16_t b;
+{
+return fwd_int16_t(a, b);
+}
+
+int32_t fwd_int32_t(
+int32_t a,
+int32_t b)
+{
+return bak_int32_t(a, b);
+}
+
+int32_t bak_int32_t(a, b)
+int32_t a;
+int32_t b;
+{
+return fwd_int32_t(a, b);
+}
+
+int64_t fwd_int64_t(
+int64_t a,
+int64_t b)
+{
+return bak_int64_t(a, b);
+}
+
+int64_t bak_int64_t(a, b)
+int64_t a;
+int64_t b;
+{
+return fwd_int64_t(a, b);
+}
+
+int8_t fwd_int8_t(
+int8_t a,
+int8_t b)
+{
+return bak_int8_t(a, b);
+}
+
+int8_t bak_int8_t(a, b)
+int8_t a;
+int8_t b;
+{
+return fwd_int8_t(a, b);
+}
+
+intmax_t fwd_intmax_t(
+intmax_t a,
+intmax_t b)
+{
+return bak_intmax_t(a, b);
+}
+
+intmax_t bak_intmax_t(a, b)
+intmax_t a;
+intmax_t b;
+{
+return fwd_intmax_t(a, b);
+}
+
+intptr_t fwd_intptr_t(
+intptr_t a,
+intptr_t b)
+{
+return bak_intptr_t(a, b);
+}
+
+intptr_t bak_intptr_t(a, b)
+intptr_t a;
+intptr_t b;
+{
+return fwd_intptr_t(a, b);
+}
+
+long fwd_long(
+long a,
+long b)
+{
+return bak_long(a, b);
+}
+
+long bak_long(a, b)
+long a;
+long b;
+{
+return fwd_long(a, b);
+}
+
+ptrdiff_t fwd_ptrdiff_t(
+ptrdiff_t a,
+ptrdiff_t b)
+{
+return bak_ptrdiff_t(a, b);
+}
+
+ptrdiff_t bak_ptrdiff_t(a, b)
+ptrdiff_t a;
+ptrdiff_t b;
+{
+return fwd_ptrdiff_t(a, b);
+}
+
+short fwd_short(
+short a,
+short b)
+{
+return bak_short(a, b);
+}
+
+short bak_short(a, b)
+short a;
+short b;
+{
+return fwd_short(a, b);
+}
+
+sig_atomic_t fwd_sig_atomic_t(
+sig_atomic_t a,
+sig_atomic_t b)
+{
+return bak_sig_atomic_t(a, b);
+}
+
+sig_atomic_t bak_sig_atomic_t(a, b)
+sig_atomic_t a;
+sig_atomic_t b;
+{
+return fwd_sig_atomic_t(a, b);
+}
+
+signed fwd_signed(
+signed a,
+signed b)
+{
+return bak_signed(a, b);
+}
+
+signed bak_signed(a, b)
+signed a;
+signed b;
+{
+return fwd_signed(a, b);
+}
+
+size_t fwd_size_t(
+size_t a,
+size_t b)
+{
+return bak_size_t(a, b);
+}
+
+size_t bak_size_t(a, b)
+size_t a;
+size_t b;
+{
+return fwd_size_t(a, b);
+}
+
+time_t fwd_time_t(
+time_t a,
+time_t b)
+{
+return bak_time_t(a, b);
+}
+
+time_t bak_time_t(a, b)
+time_t a;
+time_t b;
+{
+return fwd_time_t(a, b);
+}
+
+uint16_t fwd_uint16_t(
+uint16_t a,
+uint16_t b)
+{
+return bak_uint16_t(a, b);
+}
+
+uint16_t bak_uint16_t(a, b)
+uint16_t a;
+uint16_t b;
+{
+return fwd_uint16_t(a, b);
+}
+
+uint32_t fwd_uint32_t(
+uint32_t a,
+uint32_t b)
+{
+return bak_uint32_t(a, b);
+}
+
+uint32_t bak_uint32_t(a, b)
+uint32_t a;
+uint32_t b;
+{
+return fwd_uint32_t(a, b);
+}
+
+uint64_t fwd_uint64_t(
+uint64_t a,
+uint64_t b)
+{
+return bak_uint64_t(a, b);
+}
+
+uint64_t bak_uint64_t(a, b)
+uint64_t a;
+uint64_t b;
+{
+return fwd_uint64_t(a, b);
+}
+
+uint8_t fwd_uint8_t(
+uint8_t a,
+uint8_t b)
+{
+return bak_uint8_t(a, b);
+}
+
+uint8_t bak_uint8_t(a, b)
+uint8_t a;
+uint8_t b;
+{
+return fwd_uint8_t(a, b);
+}
+
+uintmax_t fwd_uintmax_t(
+uintmax_t a,
+uintmax_t b)
+{
+return bak_uintmax_t(a, b);
+}
+
+uintmax_t bak_uintmax_t(a, b)
+uintmax_t a;
+uintmax_t b;
+{
+return fwd_uintmax_t(a, b);
+}
+
+uintptr_t fwd_uintptr_t(
+uintptr_t a,
+uintptr_t b)
+{
+return bak_uintptr_t(a, b);
+}
+
+uintptr_t bak_uintptr_t(a, b)
+uintptr_t a;
+uintptr_t b;
+{
+return fwd_uintptr_t(a, b);
+}
+
+unsigned fwd_unsigned(
+unsigned a,
+unsigned b)
+{
+return bak_unsigned(a, b);
+}
+
+unsigned bak_unsigned(a, b)
+unsigned a;
+unsigned b;
+{
+return fwd_unsigned(a, b);
+}
+
+va_list * fwd_va_list(
+va_list * a,
+va_list * b)
+{
+return bak_va_list(a, b);
+}
+
+va_list * bak_va_list(a, b)
+va_list * a;
+va_list * b;
+{
+return fwd_va_list(a, b);
+}
+
+wchar_t fwd_wchar_t(
+wchar_t a,
+wchar_t b)
+{
+return bak_wchar_t(a, b);
+}
+
+wchar_t bak_wchar_t(a, b)
+wchar_t a;
+wchar_t b;
+{
+return fwd_wchar_t(a, b);
+}
+
+wctrans_t fwd_wctrans_t(
+wctrans_t a,
+wctrans_t b)
+{
+return bak_wctrans_t(a, b);
+}
+
+wctrans_t bak_wctrans_t(a, b)
+wctrans_t a;
+wctrans_t b;
+{
+return fwd_wctrans_t(a, b);
+}
+
+wctype_t fwd_wctype_t(
+wctype_t a,
+wctype_t b)
+{
+return bak_wctype_t(a, b);
+}
+
+wctype_t bak_wctype_t(a, b)
+wctype_t a;
+wctype_t b;
+{
+return fwd_wctype_t(a, b);
+}
+
+wint_t fwd_wint_t(
+wint_t a,
+wint_t b)
+{
+return bak_wint_t(a, b);
+}
+
+wint_t bak_wint_t(a, b)
+wint_t a;
+wint_t b;
+{
+return fwd_wint_t(a, b);
+}

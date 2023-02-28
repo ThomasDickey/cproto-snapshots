@@ -1,8 +1,8 @@
-dnl $Id: aclocal.m4,v 4.39 2022/10/16 19:01:06 tom Exp $
+dnl $Id: aclocal.m4,v 4.43 2023/02/23 00:30:06 tom Exp $
 dnl
 dnl Macros for cproto configure script
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1994-2021,2022 Thomas E. Dickey
+dnl Copyright 1994-2022,2023 Thomas E. Dickey
 dnl
 dnl Permission is hereby granted, free of charge, to any person obtaining a
 dnl copy of this software and associated documentation files (the "Software"),
@@ -212,7 +212,7 @@ ifelse([$3],,[    :]dnl
 ])dnl
 ])])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_C11_NORETURN version: 3 updated: 2021/03/28 11:36:23
+dnl CF_C11_NORETURN version: 4 updated: 2023/02/18 17:41:25
 dnl ---------------
 AC_DEFUN([CF_C11_NORETURN],
 [
@@ -226,8 +226,7 @@ AC_MSG_RESULT($enable_stdnoreturn)
 if test $enable_stdnoreturn = yes; then
 AC_CACHE_CHECK([for C11 _Noreturn feature], cf_cv_c11_noreturn,
 	[AC_TRY_COMPILE([
-#include <stdio.h>
-#include <stdlib.h>
+$ac_includes_default
 #include <stdnoreturn.h>
 static _Noreturn void giveup(void) { exit(0); }
 	],
@@ -251,7 +250,7 @@ AC_SUBST(HAVE_STDNORETURN_H)
 AC_SUBST(STDC_NORETURN)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CC_ENV_FLAGS version: 10 updated: 2020/12/31 18:40:20
+dnl CF_CC_ENV_FLAGS version: 11 updated: 2023/02/20 11:15:46
 dnl ---------------
 dnl Check for user's environment-breakage by stuffing CFLAGS/CPPFLAGS content
 dnl into CC.  This will not help with broken scripts that wrap the compiler
@@ -292,7 +291,7 @@ case "$CC" in
 	AC_MSG_WARN(your environment uses the CC variable to hold CFLAGS/CPPFLAGS options)
 	# humor him...
 	cf_prog=`echo "$CC" | sed -e 's/	/ /g' -e 's/[[ ]]* / /g' -e 's/[[ ]]*[[ ]]-[[^ ]].*//'`
-	cf_flags=`echo "$CC" | ${AWK:-awk} -v prog="$cf_prog" '{ printf("%s", [substr]([$]0,1+length(prog))); }'`
+	cf_flags=`echo "$CC" | sed -e "s%^$cf_prog%%"`
 	CC="$cf_prog"
 	for cf_arg in $cf_flags
 	do
@@ -350,7 +349,7 @@ if test ".$system_name" != ".$cf_cv_system_name" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CLANG_COMPILER version: 8 updated: 2021/01/01 13:31:04
+dnl CF_CLANG_COMPILER version: 9 updated: 2023/02/18 17:41:25
 dnl -----------------
 dnl Check if the given compiler is really clang.  clang's C driver defines
 dnl __GNUC__ (fooling the configure script into setting $GCC to yes) but does
@@ -372,7 +371,7 @@ if test "$ifelse([$1],,[$1],GCC)" = yes ; then
 	AC_TRY_COMPILE([],[
 #ifdef __clang__
 #else
-make an error
+#error __clang__ is not defined
 #endif
 ],[ifelse([$2],,CLANG_COMPILER,[$2])=yes
 ],[])
@@ -603,6 +602,7 @@ then
 	AC_CHECKING([for $CC __attribute__ directives])
 cat > "conftest.$ac_ext" <<EOF
 #line __oline__ "${as_me:-configure}"
+#include <stdio.h>
 #include "confdefs.h"
 #include "conftest.h"
 #include "conftest.i"
@@ -816,6 +816,32 @@ rm -rf ./conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_GETOPT_HEADER version: 8 updated: 2021/06/19 19:16:16
+dnl ----------------
+dnl Check for getopt's variables which are commonly defined in stdlib.h,
+dnl unistd.h or (nonstandard) in getopt.h
+AC_DEFUN([CF_GETOPT_HEADER],
+[
+AC_HAVE_HEADERS(unistd.h getopt.h)
+AC_CACHE_CHECK(for header declaring getopt variables,cf_cv_getopt_header,[
+cf_cv_getopt_header=none
+for cf_header in stdio.h stdlib.h unistd.h getopt.h
+do
+AC_TRY_COMPILE([
+#include <$cf_header>],
+[int x = optind; char *y = optarg; (void)x; (void)y],
+[cf_cv_getopt_header=$cf_header
+ break])
+done
+])
+if test "$cf_cv_getopt_header" != none ; then
+	AC_DEFINE(HAVE_GETOPT_HEADER,1,[Define to 1 if getopt variables are declared in header])
+fi
+if test "$cf_cv_getopt_header" = getopt.h ; then
+	AC_DEFINE(NEED_GETOPT_H,1,[Define to 1 if we must include getopt.h])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_GNU_SOURCE version: 10 updated: 2018/12/10 20:09:41
 dnl -------------
 dnl Check if we must define _GNU_SOURCE to get a reasonable value for
@@ -927,33 +953,7 @@ if test x$cf_cv_gnu_library = xyes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GETOPT_HEADER version: 8 updated: 2021/06/19 19:16:16
-dnl ----------------
-dnl Check for getopt's variables which are commonly defined in stdlib.h,
-dnl unistd.h or (nonstandard) in getopt.h
-AC_DEFUN([CF_GETOPT_HEADER],
-[
-AC_HAVE_HEADERS(unistd.h getopt.h)
-AC_CACHE_CHECK(for header declaring getopt variables,cf_cv_getopt_header,[
-cf_cv_getopt_header=none
-for cf_header in stdio.h stdlib.h unistd.h getopt.h
-do
-AC_TRY_COMPILE([
-#include <$cf_header>],
-[int x = optind; char *y = optarg; (void)x; (void)y],
-[cf_cv_getopt_header=$cf_header
- break])
-done
-])
-if test "$cf_cv_getopt_header" != none ; then
-	AC_DEFINE(HAVE_GETOPT_HEADER,1,[Define to 1 if getopt variables are declared in header])
-fi
-if test "$cf_cv_getopt_header" = getopt.h ; then
-	AC_DEFINE(NEED_GETOPT_H,1,[Define to 1 if we must include getopt.h])
-fi
-])dnl
-dnl ---------------------------------------------------------------------------
-dnl CF_INTEL_COMPILER version: 8 updated: 2021/01/01 16:53:59
+dnl CF_INTEL_COMPILER version: 9 updated: 2023/02/18 17:41:25
 dnl -----------------
 dnl Check if the given compiler is really the Intel compiler for Linux.  It
 dnl tries to imitate gcc, but does not return an error when it finds a mismatch
@@ -979,7 +979,7 @@ if test "$ifelse([$1],,[$1],GCC)" = yes ; then
 		AC_TRY_COMPILE([],[
 #ifdef __INTEL_COMPILER
 #else
-make an error
+#error __INTEL_COMPILER is not defined
 #endif
 ],[ifelse([$2],,INTEL_COMPILER,[$2])=yes
 cf_save_CFLAGS="$cf_save_CFLAGS -we147"
@@ -1123,7 +1123,7 @@ fi
 test "$cf_cv_mixedcase" = yes && AC_DEFINE(MIXEDCASE_FILENAMES,1,[Define to 1 if filesystem supports mixed-case filenames.])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_MKSTEMP version: 11 updated: 2021/01/01 13:31:04
+dnl CF_MKSTEMP version: 12 updated: 2023/01/05 17:53:11
 dnl ----------
 dnl Check for a working mkstemp.  This creates two files, checks that they are
 dnl successfully created and distinct (AmigaOS apparently fails on the last).
@@ -1134,14 +1134,8 @@ unistd.h \
 AC_CACHE_CHECK(for working mkstemp, cf_cv_func_mkstemp,[
 rm -rf ./conftest*
 AC_TRY_RUN([
-#include <sys/types.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
+$ac_includes_default
+
 int main(void)
 {
 	char *tmpl = "conftestXXXXXX";
@@ -1309,7 +1303,7 @@ if test $ac_cv_td_popen = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_POSIX_C_SOURCE version: 11 updated: 2018/12/31 20:46:17
+dnl CF_POSIX_C_SOURCE version: 12 updated: 2023/02/18 17:41:25
 dnl -----------------
 dnl Define _POSIX_C_SOURCE to the given level, and _POSIX_SOURCE if needed.
 dnl
@@ -1340,7 +1334,7 @@ AC_CACHE_CHECK(if we should define _POSIX_C_SOURCE,cf_cv_posix_c_source,[
 	CF_MSG_LOG(if the symbol is already defined go no further)
 	AC_TRY_COMPILE([#include <sys/types.h>],[
 #ifndef _POSIX_C_SOURCE
-make an error
+#error _POSIX_C_SOURCE is not defined
 #endif],
 	[cf_cv_posix_c_source=no],
 	[cf_want_posix_source=no
@@ -1359,7 +1353,7 @@ make an error
 	 if test "$cf_want_posix_source" = yes ; then
 		AC_TRY_COMPILE([#include <sys/types.h>],[
 #ifdef _POSIX_SOURCE
-make an error
+#error _POSIX_SOURCE is defined
 #endif],[],
 		cf_cv_posix_c_source="$cf_cv_posix_c_source -D_POSIX_SOURCE")
 	 fi
@@ -1370,7 +1364,7 @@ make an error
 	 CF_MSG_LOG(if the second compile does not leave our definition intact error)
 	 AC_TRY_COMPILE([#include <sys/types.h>],[
 #ifndef _POSIX_C_SOURCE
-make an error
+#error _POSIX_C_SOURCE is not defined
 #endif],,
 	 [cf_cv_posix_c_source=no])
 	 CFLAGS="$cf_save_CFLAGS"
@@ -1430,6 +1424,20 @@ CF_ACVERSION_CHECK(2.52,
 	[AC_PROG_CC_STDC],
 	[CF_ANSI_CC_REQD])
 CF_CC_ENV_FLAGS
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PROG_GPERF version: 1 updated: 2023/02/22 19:29:02
+dnl -------------
+dnl Check if gpref is available, for generating symbol lookup functions.
+AC_DEFUN([CF_PROG_GPERF],[
+AC_PATH_PROG(GPERF_PATH,gperf,no)
+if test "x$GPERF_PATH" = xno
+then
+	GPERF_NOTE="#"
+else
+	GPERF_NOTE=
+fi
+AC_SUBST(GPERF_NOTE)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_PROG_GROFF version: 3 updated: 2018/01/07 13:16:19
@@ -1791,7 +1799,7 @@ CF_NO_LEAKS_OPTION(valgrind,
 	[USE_VALGRIND])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 62 updated: 2022/10/02 19:55:56
+dnl CF_XOPEN_SOURCE version: 64 updated: 2023/02/18 17:41:25
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -1813,9 +1821,6 @@ cf_xopen_source=
 case "$host_os" in
 (aix[[4-7]]*)
 	cf_xopen_source="-D_ALL_SOURCE"
-	;;
-(msys)
-	cf_XOPEN_SOURCE=600
 	;;
 (darwin[[0-8]].*)
 	cf_xopen_source="-D_APPLE_C_SOURCE"
@@ -1842,7 +1847,7 @@ case "$host_os" in
 	cf_xopen_source="-D_SGI_SOURCE"
 	cf_XOPEN_SOURCE=
 	;;
-(linux*gnu|linux*gnuabi64|linux*gnuabin32|linux*gnueabi|linux*gnueabihf|linux*gnux32|uclinux*|gnu*|mint*|k*bsd*-gnu|cygwin)
+(linux*gnu|linux*gnuabi64|linux*gnuabin32|linux*gnueabi|linux*gnueabihf|linux*gnux32|uclinux*|gnu*|mint*|k*bsd*-gnu|cygwin|msys)
 	CF_GNU_SOURCE($cf_XOPEN_SOURCE)
 	;;
 (minix*)
@@ -1894,10 +1899,12 @@ case "$host_os" in
 	cf_save_xopen_cppflags="$CPPFLAGS"
 	CF_POSIX_C_SOURCE($cf_POSIX_C_SOURCE)
 	# Some of these niche implementations use copy/paste, double-check...
-	CF_VERBOSE(checking if _POSIX_C_SOURCE inteferes)
-	AC_TRY_COMPILE(CF__XOPEN_SOURCE_HEAD,CF__XOPEN_SOURCE_BODY,,[
-		AC_MSG_WARN(_POSIX_C_SOURCE definition is not usable)
-		CPPFLAGS="$cf_save_xopen_cppflags"])
+	if test "$cf_cv_xopen_source" != no ; then
+		CF_VERBOSE(checking if _POSIX_C_SOURCE inteferes)
+		AC_TRY_COMPILE(CF__XOPEN_SOURCE_HEAD,CF__XOPEN_SOURCE_BODY,,[
+			AC_MSG_WARN(_POSIX_C_SOURCE definition is not usable)
+			CPPFLAGS="$cf_save_xopen_cppflags"])
+	fi
 	;;
 esac
 
@@ -1912,7 +1919,7 @@ if test -n "$cf_XOPEN_SOURCE" && test -z "$cf_cv_xopen_source" ; then
 	AC_MSG_CHECKING(if _XOPEN_SOURCE really is set)
 	AC_TRY_COMPILE([#include <stdlib.h>],[
 #ifndef _XOPEN_SOURCE
-make an error
+#error _XOPEN_SOURCE is not defined
 #endif],
 	[cf_XOPEN_SOURCE_set=yes],
 	[cf_XOPEN_SOURCE_set=no])
@@ -1921,7 +1928,7 @@ make an error
 	then
 		AC_TRY_COMPILE([#include <stdlib.h>],[
 #if (_XOPEN_SOURCE - 0) < $cf_XOPEN_SOURCE
-make an error
+#error (_XOPEN_SOURCE - 0) < $cf_XOPEN_SOURCE
 #endif],
 		[cf_XOPEN_SOURCE_set_ok=yes],
 		[cf_XOPEN_SOURCE_set_ok=no])
@@ -1999,22 +2006,20 @@ done
 rm -f y.tab.c
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF__XOPEN_SOURCE_BODY version: 1 updated: 2022/09/10 15:17:35
+dnl CF__XOPEN_SOURCE_BODY version: 2 updated: 2023/02/18 17:41:25
 dnl ---------------------
 dnl body of test when test-compiling for _XOPEN_SOURCE check
 define([CF__XOPEN_SOURCE_BODY],
 [
 #ifndef _XOPEN_SOURCE
-make an error
+#error _XOPEN_SOURCE is not defined
 #endif
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF__XOPEN_SOURCE_HEAD version: 1 updated: 2022/09/10 15:17:03
+dnl CF__XOPEN_SOURCE_HEAD version: 2 updated: 2023/02/18 17:41:25
 dnl ---------------------
 dnl headers to include when test-compiling for _XOPEN_SOURCE check
 define([CF__XOPEN_SOURCE_HEAD],
 [
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+$ac_includes_default
 ])

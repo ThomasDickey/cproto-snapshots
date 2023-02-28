@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.28 2022/10/15 00:05:45 tom Exp $
+/* $Id: grammar.y,v 4.34 2023/02/28 12:47:29 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -7,7 +7,7 @@
 
 %token <text> '(' '*' '&'
 	/* identifiers that are not reserved words */
-	T_IDENTIFIER T_TYPEDEF_NAME T_DEFINE_NAME
+	STD_TYPENAME T_IDENTIFIER T_TYPEDEF_NAME T_DEFINE_NAME
 
 	/* storage class */
 	T_AUTO T_EXTERN T_REGISTER T_STATIC T_TYPEDEF
@@ -23,8 +23,11 @@
 	T_ENUM T_STRUCT T_UNION
 	/* C9X new types */
 	T_Bool T_Complex T_Imaginary
-	/* nonstandard "gcc" types */
+	/* c99 types */
 	T_LONG_DOUBLE
+
+	/* va_list from <stdarg.h> */
+	T_VA_LIST
 
 	/* type qualifiers */
 	T_TYPE_QUALIFIER
@@ -241,7 +244,7 @@ declaration
 	}
 	| any_typedef decl_specifiers
 	{
-	    cur_decl_spec_flags = $2.flags;
+	    cur_decl_spec_flags = (int) $2.flags;
 	    free_decl_spec(&$2);
 	}
 	  opt_declarator_list ';'
@@ -275,7 +278,7 @@ declarator_list
 	     * flags so it does not get promoted.
 	     */
 	    if (strcmp($1->text, $1->name) != 0)
-		flags &= ~(DS_CHAR | DS_SHORT | DS_FLOAT);
+		flags &= (int) ~(DS_CHAR | DS_SHORT | DS_FLOAT);
 	    new_symbol(typedef_names, $1->name, NULL, flags);
 	    free_declarator($1);
 	}
@@ -284,7 +287,7 @@ declarator_list
 	    int flags = cur_decl_spec_flags;
 
 	    if (strcmp($3->text, $3->name) != 0)
-		flags &= ~(DS_CHAR | DS_SHORT | DS_FLOAT);
+		flags &= (int) ~(DS_CHAR | DS_SHORT | DS_FLOAT);
 	    new_symbol(typedef_names, $3->name, NULL, flags);
 	    free_declarator($3);
 	}
@@ -446,6 +449,10 @@ type_specifier
 	{
 	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
 	}
+	| T_VA_LIST
+	{
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	}
 	| T_VOID
 	{
 	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
@@ -456,11 +463,11 @@ type_specifier
 	}
 	| T_Complex
 	{
-	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_UNREAL);
 	}
 	| T_Imaginary
 	{
-	    new_decl_spec(&$$, $1.text, $1.begin, DS_NONE);
+	    new_decl_spec(&$$, $1.text, $1.begin, DS_UNREAL);
 	}
 	| T_TYPEDEF_NAME
 	{
@@ -873,6 +880,7 @@ direct_abs_declarator
 
 %%
 
+#include "keywords.c"
 
 #if defined(HAVE_CONFIG_H)
 # include "lex.yy.c"

@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.10 2018/05/23 22:18:44 tom Exp $
+/* $Id: yyerror.c,v 4.11 2023/02/28 01:13:22 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function.
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -143,6 +143,7 @@ yaccExpected(const char *s, int count)
 
     if (count < 0) {
 	if (used != 0) {
+	    fflush(stdout);
 	    if (used > 1)
 		qsort((char *) vec, used, sizeof(vec[0]), compar);
 	    /* limit length of error message */

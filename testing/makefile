@@ -1,4 +1,4 @@
-# $Id: makefile,v 4.10 2022/10/16 22:01:21 tom Exp $
+# $Id: makefile,v 4.11 2023/02/25 12:49:38 tom Exp $
 # make-file for CPROTO test directory
 
 THIS	= cproto
@@ -49,3 +49,7 @@ check \
 check_errors:	$(SOURCES)
 	date >>$@.out
 	$(SHELL) -c '(SHELL="$(SHELL)" TEST_REF="$(TEST_REF)" $(SHELL) ./run_test.sh $@ 2>&1)' |tee -a $@.out
+
+check_types:	$(SOURCES)
+	date >>$@.out
+	$(SHELL) -c '(SHELL="$(SHELL)" TEST_REF="$(TEST_REF)" $(SHELL) ./alltypes.sh $@ 2>&1)' |tee -a $@.out

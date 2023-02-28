@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.38 2022/10/13 00:19:23 tom Exp $
+# $Id: Makefile.in,v 4.46 2023/02/28 13:10:49 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7u
+RELEASE = 4_7v
 
 #### Start of system configuration section. ####
 
@@ -119,6 +119,17 @@ $(PROG) : $(OBJECTS)
 y.tab.c : grammar.y
 	$(YACC) $(srcdir)/grammar.y
 
+@GPERF_NOTE@# tested with gperf 3.1
+@GPERF_NOTE@keywords.c: keywords.gperf
+@GPERF_NOTE@	@-rm -f $@
+@GPERF_NOTE@	echo "/* *INDENT-OFF* */" >$@
+@GPERF_NOTE@	gperf -C -c -p -t -T -g -j1 -o -H hash_keyword -N find_keyword keywords.gperf |\
+@GPERF_NOTE@	sed \
+@GPERF_NOTE@		-e '/^const struct/,/^find_keyword/s,^const,static const,' \
+@GPERF_NOTE@		-e 's/{""}/{"", 0}/g' \
+@GPERF_NOTE@		-e 's/hval = len/hval = (unsigned)len/' >>$@
+@GPERF_NOTE@	echo "/* *INDENT-ON* */" >>$@
+
 lex.yy.c : lex.l
 	$(LEX) $(srcdir)/lex.l
 
@@ -140,6 +151,9 @@ realclean :: distclean
 
 check \
 check_errors:	$(PROG)
+	cd $(srcdir)/testing && $(MAKE) $@ TEST_REF="$(TEST_REF)" SHELL="$(SHELL)"
+
+check_types:	$(PROG)
 	cd $(srcdir)/testing && $(MAKE) $@ TEST_REF="$(TEST_REF)" SHELL="$(SHELL)"
 
 default.h: $(C_FILES) lex.yy.c
@@ -173,4 +187,4 @@ lintlibs$o : cproto.h config.h system.h semantic.h symbol.h
 semantic$o : cproto.h config.h system.h semantic.h
 strkey$o   : cproto.h config.h system.h 
 symbol$o   : cproto.h config.h system.h symbol.h
-y.tab$o	   : cproto.h config.h system.h symbol.h semantic.h lex.yy.c yyerror.c
+y.tab$o	   : cproto.h config.h system.h symbol.h semantic.h lex.yy.c keywords.c yyerror.c

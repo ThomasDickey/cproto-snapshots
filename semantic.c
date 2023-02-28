@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.30 2022/10/16 21:16:34 tom Exp $
+/* $Id: semantic.c,v 4.32 2023/02/28 12:48:20 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -46,7 +46,7 @@ define_function_name(Declarator * declarator, DeclSpec * decl_spec)
 		TRACE(("updated flags:%s\n", flagsDeclSpec(decl_spec->flags)));
 	    }
 	} else {
-	    new_symbol(function_names, declarator->name, NULL, decl_spec->flags);
+	    new_symbol(function_names, declarator->name, NULL, (int) decl_spec->flags);
 	}
     }
 }
@@ -359,11 +359,14 @@ set_param_types(ParameterList * params, DeclSpec * decl_spec, DeclaratorList
 	    put_error();
 	    fprintf(stderr, "declared argument \"%s\" is missing\n", d->name);
 	} else {
+#define isPromotable(why) \
+		((decl_spec->flags & (why)) != 0 && \
+		 (decl_spec->flags & (why)) == decl_spec->flags)
 	    decl_spec_text = decl_spec->text;
 	    if (promote_param && strcmp(d->text, d->name) == 0) {
-		if (decl_spec->flags & (DS_CHAR | DS_SHORT))
+		if (isPromotable(DS_CHAR | DS_SHORT))
 		    decl_spec_text = "int";
-		else if (decl_spec->flags & DS_FLOAT)
+		else if (isPromotable(DS_FLOAT))
 		    decl_spec_text = "double";
 	    }
 	    free(p->decl_spec.text);
@@ -812,7 +815,7 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
     if (decl_list != NULL) {
 	for (d = decl_list->first;; d = d->next) {
 	    if (d->func_def != FUNC_NONE)
-		new_symbol(function_names, d->name, NULL, decl_spec->flags);
+		new_symbol(function_names, d->name, NULL, (int) decl_spec->flags);
 	    if (d == decl_list->last)
 		break;
 	}

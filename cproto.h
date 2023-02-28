@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.21 2021/01/10 16:18:30 tom Exp $
+/* $Id: cproto.h,v 4.23 2023/02/24 22:19:36 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -111,19 +111,22 @@ typedef struct parameter_list {
     char *comment;		/* comment at start of parameter list */
 } ParameterList;
 
+#define uBIT(n)		(1U<<(n))
+
 /* Declaration specifier flags */
-#define DS_NONE 	0	/* default */
-#define DS_EXTERN	1	/* contains "extern" specifier */
-#define DS_STATIC	2	/* contains "static" specifier */
-#define DS_CHAR 	4	/* contains "char" type specifier */
-#define DS_SHORT	8	/* contains "short" type specifier */
-#define DS_FLOAT	16	/* contains "float" type specifier */
-#define DS_INLINE	32	/* contains "inline" specifier */
-#define DS_JUNK 	64	/* we're not interested in this declaration */
+#define DS_NONE 	0U	/* default */
+#define DS_EXTERN	uBIT(1)	/* contains "extern" specifier */
+#define DS_STATIC	uBIT(2)	/* contains "static" specifier */
+#define DS_CHAR 	uBIT(3)	/* contains "char" type specifier */
+#define DS_SHORT	uBIT(4)	/* contains "short" type specifier */
+#define DS_FLOAT	uBIT(5)	/* contains "float" type specifier */
+#define DS_INLINE	uBIT(6)	/* contains "inline" specifier */
+#define DS_JUNK 	uBIT(7)	/* we're not interested in this declaration */
+#define DS_UNREAL 	uBIT(8)	/* contains imaginary specifier */
 
 /* This structure stores information about a declaration specifier. */
 typedef struct decl_spec {
-    unsigned short flags;	/* flags defined above */
+    unsigned flags;		/* DS_xxx flags defined above */
     char *text;			/* source text */
     long begin;			/* offset in temporary file */
 } DeclSpec;

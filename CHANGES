@@ -1,6 +1,12 @@
--- $Id: CHANGES,v 4.69 2022/10/16 16:29:38 tom Exp $
+-- $Id: CHANGES,v 4.75 2023/02/28 11:36:49 tom Exp $
+
+2023/02/28 (4.7v)
+- add c99 keywords for types and qualifiers.
+- use gperf for lookup of known types/qualifiers in type_of_name()
+- improve configure script checks, reducing warnings
 
 2022/10/16 (4.7u)
+- change test-scripts to use grep rather than grep.
 - improve configure-check for getopt headers.
 - if a function prototype uses static, but that is omitted from the actual
   function, assume it is static (report by Rick Stanley).

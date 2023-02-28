@@ -1,0 +1,93 @@
+#include <complex.h>
+#include <math.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <wchar.h>
+#include <wctype.h>
+/* alltypes.c */
+_Bool fwd__Bool(_Bool a, _Bool b);
+_Bool bak__Bool(int a, int b);
+float _Complex fwd__Complex(float _Complex a, float _Complex b);
+float _Complex bak__Complex(float _Complex a, float _Complex b);
+_Float128 fwd__Float128(_Float128 a, _Float128 b);
+_Float128 bak__Float128(_Float128 a, _Float128 b);
+__float128 fwd___float128(__float128 a, __float128 b);
+__float128 bak___float128(__float128 a, __float128 b);
+__int32_t fwd___int32_t(__int32_t a, __int32_t b);
+__int32_t bak___int32_t(__int32_t a, __int32_t b);
+__signed fwd___signed(__signed a, __signed b);
+__signed bak___signed(__signed a, __signed b);
+__signed__ fwd___signed__(__signed__ a, __signed__ b);
+__signed__ bak___signed__(__signed__ a, __signed__ b);
+char fwd_char(char a, char b);
+char bak_char(int a, int b);
+clock_t fwd_clock_t(clock_t a, clock_t b);
+clock_t bak_clock_t(clock_t a, clock_t b);
+double fwd_double(double a, double b);
+double bak_double(double a, double b);
+double_t fwd_double_t(double_t a, double_t b);
+double_t bak_double_t(double_t a, double_t b);
+float fwd_float(float a, float b);
+float bak_float(double a, double b);
+float_t fwd_float_t(float_t a, float_t b);
+float_t bak_float_t(float_t a, float_t b);
+fpos_t fwd_fpos_t(fpos_t a, fpos_t b);
+fpos_t bak_fpos_t(fpos_t a, fpos_t b);
+int fwd_int(int a, int b);
+int bak_int(int a, int b);
+int16_t fwd_int16_t(int16_t a, int16_t b);
+int16_t bak_int16_t(int16_t a, int16_t b);
+int32_t fwd_int32_t(int32_t a, int32_t b);
+int32_t bak_int32_t(int32_t a, int32_t b);
+int64_t fwd_int64_t(int64_t a, int64_t b);
+int64_t bak_int64_t(int64_t a, int64_t b);
+int8_t fwd_int8_t(int8_t a, int8_t b);
+int8_t bak_int8_t(int8_t a, int8_t b);
+intmax_t fwd_intmax_t(intmax_t a, intmax_t b);
+intmax_t bak_intmax_t(intmax_t a, intmax_t b);
+intptr_t fwd_intptr_t(intptr_t a, intptr_t b);
+intptr_t bak_intptr_t(intptr_t a, intptr_t b);
+long fwd_long(long a, long b);
+long bak_long(long a, long b);
+ptrdiff_t fwd_ptrdiff_t(ptrdiff_t a, ptrdiff_t b);
+ptrdiff_t bak_ptrdiff_t(ptrdiff_t a, ptrdiff_t b);
+short fwd_short(short a, short b);
+short bak_short(int a, int b);
+sig_atomic_t fwd_sig_atomic_t(sig_atomic_t a, sig_atomic_t b);
+sig_atomic_t bak_sig_atomic_t(sig_atomic_t a, sig_atomic_t b);
+signed fwd_signed(signed a, signed b);
+signed bak_signed(signed a, signed b);
+size_t fwd_size_t(size_t a, size_t b);
+size_t bak_size_t(size_t a, size_t b);
+time_t fwd_time_t(time_t a, time_t b);
+time_t bak_time_t(time_t a, time_t b);
+uint16_t fwd_uint16_t(uint16_t a, uint16_t b);
+uint16_t bak_uint16_t(uint16_t a, uint16_t b);
+uint32_t fwd_uint32_t(uint32_t a, uint32_t b);
+uint32_t bak_uint32_t(uint32_t a, uint32_t b);
+uint64_t fwd_uint64_t(uint64_t a, uint64_t b);
+uint64_t bak_uint64_t(uint64_t a, uint64_t b);
+uint8_t fwd_uint8_t(uint8_t a, uint8_t b);
+uint8_t bak_uint8_t(uint8_t a, uint8_t b);
+uintmax_t fwd_uintmax_t(uintmax_t a, uintmax_t b);
+uintmax_t bak_uintmax_t(uintmax_t a, uintmax_t b);
+uintptr_t fwd_uintptr_t(uintptr_t a, uintptr_t b);
+uintptr_t bak_uintptr_t(uintptr_t a, uintptr_t b);
+unsigned fwd_unsigned(unsigned a, unsigned b);
+unsigned bak_unsigned(unsigned a, unsigned b);
+va_list *fwd_va_list(va_list *a, va_list *b);
+va_list *bak_va_list(va_list *a, va_list *b);
+wchar_t fwd_wchar_t(wchar_t a, wchar_t b);
+wchar_t bak_wchar_t(wchar_t a, wchar_t b);
+wctrans_t fwd_wctrans_t(wctrans_t a, wctrans_t b);
+wctrans_t bak_wctrans_t(wctrans_t a, wctrans_t b);
+wctype_t fwd_wctype_t(wctype_t a, wctype_t b);
+wctype_t bak_wctype_t(wctype_t a, wctype_t b);
+wint_t fwd_wint_t(wint_t a, wint_t b);
+wint_t bak_wint_t(wint_t a, wint_t b);

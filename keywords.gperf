@@ -1,0 +1,70 @@
+%{
+struct KEYWORDS {
+    const char *name;
+    int value;
+};
+%}
+struct KEYWORDS;
+%%
+_Bool,		T_Bool,
+_Complex,	T_Complex,
+_Float128,	STD_TYPENAME,	/* c99 */
+_Float16,	STD_TYPENAME,	/* c99 */
+_Float32,	STD_TYPENAME,	/* c99 */
+_Float32x,	STD_TYPENAME,	/* c99 */
+_Float64,	STD_TYPENAME,	/* c99 */
+_Float64x,	STD_TYPENAME,	/* c99 */
+_Imaginary,	T_Imaginary,
+__attribute__, 	T_ATTRIBUTE,
+__extension__, 	T_EXTENSION,
+__float128, 	STD_TYPENAME,
+__ibm128, 	STD_TYPENAME,
+__inline, 	T_INLINE,
+__inline__, 	T_INLINE,
+__int32_t,	STD_TYPENAME,	/* gcc */
+__signed, 	T_SIGNED,
+__signed__, 	T_SIGNED,
+auto,		T_AUTO,
+char,		T_CHAR,
+clock_t,	STD_TYPENAME,	/* c99 */
+double, 	T_DOUBLE,
+double_t,	STD_TYPENAME,	/* c99 */
+enum,		T_ENUM,
+extern, 	T_EXTERN,
+float,		T_FLOAT,
+float_t,	STD_TYPENAME,	/* c99 */
+fpos_t,		STD_TYPENAME,	/* c99 */
+inline, 	T_INLINE,
+int,		T_INT,
+int16_t,	STD_TYPENAME,	/* c99 */
+int32_t,	STD_TYPENAME,	/* c99 */
+int64_t,	STD_TYPENAME,	/* c99 */
+int8_t,		STD_TYPENAME,	/* c99 */
+intmax_t,	STD_TYPENAME,	/* c99 */
+intptr_t,	STD_TYPENAME,	/* c99 */
+long,		T_LONG,
+ptrdiff_t,	STD_TYPENAME,	/* c99 */
+register,	T_REGISTER,
+short,		T_SHORT,
+sig_atomic_t,	STD_TYPENAME,	/* c99 */
+signed, 	T_SIGNED,
+size_t,		T_LONG,
+static, 	T_STATIC,
+struct, 	T_STRUCT,
+time_t,		STD_TYPENAME,	/* c99 */
+typedef,	T_TYPEDEF,
+uint16_t,	STD_TYPENAME,	/* c99 */
+uint32_t,	STD_TYPENAME,	/* c99 */
+uint64_t,	STD_TYPENAME,	/* c99 */
+uint8_t,	STD_TYPENAME,	/* c99 */
+uintmax_t,	STD_TYPENAME,	/* c99 */
+uintptr_t,	STD_TYPENAME,	/* c99 */
+union,		T_UNION,
+unsigned,	T_UNSIGNED,
+va_dcl,		T_VA_DCL,
+va_list,	T_VA_LIST,
+void,		T_VOID,
+wchar_t,	STD_TYPENAME,	/* c99 */
+wctrans_t,	STD_TYPENAME,	/* c99 */
+wctype_t,	STD_TYPENAME,	/* c99 */
+wint_t,		STD_TYPENAME,	/* c99 */
