@@ -1,4 +1,8 @@
--- $Id: CHANGES,v 4.75 2023/02/28 11:36:49 tom Exp $
+-- $Id: CHANGES,v 4.76 2024/07/12 00:24:00 tom Exp $
+
+2024/07/11 (4.7w)
+- improve configure script checks, reducing warnings
+- update config.guess, config.sub
 
 2023/02/28 (4.7v)
 - add c99 keywords for types and qualifiers.

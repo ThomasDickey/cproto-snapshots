@@ -1,4 +1,4 @@
-MANIFEST for cproto, version v4_7v
+MANIFEST for cproto, version v4_7w
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 AUTHORS                         authors
@@ -54,10 +54,9 @@ package/debian/control          debian build script
 package/debian/copyright        debian build script
 package/debian/docs             debian build script
 package/debian/rules            debian build script
+package/debian/watch            debian build script
 package/debian/source           subdirectory
 package/debian/source/format    debian build script
-package/debian                  subdirectory
-package/debian/watch            debian build script
 porting                         subdirectory
 porting/README                  description of files in CPROTO/PORTING
 porting/getopt.c                free version of getopt
