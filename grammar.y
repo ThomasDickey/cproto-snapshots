@@ -1,4 +1,4 @@
-/* $Id: grammar.y,v 4.34 2023/02/28 12:47:29 tom Exp $
+/* $Id: grammar.y,v 4.35 2024/12/31 21:04:24 tom Exp $
  *
  * yacc grammar for C function prototype generator
  * This was derived from the grammar in Appendix A of
@@ -98,7 +98,7 @@ static ParameterList *func_params;
 static Declarator *cur_declarator;
 
 /* temporary string buffer */
-static char *temp_buf = 0;
+static char *temp_buf = NULL;
 static size_t temp_len = 0;
 
 SymbolTable *function_names;	/* table of function names */
@@ -146,8 +146,8 @@ static int
 haveAnsiParam(void)
 {
     Parameter *p;
-    if (func_params != 0) {
-	for (p = func_params->first; p != 0; p = p->next) {
+    if (func_params != NULL) {
+	for (p = func_params->first; p != NULL; p = p->next) {
 	    if (p->declarator->func_def == FUNC_ANSI) {
 		return TRUE;
 	    }
@@ -501,7 +501,7 @@ struct_or_union_specifier
 	: struct_or_union any_id braces
 	{
 	    char *s;
-	    if ((s = implied_typedef()) == 0) {
+	    if ((s = implied_typedef()) == NULL) {
 		need_temp(2 + strlen($1.text) + strlen($2.text));
 	        (void)sprintf(s = temp_buf, "%s %s", $1.text, $2.text);
 	    }
@@ -510,7 +510,7 @@ struct_or_union_specifier
 	| struct_or_union braces
 	{
 	    char *s;
-	    if ((s = implied_typedef()) == 0) {
+	    if ((s = implied_typedef()) == NULL) {
 		need_temp(4 + strlen($1.text));
 		(void)sprintf(s = temp_buf, "%s {}", $1.text);
 	    }
@@ -579,7 +579,7 @@ enum_specifier
 	: enumeration any_id braces
 	{
 	    char *s;
-	    if ((s = implied_typedef()) == 0) {
+	    if ((s = implied_typedef()) == NULL) {
 		need_temp(6 + strlen($2.text));
 		(void)sprintf(s = temp_buf, "enum %s", $2.text);
 	    }
@@ -588,7 +588,7 @@ enum_specifier
 	| enumeration braces
 	{
 	    char *s;
-	    if ((s = implied_typedef()) == 0) {
+	    if ((s = implied_typedef()) == NULL) {
 		need_temp(4 + strlen($1.text));
 		(void)sprintf(s = temp_buf, "%s {}", $1.text);
 	    }

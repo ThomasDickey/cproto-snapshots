@@ -1,4 +1,4 @@
-/* $Id: yyerror.c,v 4.11 2023/02/28 01:13:22 tom Exp $
+/* $Id: yyerror.c,v 4.12 2024/12/31 21:03:33 tom Exp $
  *
  * This file is included into grammar.y to provide the 'yyerror()' function.
  * If the yacc/bison parser is one that we know how to backtrack, we'll augment
@@ -164,7 +164,7 @@ yaccExpected(const char *s, int count)
 	    fprintf(stderr, "\n");
 	    while (used-- != 0) {
 		free(vec[used]);
-		vec[used] = 0;
+		vec[used] = NULL;
 	    }
 	}
 	used = 0;
@@ -192,15 +192,15 @@ yaccExpected(const char *s, int count)
 	}
 	if ((unsigned) count >= have) {
 	    have = (unsigned) (count + 10);
-	    if (vec == 0) {
+	    if (vec == NULL) {
 		vec = (char **) malloc(have * sizeof(*vec));
 	    } else {
 		vec = (char **) realloc(vec, have * sizeof(*vec));
 	    }
 	    for (n = used; n < have; n++)
-		vec[n] = 0;
+		vec[n] = NULL;
 	}
-	if (vec[count] != 0) {
+	if (vec[count] != NULL) {
 	    free(vec[count]);
 	}
 	vec[count] = xstrdup(found ? t : tmp);

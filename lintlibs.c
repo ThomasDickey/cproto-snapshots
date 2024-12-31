@@ -1,4 +1,4 @@
-/* $Id: lintlibs.c,v 4.22 2021/03/03 23:44:49 tom Exp $
+/* $Id: lintlibs.c,v 4.23 2024/12/31 21:03:33 tom Exp $
  *
  * C prototype/lint-library generator
  * These routines implement the semantic actions for lint libraries executed by
@@ -146,8 +146,8 @@ strip_name(char *s)
 	    quote_r = '"';
 	if (*s == '.' && is_path_sep(s[1]))
 	    s += 2;
-	else if ((t = strstr(s, GccLeaf)) != 0
-		 && (t = strstr(t, IncLeaf)) != 0) {
+	else if ((t = strstr(s, GccLeaf)) != NULL
+		 && (t = strstr(t, IncLeaf)) != NULL) {
 	    s = t + sizeof(IncLeaf) - 1;
 	    quote_l = '<';
 	    quote_r = '>';
@@ -160,12 +160,12 @@ strip_name(char *s)
 
 static unsigned base_level;
 static unsigned inc_depth = 0;
-static char **inc_stack = 0;
+static char **inc_stack = NULL;
 
 static char *
 get_inc_stack(unsigned n)
 {
-    return (((int) n) < 0 || n >= inc_depth) ? 0 : inc_stack[n];
+    return (((int) n) < 0 || n >= inc_depth) ? NULL : inc_stack[n];
 }
 
 #ifdef	DEBUG
@@ -185,9 +185,9 @@ dump_stack(char *tag)
 static void
 free_inc_stack(unsigned n)
 {
-    if (get_inc_stack(n) != 0) {
+    if (get_inc_stack(n) != NULL) {
 	free(inc_stack[n]);
-	inc_stack[n] = 0;
+	inc_stack[n] = NULL;
     }
 }
 
@@ -201,7 +201,7 @@ make_inc_stack(unsigned n, char *s)
 	if (n > inc_depth) {
 	    inc_stack = type_realloc(char *, inc_stack, need);
 	    while (inc_depth < need)
-		inc_stack[inc_depth++] = 0;
+		inc_stack[inc_depth++] = NULL;
 	    inc_depth = need;
 	}
 	inc_stack[n] = xstrdup(s);
@@ -230,10 +230,10 @@ already_included(char *path)
 int
 already_declared(char *name)
 {
-    if (declared_list == 0)
+    if (declared_list == NULL)
 	declared_list = new_symbol_table();
-    if (find_symbol(declared_list, name) == 0) {
-	(void) new_symbol(declared_list, name, 0, 0);
+    if (find_symbol(declared_list, name) == NULL) {
+	(void) new_symbol(declared_list, name, NULL, 0);
 	return FALSE;
     }
     return TRUE;
@@ -413,7 +413,7 @@ add2implied_buf(const char *s, int append)
 	implied_len = 0;
     implied_len += strlen(s);
 
-    if (implied_buf == 0)
+    if (implied_buf == NULL)
 	*(implied_buf = (char *) malloc(implied_max = BUFSIZ)) = '\0';
     if (implied_max < implied_len + 2)
 	implied_buf = (char *) realloc(implied_buf, implied_max +=
@@ -499,7 +499,7 @@ implied_typedef(void)
 	implied_cnt = 0;
 	return (implied_buf);
     }
-    return (0);
+    return (NULL);
 }
 
 /*
@@ -532,9 +532,9 @@ flush_varargs(void)
     exitlike_func = FALSE;
 
     varargs_num = 0;
-    if (varargs_str != 0) {
+    if (varargs_str != NULL) {
 	free(varargs_str);
-	varargs_str = 0;
+	varargs_str = NULL;
     }
 }
 
@@ -549,7 +549,7 @@ ellipsis_varargs(Declarator * d)
     Parameter *p;
 
     fmt_library(0);
-    for (p = d->params.first, count = 0; p != 0; p = p->next, count++)
+    for (p = d->params.first, count = 0; p != NULL; p = p->next, count++)
 	if (lint_ellipsis(p)) {
 	    varargs_num = count;
 	    break;
@@ -558,7 +558,7 @@ ellipsis_varargs(Declarator * d)
 	put_string(stdout, "\t/* VARARGS");
 	if (varargs_num > 0) {
 	    printf("%d", varargs_num);
-	    if (varargs_str != 0) {
+	    if (varargs_str != NULL) {
 		put_char(stdout, ' ');
 		put_string(stdout, varargs_str);
 	    }
@@ -592,7 +592,7 @@ is_actual_func(Declarator * d)
     if (lintLibrary() && (d->func_def != FUNC_NONE)) {
 	if (d->func_stack->text[0] == PAREN_L
 	    && d->func_stack->text[1] == '*') {
-	    if (strstr(d->func_stack->text, "()") != 0)
+	    if (strstr(d->func_stack->text, "()") != NULL)
 		return TRUE;
 	} else {
 	    return TRUE;

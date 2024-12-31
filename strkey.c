@@ -1,4 +1,4 @@
-/* $Id: strkey.c,v 4.11 2020/07/16 13:00:27 tom Exp $
+/* $Id: strkey.c,v 4.12 2024/12/31 21:04:24 tom Exp $
  *
  * Some string handling routines
  */
@@ -15,7 +15,7 @@
 char *
 strkey(char *src, const char *key)
 {
-    if (src != 0 && key != 0) {
+    if (src != NULL && key != NULL) {
 	char *s = src, *d;
 	size_t len = strlen(key);
 
@@ -41,7 +41,7 @@ strcut(char *src, const char *key)
 {
     char *s, *d;
 
-    if ((s = strkey(src, key)) != 0) {
+    if ((s = strkey(src, key)) != NULL) {
 	d = s + strlen(key);
 	while (*d != '\0' && !LETTER(*d))
 	    d++;

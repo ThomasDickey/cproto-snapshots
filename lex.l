@@ -2,7 +2,7 @@
 
 %{
 
-/* $Id: lex.l,v 4.33 2023/02/28 13:03:46 tom Exp $
+/* $Id: lex.l,v 4.34 2024/12/31 21:04:24 tom Exp $
  *
  * Lexical analyzer for C function prototype generator
  *
@@ -662,7 +662,7 @@ get_comment(void)
 		if (cmtVal.varargs != 0) {
 		    if ((varargs_num = cmtVal.varargs) != 0
 			&& cmtVal.varText != 0) {
-			if (varargs_str != 0)
+			if (varargs_str != NULL)
 			    free(varargs_str);
 			varargs_str = xstrdup(keyword);
 		    }
@@ -849,7 +849,7 @@ include_file(char *name,	/* file name */
 	inc_stack = type_realloc(IncludeStack, inc_stack, need);
 	while (inc_limit < need) {
 #ifdef FLEX_SCANNER
-	    buffer_stack[inc_limit] = 0;
+	    buffer_stack[inc_limit] = NULL;
 #endif
 	    memset(inc_stack + inc_limit, 0, sizeof(*inc_stack));
 	    ++inc_limit;

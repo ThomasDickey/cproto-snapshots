@@ -1,8 +1,8 @@
-/* $Id: cproto.c,v 4.58 2024/07/12 00:21:38 tom Exp $
+/* $Id: cproto.c,v 4.59 2024/12/31 21:37:49 tom Exp $
  *
  * C function prototype generator and function definition converter
  */
-#define VERSION "4.7w"
+#define VERSION "4.7x"
 
 #include <cproto.h>
 
@@ -101,7 +101,7 @@ boolean quiet = FALSE;
 
 /* Include file directories */
 unsigned num_inc_dir = 0;
-char **inc_dir = 0;
+char **inc_dir = NULL;
 
 /* Run the C preprocessor */
 #ifdef CPP
@@ -376,7 +376,7 @@ add_inc_dir(const char *src)
     size_t used = (need * sizeof(char *));
     char *save;
 
-    if (inc_dir == 0) {
+    if (inc_dir == NULL) {
 	inc_dir = (char **) malloc(used);
     } else if (have != need) {
 	inc_dir = (char **) realloc(inc_dir, used);
@@ -747,13 +747,13 @@ process_options(int *pargc, char ***pargv)
 	    variables_out = TRUE;
 	    break;
 	case 'o':
-	    if (freopen(optarg, "w", stdout) == 0) {
+	    if (freopen(optarg, "w", stdout) == NULL) {
 		perror(optarg);
 		exit(EXIT_FAILURE);
 	    }
 	    break;
 	case 'O':
-	    if (numeric_param() < 0 && freopen(optarg, "w", stderr) == 0) {
+	    if (numeric_param() < 0 && freopen(optarg, "w", stderr) == NULL) {
 		perror(optarg);
 		exit(EXIT_FAILURE);
 	    }

@@ -1,4 +1,4 @@
-/* $Id: cproto.h,v 4.23 2023/02/24 22:19:36 tom Exp $
+/* $Id: cproto.h,v 4.24 2024/12/31 21:02:11 tom Exp $
  *
  * Declarations for C function prototype generator
  */
@@ -360,7 +360,7 @@ extern void free_parser(void);
 #endif
 
 #define type_realloc(type,ptr,size) \
-		(((ptr) != 0) \
+		(((ptr) != NULL) \
 		 ? (type *) xrealloc(ptr, (size) * sizeof(type)) \
 		 : (type *) xmalloc((size) * sizeof(type)))
 

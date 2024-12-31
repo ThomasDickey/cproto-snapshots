@@ -1,4 +1,4 @@
-/* $Id: semantic.c,v 4.32 2023/02/28 12:48:20 tom Exp $
+/* $Id: semantic.c,v 4.33 2024/12/31 21:03:33 tom Exp $
  *
  * Semantic actions executed by the parser of the
  * C function prototype generator.
@@ -432,14 +432,14 @@ put_parameter(FILE *outf,
 	    p->declarator->text = glue_strings(u, supply_parm(count));
 	    free(u);
 	} else if (p->declarator->name[0] == '\0') {
-	    if ((t = strstr(s, "%s")) != 0) {
+	    if ((t = strstr(s, "%s")) != NULL) {
 		int parenthesized = FALSE;
 		Declarator *q;
 
 		free(p->declarator->name);
 		p->declarator->name = xstrdup(supply_parm(count));
 
-		for (q = p->declarator; q != 0; q = q->func_stack) {
+		for (q = p->declarator; q != NULL; q = q->func_stack) {
 		    if (q->func_def == FUNC_NONE) {
 			if (!strcmp(q->text, "(*)")) {
 			    char temp[20];
@@ -455,7 +455,7 @@ put_parameter(FILE *outf,
 		    }
 		}
 		if (!parenthesized) {
-		    if (strchr(t, PAREN_L) != 0) {	/* e.g., "*%s()" */
+		    if (strchr(t, PAREN_L) != NULL) {	/* e.g., "*%s()" */
 			t = p->declarator->text;
 			u = (char *) xmalloc(strlen(t) + 3);
 			(void) sprintf(u, "(%s)", t);
@@ -783,7 +783,7 @@ put_llib_params(Declarator * declarator, int commented)
 	? declarator->func_stack->params.first
 	: declarator->params.first;
 
-    while (p != 0) {
+    while (p != NULL) {
 	if (lint_ellipsis(p))
 	    break;
 	if (putParameter(stdout, p, FALSE, ++count, commented))
@@ -804,7 +804,7 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
     int commented = FALSE;
     int saveNest = nestedParams;
 #if OPT_LINTLIBRARY
-    boolean defines = (boolean) (strchr(decl_spec->text, CURL_L) != 0);
+    boolean defines = (boolean) (strchr(decl_spec->text, CURL_L) != NULL);
     int is_func;
 #endif
 
@@ -822,10 +822,10 @@ gen_declarations(DeclSpec * decl_spec,	/* declaration specifier */
     }
 #if OPT_LINTLIBRARY
     /* special treatment for -l, -T options */
-    if ((!variables_out && types_out && defines) || (decl_list == 0)) {
+    if ((!variables_out && types_out && defines) || (decl_list == NULL)) {
 	strcut(decl_spec->text, "static");
 	strcut(decl_spec->text, "extern");
-	fmt_library((decl_list == 0) ? 1 : 2);
+	fmt_library((decl_list == NULL) ? 1 : 2);
 	if (decl_spec->text[0] != '\0') {
 	    put_string(stdout, decl_spec->text);
 	    put_string(stdout, ";\n");
@@ -1061,7 +1061,7 @@ put_param_decl(Declarator * declarator, int commented)
 	fputc('\n', cur_tmp_file());
 	(void) putParameter(cur_tmp_file(), p, knrLintLibrary(), ++count, commented);
 	fputc(';', cur_tmp_file());
-	if (p->comment != 0)
+	if (p->comment != NULL)
 	    fputs(p->comment, cur_tmp_file());
 	p = p->next;
 	while (p != NULL && strcmp(p->declarator->text, ELLIPSIS) != 0) {
@@ -1069,7 +1069,7 @@ put_param_decl(Declarator * declarator, int commented)
 	    (void) putParameter(cur_tmp_file(), p, knrLintLibrary(),
 				++count, commented);
 	    fputc(';', cur_tmp_file());
-	    if (p->comment != 0)
+	    if (p->comment != NULL)
 		fputs(p->comment, cur_tmp_file());
 	    p = p->next;
 	}
@@ -1089,7 +1089,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 {
     Parameter *p;
     ParameterList *params;
-    char *comment = 0;
+    char *comment = NULL;
     int n;
     size_t comment_len;
     long diff;
@@ -1169,7 +1169,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	    cur_func = (char *) xmalloc(func_len);
 	    FileRead(cur_func, func_len);
 	} else {
-	    cur_func = 0;
+	    cur_func = NULL;
 	    func_len = 0;
 	}
 
@@ -1178,7 +1178,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 
 	/* Output new style function definition head. */
 	if (func_declarator->func_def == FUNC_ANSI) {
-	    if (cur_func != 0)
+	    if (cur_func != NULL)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
@@ -1196,7 +1196,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	/* Output old style function definition head. */
 	if (func_declarator->func_def == FUNC_TRADITIONAL
 	    || func_declarator->func_def == FUNC_BOTH) {
-	    if (cur_func != 0)
+	    if (cur_func != NULL)
 		fwrite(cur_func, sizeof(char), func_len, cur_tmp_file());
 	} else {
 	    fputs(fmt[format].decl_spec_prefix, cur_tmp_file());
@@ -1213,11 +1213,11 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
 	}
 
 	fputs("\n#endif", cur_tmp_file());
-	if (comment != 0 && *comment != '\n')
+	if (comment != NULL && *comment != '\n')
 	    fputc('\n', cur_tmp_file());
 	func_style = FUNC_BOTH;
 
-	if (cur_func != 0)
+	if (cur_func != NULL)
 	    free(cur_func);
 
     } else {
@@ -1236,7 +1236,7 @@ gen_func_definition(DeclSpec * decl_spec, Declarator * declarator)
     }
 
     /* Output text between function head and body. */
-    if (comment != 0) {
+    if (comment != NULL) {
 	fwrite(comment, sizeof(char), comment_len, cur_tmp_file());
 	free(comment);
     }

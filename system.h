@@ -1,10 +1,10 @@
-/* $Id: system.h,v 4.13 2011/01/02 19:23:38 tom Exp $
+/* $Id: system.h,v 4.14 2024/12/31 21:01:30 tom Exp $
  *
  * cproto configuration and system dependencies
  */
 #ifndef	SYSTEM_H
 #define	SYSTEM_H
- 
+
 #include <stdio.h>
 #include <ctype.h>
 
@@ -93,7 +93,7 @@
  */
 #ifndef HAVE_GETOPT_H
 #define HAVE_GETOPT_H 0
-#endif 
+#endif
 
 #ifndef HAVE_LIBDBMALLOC
 #define HAVE_LIBDBMALLOC 0
