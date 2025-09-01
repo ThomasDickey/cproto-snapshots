@@ -1,14 +1,12 @@
-Summary:  cproto - generate C function prototypes and convert function definitions
-%define AppProgram cproto
-%define AppVersion 4.7x
-# $Id: cproto.spec,v 1.18 2024/12/31 21:37:49 tom Exp $
-Name: %{AppProgram}
-Version: %{AppVersion}
+Summary: generate C function prototypes and convert function definitions
+# $Id: cproto.spec,v 1.21 2025/09/01 10:51:16 tom Exp $
+Name: cproto
+Version: 4.7y
 Release: 1
 License: Public Domain
 Group: Applications/Development
-URL: ftp://invisible-island.net/%{AppProgram}
-Source0: %{AppProgram}-%{AppVersion}.tgz
+URL: https://invisible-island.net/%{name}
+Source0: %{name}-%{version}.tgz
 Packager: Thomas Dickey <dickey@invisible-island.net>
 
 %description
@@ -21,7 +19,7 @@ variables defined in the files.
 
 %define debug_package %{nil}
 
-%setup -q -n %{AppProgram}-%{AppVersion}
+%setup -q -n %{name}-%{version}
 
 %build
 
@@ -41,18 +39,21 @@ make
 
 make install                    DESTDIR=$RPM_BUILD_ROOT
 
-strip $RPM_BUILD_ROOT%{_bindir}/%{AppProgram}
+strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{_prefix}/bin/%{AppProgram}
-%{_mandir}/man1/%{AppProgram}.*
+%{_prefix}/bin/%{name}
+%{_mandir}/man1/%{name}.*
 
 %changelog
 # each patch should add its ChangeLog entries here
+
+* Mon Sep 01 2025 Thomas E. Dickey
+- testing cproto 4.7y-1
 
 * Wed May 23 2018 Thomas Dickey
 - turn off debug package; add llib feature

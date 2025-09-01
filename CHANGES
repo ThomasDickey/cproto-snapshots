@@ -1,4 +1,10 @@
--- $Id: CHANGES,v 4.77 2024/12/31 21:53:42 tom Exp $
+-- $Id: CHANGES,v 4.80 2025/09/01 19:59:00 tom Exp $
+
+2025/09/01 (4.7y)
+- improve manpage discussion of limitations when using cproto's built-in
+  support for C preprocessor directives (Debian #1112126).
+- modify makefile for installing manpage to show actual cpp (Debian #1112126).
+- improve configure script checks, reducing warnings
 
 2024/12/31 (4.7x)
 - improve configure script checks, reducing warnings

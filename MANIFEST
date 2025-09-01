@@ -1,4 +1,4 @@
-MANIFEST for cproto, version v4_7x
+MANIFEST for cproto, version v4_7y
 --------------------------------------------------------------------------------
 MANIFEST                        this file
 AUTHORS                         authors
@@ -23,6 +23,7 @@ keywords.c                      generated from keywords.gperf
 keywords.gperf                  gperf input for keywords.c
 lex.l                           lex rules for CPROTO
 lintlibs.c                      functions used for lint-library formatting
+minstall.in                     install-script for manpage
 semantic.c                      functions to support yacc grammar (formatting and translation)
 semantic.h                      interface definitions of semantic.c
 strkey.c                        look for a keyword within a string

@@ -1,0 +1,8 @@
+#!/bin/sh
+# $Id: minstall.in,v 4.4 2025/09/01 11:19:05 tom Exp $
+# install manpage, substituting the actual command/path for C preprocessor
+mytemp=`mktemp || echo mytemp.$$`
+sed -e 's%/lib/cpp%@CPP@%g' "$1" >"$mytemp"
+INSTALL="@INSTALL@"
+@INSTALL_DATA@ "$mytemp" "$2"
+rm -f "$mytemp"

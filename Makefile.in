@@ -1,9 +1,9 @@
-# $Id: Makefile.in,v 4.48 2024/12/31 21:37:49 tom Exp $
+# $Id: Makefile.in,v 4.51 2025/09/01 11:00:10 tom Exp $
 #
 # UNIX template-makefile for C prototype generator
 
 THIS = cproto
-RELEASE = 4_7x
+RELEASE = 4_7y
 
 #### Start of system configuration section. ####
 
@@ -19,7 +19,6 @@ CTAGS		= @CTAGS@
 
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
-INSTALL_DATA	= @INSTALL_DATA@
 
 DEFINES		=
 EXTRA_CFLAGS	= @EXTRA_CFLAGS@
@@ -94,13 +93,14 @@ SOURCES = $(DOC_FILES) $(MAK_FILES) $(H_FILES) $(C_FILES) $(AUX_FILES)
 
 all : $(PROG) # $(THIS).man
 
-install: all installdirs
+install:: all installdirs
 	$(INSTALL_PROGRAM) $(PROG) $(BINDIR)/$(PROG)
-	- $(INSTALL_DATA) $(srcdir)/$(THIS).1 $(MANDIR)/$(THIS).$(manext)
+	$(SHELL) ./minstall $(srcdir)/$(THIS).1 $(MANDIR)/$(THIS).$(manext)
 
-installdirs:
+installdirs::
 	mkdir -p $(BINDIR)
-	- mkdir -p $(MANDIR)
+installdirs::
+	mkdir -p $(MANDIR)
 
 uninstall:
 	- rm -f $(BINDIR)/$(PROG) $(MANDIR)/$(THIS).$(manext)
@@ -141,7 +141,7 @@ clean :: mostlyclean
 	- cd $(srcdir)/testing && $(MAKE) $@
 
 distclean :: clean
-	- rm -f config.log config.cache config.status config.h Makefile man2html.tmp
+	- rm -f config.log config.cache config.status config.h Makefile man2html.tmp minstall
 	- rm -f .version .fname
 	- cd $(srcdir)/testing && $(MAKE) $@
 
@@ -185,6 +185,6 @@ depend:
 cproto$o   : cproto.h config.h system.h
 lintlibs$o : cproto.h config.h system.h semantic.h symbol.h
 semantic$o : cproto.h config.h system.h semantic.h
-strkey$o   : cproto.h config.h system.h 
+strkey$o   : cproto.h config.h system.h
 symbol$o   : cproto.h config.h system.h symbol.h
 y.tab$o	   : cproto.h config.h system.h symbol.h semantic.h lex.yy.c keywords.c yyerror.c
